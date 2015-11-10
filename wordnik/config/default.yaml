@@ -1,0 +1,5 @@
+key: value
+other: (1, 2)
+domains:
+    - nytimes.com
+    - theatlantic.com
