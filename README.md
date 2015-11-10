@@ -17,6 +17,8 @@ mkvirtualenv wordnik --python=/usr/local/bin/python3.5
 workon wordnik
 ```
 
+Set up your environment and download corpora if needed.
+
 ```sh
 pip install -r requirements.txt
 python -m textblob.download_corpora
