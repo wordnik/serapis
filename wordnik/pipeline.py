@@ -32,7 +32,8 @@ def process(word: str):
                     frd_result['sentence'] = sentence
                     frd_result['word'] = word
                     frd_result['rating'] = rate(frd_result)
-                    save(frd_result)
+                    if frd_result['rating'] > config.min_frd_rating:
+                        save(frd_result)
 
 
 if __name__ == "__main__":

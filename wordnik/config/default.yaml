@@ -1,5 +1,4 @@
-key: value
-other: (1, 2)
+min_frd_rating: 0.75
 domains:
     - nytimes.com
     - theatlantic.com
