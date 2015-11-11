@@ -33,7 +33,7 @@ cd wordnik
 python pipeline.py misogynoir
 ```
 
-## Muddle:
+## Modules:
 
 All functionality is neatly spread out across files:
 
