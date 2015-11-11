@@ -24,14 +24,21 @@ from save import save
 def process(word: str):
     for result in search(word):
         if qualify(result):
-            cleaned = parse(result)
+            cleaned = parse(result) # has body text
             cleaned['word'] = word
+
+            # sentences containing word from cleaned body text
             for sentence in extract(cleaned['body'], word):
-                frd_result = cleaned.copy()
+
                 if detect(sentence, word):
+                    frd_result = cleaned.copy() # include page info w frd info
+
                     frd_result['sentence'] = sentence
                     frd_result['word'] = word
+                    # rate result
                     frd_result['rating'] = rate(frd_result)
+
+                    # NB use min = 0 during dev
                     if frd_result['rating'] > config.min_frd_rating:
                         save(frd_result)
 

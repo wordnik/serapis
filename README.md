@@ -42,10 +42,14 @@ All functionality is neatly spread out across files:
 - `pipeline.py` - Runs the whole pipeline for a single word
 - `search.py` - Searches the net for a word
 - `qualify.py` - Determines whether a search result is valid and should be considered
-- `parse.py` - Parses a search result to get the text body and other information
+- `parse.py` - Requests page of a search result to get the text body and other information (incl diffbot)
 - `extract.py` - Extracts sentences containing words from a text body
 - `detect.py` - Detects if a sentence is a FRD
 - `rate.py` - Rates an FRD
 - `save.py` - Saves an FRD to the database
+
+NB:
+
+- Modules need to `yield` results to allow for async
 
 Generally, if you work on something, create your own branch and send a PR! Never commit straight to master. @maebert can break this rule because @maebert made this rule.

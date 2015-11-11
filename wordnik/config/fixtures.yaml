@@ -23,8 +23,8 @@ search:
 
 parser:
    "https://en.wikipedia.org/wiki/Misogynoir":
-      body: '''Misogynoir is a term referring to misogyny directed towards Black women, where race and gender both play roles in bias. It was coined by queer Black feminist scholar Moya Bailey, who created the term to address misogyny directed toward black women in American visual and popular culture. Trudy of Gradient Lair, a womanist blog about Black women and art, media, social media, socio-politics and culture, has also been credited in developing the lexical definition of the term.'''
       author: 'Wikipedia'
+      body: '''Misogynoir is a term referring to misogyny directed towards Black women, where race and gender both play roles in bias. It was coined by queer Black feminist scholar Moya Bailey, who created the term to address misogyny directed toward black women in American visual and popular culture. Trudy of Gradient Lair, a womanist blog about Black women and art, media, social media, socio-politics and culture, has also been credited in developing the lexical definition of the term.'''
    "http://www.theguardian.com/lifeandstyle/2015/oct/05/what-is-misogynoir":
       author: 'Eliza Anyangwe'
       body: '''
