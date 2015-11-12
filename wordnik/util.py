@@ -19,3 +19,31 @@ def singleton(class_):
             instances[class_] = class_(*args, **kwargs)
         return instances[class_]
     return getinstance
+
+
+def batch(generator, batch_size=5):
+    """Wraps around a generator and yields results in batches.
+
+    Example:
+
+        gen = (letter for letter in string.ascii_uppercase)
+        for n in batch(gen, 8):
+            print(''.join(n))
+
+    Will produce:
+
+        ABCDEFGH
+        IJKLMNOP
+        QRSTUVWX
+        YZ
+    """
+    cont = True
+    while cont:
+        result = []
+        for n in range(batch_size):
+            try:
+                result.append(next(generator))
+            except StopIteration:
+                cont = False
+                break
+        yield result

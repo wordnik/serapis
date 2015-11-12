@@ -10,9 +10,10 @@ __date__ = "2015-11-09"
 __email__ = "manuel@summer.ai"
 
 import datetime
+from objects import Term
 
 
-def qualify(searchresult: dict) -> bool:
+def qualify(term: Term) -> bool:
     """Decides whether a search result is relevant."""
     # Dummy: Only process results that are newer than October
-    return searchresult['date'] > datetime.date(2015, 10, 1)
+    return term.date > datetime.date(2015, 10, 1)

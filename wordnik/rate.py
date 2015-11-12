@@ -10,10 +10,11 @@ __date__ = "2015-11-09"
 __email__ = "manuel@summer.ai"
 
 import math
+from objects import Term
 
 
-def rate(result: dict) -> bool:
+def rate(term: Term) -> bool:
     """Rates the quality of an FRD
     """
-    words = result['sentence'].split()
+    words = term.sentence.split()
     return 1 - math.sqrt(1 / len(words))

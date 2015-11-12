@@ -2,3 +2,4 @@ min_frd_rating: 0.75
 domains:
     - nytimes.com
     - theatlantic.com
+diffbot_batch_size: 50

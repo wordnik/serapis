@@ -9,8 +9,10 @@ __copyright__ = "Copyright 2015, summer.ai"
 __date__ = "2015-11-09"
 __email__ = "manuel@summer.ai"
 
+from objects import Term
 
-def save(result: dict):
+
+def save(term: Term):
     """Saves the FRD
     """
-    print("{}: '{:40}...' -> {:.3f}".format(result['url'], str(result['sentence']), result['rating']))
+    print("{}: '{:40}...' -> {:.3f}".format(term.url, str(term.sentence), term.rating))

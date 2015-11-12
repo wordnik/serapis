@@ -10,12 +10,15 @@ __date__ = "2015-11-09"
 __email__ = "manuel@summer.ai"
 
 from textblob import TextBlob
+from objects import Term
 
 
-def extract(body: str, word: str):
+def extract(term: Term):
     """Extracts and yields sentences mentioning a word from the body text.
     """
-    blob = TextBlob(body)
+    blob = TextBlob(term.document)
     for sentence in blob.sentences:
-        if word.lower() in sentence.lower():
-            yield sentence
+        if term.term.lower() in sentence.lower():
+            result = term.copy()
+            result.sentence = sentence
+            yield result

@@ -9,9 +9,11 @@ __copyright__ = "Copyright 2015, summer.ai"
 __date__ = "2015-11-09"
 __email__ = "manuel@summer.ai"
 
+from objects import Term
 
-def detect(sentence: str, word: str) -> bool:
+
+def detect(term: Term) -> bool:
     """Determines whether a sentence is an FRD.
     """
     # Let's make this simple
-    return word.lower() in sentence.lower()
+    return term.term.lower() in term.document.lower()
