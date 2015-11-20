@@ -4,3 +4,4 @@ domains:
     - theatlantic.com
 diffbot_batch_size: 50
 bucket: ai.summer.1mwords
+save_messages: true

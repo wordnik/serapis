@@ -19,6 +19,8 @@ s3 = boto3.resource('s3', region_name=config.region)
 
 def write_message(task, message):
     """Writes a message to the S3 bucket."""
+    if not config.save_messages:
+        return
     s3.Object(config.bucket, task).put(Body=json.dumps(message))
 
 
