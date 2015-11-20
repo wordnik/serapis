@@ -11,6 +11,7 @@ __email__ = "manuel@summer.ai"
 
 import argparse
 from config import config
+import json
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Set up buckets')
@@ -27,4 +28,4 @@ if __name__ == "__main__":
     message = tasks.rate(message)
     message = tasks.save(message)
 
-    print(message)
+    print(json.dumps(message, indent=2))

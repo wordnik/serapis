@@ -39,6 +39,9 @@ class Config(object):
         with open(os.path.join("config", "default.yaml")) as c:
             self.keys = yaml.load(c)
 
+        with open(os.path.join("config", "credentials.yaml")) as c:
+            self.keys['credentials'] = yaml.load(c)
+
         if config != "default":
             with open(os.path.join("config", "{}.yaml".format(config))) as c:
                 self.keys.update(yaml.load(c))
