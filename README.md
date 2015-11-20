@@ -41,7 +41,7 @@ python local_handler.py watch --config dev
 
 Now, open a new terminal window and add a new word to the pipeline:
 
-``sh
+```sh
 python local_handler.py add --word  --config dev
 ```
 
