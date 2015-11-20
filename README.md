@@ -21,6 +21,14 @@ pip install -r requirements.txt
 python -m textblob.download_corpora
 ```
 
+Create a file called `wordnik/config/credentials.yaml` with the required tokens:
+
+```yaml
+aws_access_key: AKIA...
+aws_access_secret: ...
+diffbot: ...
+```
+
 ## Run:
 
 ```

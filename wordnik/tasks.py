@@ -3,6 +3,8 @@
 """
 Task dispatcher
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
 
 __author__ = "Manuel Ebert"
 __copyright__ = "Copyright 2015, summer.ai"
@@ -13,6 +15,7 @@ import boto3
 from config import config
 import json
 from textblob import TextBlob
+import search as search_helper
 
 s3 = boto3.resource('s3', region_name=config.region)
 
@@ -50,13 +53,8 @@ def search(message):
 
     Where doc contains the parsed body text.
     """
-    message['urls'] = []
-    # Search Diffbot's cache
-    # if there are enough results in cache:
-    #     add results to message
-    # else:
-    #    Search Bing
-    #    Hit Diffbot's exctract API with result urls
+    word = message['word']
+    message['urls'] = [result for result in search_helper.search_diffbot_cache(word)]
     return write_message('detect', message)
 
 
@@ -87,16 +85,17 @@ def detect(message):
 
     Where s is the sentence and frd is the probability of this sentence being an FRD.
     """
-
+    word = message['word']
     for url in message['urls']:
         doc = TextBlob(url['doc'])
         url['sentences'] = []
         for sentence in doc.sentences:
-            result = {
-                's': sentence,
-                'frd': 0  # Detect if this is an FRD
-            }
-            url['sentences'].append(result)
+            if word.lower() in sentence.lower():
+                result = {
+                    's': str(sentence),
+                    'frd': 0  # Detect if this is an FRD
+                }
+                url['sentences'].append(result)
     return write_message('rate', message)
 
 
