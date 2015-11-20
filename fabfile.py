@@ -2,7 +2,6 @@
 Steps:
 -get the summer.ai.pem key
 -login to the env.host machine and add your public key to the machine's authorized keys
--make sure you have '
 
 http://www.perrygeo.com/running-python-with-compiled-code-on-aws-lambda.html
 """
@@ -22,6 +21,12 @@ def pack():
     local('git archive --format=zip HEAD -o %s' %gitfile, capture=False)
 
 def deploy():
+    # Make sure machine and dev tools are up to date
+    sudo('sudo yum -y update')
+    sudo('yum -y upgrade')
+    sudo('yum -y install python27-devel python27-pip gcc libjpeg-devel zlib-devel gcc-c++')
+    
+    
     # upload the source zipfile to the temporary folder on the server
     deploy_filename = '/tmp/wordnik.%s.zip' %str(time.time())
     put(gitfile, deploy_filename)
@@ -38,11 +43,13 @@ def deploy():
         # run('/var/www/yourapplication/env/bin/python setup.py install')
         
         """
-        TODO: compile all the dependencies locally on the ec2 machine.
-        Make sure any extensions are in a subdirectory of ~/lambda so that they are zipped
+        TODO: compile all the dependencies locally on the ec2 machine,
+        making sure any extensions are in a subdirectory of ~/lambda so that they are zipped
         """
+        run('virtualenv venv')
+        run('source venv/bin/activate && pip install -r requirements.txt')
         
-        run('zip -r wordnik.zip *')
+        run('zip -9r wordnik.zip *')
     # # now that all is set up, delete the folder again
     # run('rm -rf /tmp/yourapplication /tmp/yourapplication.tar.gz')
     # # and finally touch the .wsgi file so that mod_wsgi triggers
