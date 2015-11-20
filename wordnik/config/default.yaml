@@ -3,3 +3,4 @@ domains:
     - nytimes.com
     - theatlantic.com
 diffbot_batch_size: 50
+bucket: ai.summer.1mwords
