@@ -25,5 +25,5 @@ python -m textblob.download_corpora
 
 ```
 cd wordnik
-python pipeline.py misogynoir --config dev
+python pipeline.py backthought --config dev
 ```

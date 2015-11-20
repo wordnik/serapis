@@ -19,9 +19,9 @@ s3 = boto3.resource('s3', region_name=config.region)
 
 def write_message(task, message):
     """Writes a message to the S3 bucket."""
-    if not config.save_messages:
-        return
-    s3.Object(config.bucket, task).put(Body=json.dumps(message))
+    if config.save_messages:
+        s3.Object(config.bucket, task).put(Body=json.dumps(message))
+    return message
 
 
 def search(message):
@@ -57,7 +57,7 @@ def search(message):
     # else:
     #    Search Bing
     #    Hit Diffbot's exctract API with result urls
-    write_message('detect', message)
+    return write_message('detect', message)
 
 
 def detect(message):
@@ -97,7 +97,7 @@ def detect(message):
                 'frd': 0  # Detect if this is an FRD
             }
             url['sentences'].append(result)
-    write_message('rate', message)
+    return write_message('rate', message)
 
 
 def rate(message):
@@ -107,11 +107,11 @@ def rate(message):
     for url in message['urls']:
         for sentence in url['sentences']:
             sentence['rating'] = 0
-    write_message('save', message)
+    return write_message('save', message)
 
 
 def save(message):
     """
     ...
     """
-    pass
+    return message
