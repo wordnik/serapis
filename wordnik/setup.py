@@ -15,7 +15,7 @@ import argparse
 
 
 def set_up_buckets():
-    s3 = boto3.resource('s3', aws_access_key_id=config.aws_access_key, aws_secret_access_key=config.aws_access_secret, region_name=config.region)
+    s3 = boto3.resource('s3', region_name=config.region)
     existing_buckets = [bucket.name for bucket in s3.buckets.all()]
     if config.bucket not in existing_buckets:
         print("Creating bucket '{}'".format(config.bucket))
