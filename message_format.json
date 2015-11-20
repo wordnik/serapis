@@ -1,0 +1,12 @@
+{
+  "word": "the word in question"
+  "urls": [
+    "url 1 corresponding to word": {
+      "meta": {},
+      "doc": "contents of this URL fetched by bitbot?",
+      "sentences": [
+        {"s": "text of sentence", "rating": 0.2335}
+      ]
+    }
+  ]
+}
