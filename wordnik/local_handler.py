@@ -33,6 +33,10 @@ class TaskHandler(FileSystemEventHandler):
             tasks_map[task](message)
         os.remove(event.src_path)
 
+    def on_modified(self, event):
+        if not os.path.isdir(event.src_path):
+            self.on_created(event)
+
 
 def watch():
     import tasks

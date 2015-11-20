@@ -123,5 +123,10 @@ def save(message):
     """
     ...
     """
-    print(message)
+    if not config.save_messages:
+        # Write things locally!
+        resultfile = os.path.join(config.local_s3_results, message['hashslug'])
+        with open(resultfile, 'w') as f:
+            print("Saving results to '{}".format(resultfile))
+            json.dump(message, f)
     return message

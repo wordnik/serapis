@@ -64,3 +64,8 @@ venv/
 # Autoenv
 .env
 
+
+*.zip
+
+wordnik/local_result_bucket/*
+wordnik/local_bucket/*
