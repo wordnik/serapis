@@ -10,7 +10,7 @@ __date__ = "2015-11-19"
 __email__ = "manuel@summer.ai"
 
 import boto3
-from wordnik.config import config
+from config import config
 import argparse
 
 
