@@ -2,10 +2,10 @@
   "word": "the word in question",
   "urls": [
     "url 1 corresponding to word": {
-      "meta": {},
-      "doc": "contents of this URL fetched by bitbot?",
+      "meta": {"author": "", "date": "", "readability_score": 4},
+      "doc": "contents of the article fetched by diffbot?",
       "sentences": [
-        {"s": "text of sentence", "rating": 0.2335}
+        {"s": "text of sentence", "frd": 0.132, "rating": 0.2335}
       ]
     }
   ]
