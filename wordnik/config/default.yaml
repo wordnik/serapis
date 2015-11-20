@@ -3,3 +3,6 @@ domains:
     - nytimes.com
     - theatlantic.com
 diffbot_batch_size: 50
+bucket: ai.summer.1mwords
+region: us-east-1
+save_messages: true
