@@ -32,8 +32,8 @@ def handler(event, context):
     for record in event['Records']:
         bucket = record['s3']['bucket']['name']
         key = record['s3']['object']['key']
-
+        task, _, _ = key.split(":")
         message = json.loads(s3.Object(bucket, key).get()['Body'].read())
 
         # Execute task
-        tasks_map[key](message)
+        tasks_map[task](message)

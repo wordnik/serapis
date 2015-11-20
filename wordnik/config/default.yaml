@@ -6,3 +6,5 @@ diffbot_batch_size: 50
 bucket: ai.summer.1mwords.test
 region: us-east-1
 save_messages: true
+local_s3: local_bucket
+local_s3_results: local_result_bucket
