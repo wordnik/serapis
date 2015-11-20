@@ -57,3 +57,10 @@ docs/_build/
 target/
 
 wordnik/config/credentials.yaml
+
+# Virtualenv
+venv/
+
+# Autoenv
+.env
+
