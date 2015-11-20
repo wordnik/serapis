@@ -1,7 +1,8 @@
 {
   "word": "the word in question",
   "urls": [
-    "url 1 corresponding to word": {
+    {
+      "url": "url for one search result"
       "meta": {"author": "", "date": "", "readability_score": 4},
       "doc": "contents of the article fetched by diffbot?",
       "sentences": [
