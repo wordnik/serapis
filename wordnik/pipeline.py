@@ -12,6 +12,9 @@ __email__ = "manuel@summer.ai"
 import argparse
 from config import config
 import json
+import util
+import os
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Set up buckets')
@@ -21,8 +24,10 @@ if __name__ == "__main__":
     config.load(args.config)
 
     import tasks
+    if not os.path.exists(config.local_s3):
+        os.mkdir(config.local_s3)
 
-    message = {'word': args.word}
+    message = {'word': args.word, 'hashslug': util.hashslug(args.word)}
     message = tasks.search(message)
     message = tasks.detect(message)
     message = tasks.rate(message)

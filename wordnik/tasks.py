@@ -18,12 +18,21 @@ from textblob import TextBlob
 import search as search_helper
 
 s3 = boto3.resource('s3', region_name=config.region)
+import os
 
 
 def write_message(task, message):
-    """Writes a message to the S3 bucket."""
+    """Writes a task with a message to the S3 bucket.
+    The key will have the format task:slug:hash, e.g.
+
+        search:lesprit-de-lescalier:6ad283
+    """
+    key = "{}:{}".format(task, message['hashslug'])
     if config.save_messages:
         s3.Object(config.bucket, task).put(Body=json.dumps(message))
+    else:
+        with open(os.path.join(config.local_s3, key), 'w') as f:
+            json.dump(message, f)
     return message
 
 
@@ -34,6 +43,7 @@ def search(message):
 
         {
             'word': ...
+            'hashslug': ...
         }
 
     The message saved will look like this:
@@ -113,4 +123,5 @@ def save(message):
     """
     ...
     """
+    print(message)
     return message
