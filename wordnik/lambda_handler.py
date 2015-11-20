@@ -3,6 +3,8 @@
 """
 Searcher
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
 
 __author__ = "Manuel Ebert"
 __copyright__ = "Copyright 2015, summer.ai"
