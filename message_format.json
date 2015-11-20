@@ -3,7 +3,9 @@
   "urls": [
     {
       "url": "url for one search result"
-      "meta": {"author": "", "date": "", "readability_score": 4},
+      "author": "", 
+      "date": "", 
+      "readability_score": 4,
       "doc": "contents of the article fetched by diffbot?",
       "sentences": [
         {"s": "text of sentence", "frd": 0.132, "rating": 0.2335}
