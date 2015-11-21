@@ -36,13 +36,13 @@ To run this beauty locally, use the `local_handler`. This will simulate a lambda
 
 ```sh
 cd wordnik
-python local_handler.py watch --config dev
+python lambda_simulator.py --config dev
 ```
 
 Now, open a new terminal window and add a new word to the pipeline:
 
 ```sh
-python local_handler.py add --word  --config dev
+python add.py brainfart --config dev
 ```
 
-You can see in the first window how the task gets processed. Results will be saved into `local_result_bucket`.
+You can see in the first window how the task gets processed. Results will be saved into `local_result_bucket`. You can also use `add.py` to add a word to the actual pipeline.

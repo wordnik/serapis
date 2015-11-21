@@ -70,8 +70,6 @@ def add(word):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Simulate Lambda functions locally')
-    parser.add_argument('action', choices=['watch', 'add'])
-    parser.add_argument('--word', type=str, help="Word to add")
     parser.add_argument('--config', dest='config', default="default", help='Config file to use')
     args = parser.parse_args()
     config.load(args.config)
@@ -80,9 +78,4 @@ if __name__ == "__main__":
         if not os.path.exists(bucket):
             os.mkdir(bucket)
 
-    if args.action == 'watch':
-        watch()
-    elif args.action == 'add':
-        if not args.word:
-            print("You need to specify a word to add with --word.")
-        add(args.word)
+    watch()
