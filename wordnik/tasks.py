@@ -64,7 +64,7 @@ def search(message):
     Where doc contains the parsed body text.
     """
     word = message['word']
-    message['urls'] = [result for result in search_helper.search_diffbot_cache(word)]
+    message['urls'] = search_helper.search_diffbot_cache(word)
     return write_message('detect', message)
 
 

@@ -17,14 +17,18 @@ from dateutil.parser import parse as parse_date
 
 
 def search_diffbot_cache(word):
-    results = requests.get('http://api.diffbot.com/v3/search', params={
+    response = requests.get('http://api.diffbot.com/v3/search', params={
         'token': config.credentials['diffbot'],
         'query': requests.utils.quote('"{}"'.format(word)),
         'col': 'GLOBAL-INDEX'
     }).json()
-    if not results['objects']:
-        print("NO RESULTS")
-    for object in results['objects']:
+    if not response.get('objects'):
+        if response.get('error'):
+            print("Response Error '{}' (code: {})".format(response['error'], response['errorCode']))
+        else:
+            print("NO RESULTS")
+    results = []
+    for object in response.get('objects', []):
         if object.get('text'):
             result = {
                 "title": object.get('title'),
@@ -33,4 +37,5 @@ def search_diffbot_cache(word):
                 "date": parse_date(object.get('date', '')).isoformat(),
                 "doc": object.get('text')
             }
-            yield result
+            results.append(result)
+    return results
