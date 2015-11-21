@@ -16,9 +16,14 @@ from config import config
 import json
 from textblob import TextBlob
 import search as search_helper
-
-s3 = boto3.resource('s3', region_name=config.region)
 import os
+
+s3 = boto3.resource(
+    's3',
+    region_name=config.region,
+    aws_access_key_id=config.credentials['aws_access_key'],
+    aws_secret_access_key=config.credentials['aws_access_secret']
+)
 
 
 def write_message(task, message):

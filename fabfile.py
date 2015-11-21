@@ -58,8 +58,12 @@ def deploy():
     # run('touch /var/www/yourapplication.wsgi')
 
     lambdafile = 'wordnik.lambda.zip'
-    lambdafunction = 'TestLambdaFunction'
+    lambdafunction = 'WordTask'
     local('scp %s@%s:~/lambda/wordnik.zip %s' % (env.user, env.hosts[0], lambdafile))
 
     cwd = local('pwd', capture=True).strip()
-    local('aws lambda update-function-code --function-name %s --zip-file fileb://%s/%s' % (lambdafunction, cwd, lambdafile))
+
+    # If this says that the function is not found, create it first:
+    # aws lambda create-function --region us-east-1 --function-name WordTask --zip-file fileb://wordnik.lambda.zip --handler lambda_handler.handler --runtime python2.7 --timeout 10 --memory-size 512 --role arn:aws:iam::054978852993:role/lambda_basic_execution
+
+    local('aws lambda update-function-code --region us-east-1 --function-name %s --zip-file fileb://%s/%s' % (lambdafunction, cwd, lambdafile))
