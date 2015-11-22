@@ -11,9 +11,9 @@ __copyright__ = "Copyright 2015, summer.ai"
 __date__ = "2015-11-20"
 __email__ = "manuel@summer.ai"
 
-from config import config
 import requests
 from dateutil.parser import parse as parse_date
+from .config import config  # Make sure to use absolute imports here
 
 
 def search_diffbot_cache(word):

@@ -11,12 +11,12 @@ __copyright__ = "Copyright 2015, summer.ai"
 __date__ = "2015-11-20"
 __email__ = "manuel@summer.ai"
 
-import boto3
-from config import config
-import json
-from textblob import TextBlob
-import search as search_helper
 import os
+import json
+import boto3
+from textblob import TextBlob
+from .config import config
+from . import search as search_helper
 
 s3 = boto3.resource(
     's3',
@@ -33,8 +33,10 @@ def write_message(task, message):
         search:lesprit-de-lescalier:6ad283
     """
     key = "{}:{}".format(task, message['hashslug'])
+    print(key)
+    print(json.dumps(message))
     if config.save_messages:
-        s3.Object(config.bucket, task).put(Body=json.dumps(message))
+        s3.Object(config.bucket, key).put(Body=json.dumps(message))
     else:
         with open(os.path.join(config.local_s3, key), 'w') as f:
             json.dump(message, f)
