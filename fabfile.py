@@ -33,6 +33,7 @@ def pack():
     # upload the source zipfile to the temporary folder on the server
     deploy_filename = '/tmp/wordnik.%s.zip' % str(time.time())
     put(gitfile, deploy_filename)
+    local('rm %s' % gitfile)
 
     # create a place where we can unzip the zipfile, then enter
     # that directory and unzip it
@@ -56,6 +57,14 @@ def pack():
 
     # Get the file back onto our local machine
     local('scp %s@%s:~/lambda/wordnik.zip %s' % (env.user, env.hosts[0], lambdafile))
+    update()
+
+
+def update():
+    local('git archive --format=zip HEAD -o %s' % gitfile, capture=False)
+    local('unzip -d git_tmp -o -u %s' % gitfile)
+    local('zip -9r %s git_tmp' % lambdafile)
+    local('rm -r git_tmp')
 
 
 def deploy():

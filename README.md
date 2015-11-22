@@ -46,3 +46,13 @@ python add.py brainfart --config dev
 ```
 
 You can see in the first window how the task gets processed. Results will be saved into `local_result_bucket`. You can also use `add.py` to add a word to the actual pipeline.
+
+
+## Deploy:
+
+1. First, run `fab pack` to create a file containing a compiled environment. This will create a file called `wordnik.lambda.zip`. Note that this will in use the current HEAD of your working git branch - if you have any uncommited files, they will not be deployed!
+2. If you already have a `wordnik.lambda.zip` and didn't add or change anything in `requirements.txt`, you can replace the `pack` step with the much faster `fab update`
+2. Upload the last zip file with `fab deploy`.
+
+You can of course do all of these steps in one with `fab pack deploy` or `fab update deploy`.
+
