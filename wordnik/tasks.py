@@ -15,8 +15,8 @@ import os
 import json
 import boto3
 from textblob import TextBlob
-from .config import config
-from . import search as search_helper
+from config import config
+import search as search_helper
 
 if "aws_access_key" in config.credentials:
     s3 = boto3.resource(
@@ -36,8 +36,6 @@ def write_message(task, message):
         search:lesprit-de-lescalier:6ad283
     """
     key = "{}:{}".format(task, message['hashslug'])
-    print(key)
-    print(json.dumps(message))
     if config.save_messages:
         s3.Object(config.bucket, key).put(Body=json.dumps(message))
     else:

@@ -11,14 +11,16 @@ __copyright__ = "Copyright 2015, summer.ai"
 __date__ = "2015-11-09"
 __email__ = "manuel@summer.ai"
 
+import os
 import json
 import time
-from config import config
+import argparse
+
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
-import argparse
-import util
-import os
+
+from wordnik import util
+from wordnik.config import config
 
 tasks_map = {}
 
@@ -39,7 +41,7 @@ class TaskHandler(FileSystemEventHandler):
 
 
 def watch():
-    import tasks
+    from wordnik import tasks
     global tasks_map
     tasks_map = {
         "search": tasks.search,

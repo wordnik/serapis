@@ -11,15 +11,15 @@ __copyright__ = "Copyright 2015, summer.ai"
 __date__ = "2015-11-09"
 __email__ = "manuel@summer.ai"
 
-from config import config
 import argparse
-import util
+from wordnik.config import config
+from wordnik import util
 
 tasks_map = {}
 
 
 def add(word):
-    import tasks
+    from wordnik import tasks
     message = {'word': args.word, 'hashslug': util.hashslug(args.word)}
     tasks.write_message('search', message)
     print("Added task '{}'".format(message['hashslug']))

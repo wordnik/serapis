@@ -13,7 +13,7 @@ __email__ = "manuel@summer.ai"
 
 import requests
 from dateutil.parser import parse as parse_date
-from .config import config  # Make sure to use absolute imports here
+from config import config  # Make sure to use absolute imports here
 
 
 def search_diffbot_cache(word):

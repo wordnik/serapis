@@ -67,5 +67,5 @@ venv/
 
 *.zip
 
-wordnik/local_result_bucket/*
-wordnik/local_bucket/*
+local_result_bucket/*
+local_bucket/*

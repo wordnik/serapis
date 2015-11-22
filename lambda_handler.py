@@ -14,9 +14,9 @@ __email__ = "manuel@summer.ai"
 import boto3
 import json
 
-from .config import config
+from wordnik.config import config
 config.load()  # Needs to be loaded before we import tasks
-from . import tasks
+from wordnik import tasks
 
 
 s3 = boto3.resource('s3', region_name=config.region)

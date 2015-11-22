@@ -35,7 +35,6 @@ diffbot: ...
 To run this beauty locally, use the `local_handler`. This will simulate a lambda function watching a bucket, but instead it watches a folder in which messages will be written. Be sure to use the `--conf def` argument to disable writing to S3 and write to the local folder `local_bucket` instead.
 
 ```sh
-cd wordnik
 python lambda_simulator.py --config dev
 ```
 
