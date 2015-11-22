@@ -18,12 +18,15 @@ from textblob import TextBlob
 from .config import config
 from . import search as search_helper
 
-s3 = boto3.resource(
-    's3',
-    region_name=config.region,
-    aws_access_key_id=config.credentials['aws_access_key'],
-    aws_secret_access_key=config.credentials['aws_access_secret']
-)
+if "aws_access_key" in config.credentials:
+    s3 = boto3.resource(
+        's3',
+        region_name=config.region,
+        aws_access_key_id=config.credentials['aws_access_key'],
+        aws_secret_access_key=config.credentials['aws_access_secret']
+    )
+else:
+    s3 = boto3.resource('s3', region_name=config.region)
 
 
 def write_message(task, message):

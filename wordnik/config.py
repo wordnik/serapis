@@ -38,17 +38,19 @@ class Config(object):
         self.config = config
         path = os.path.dirname(os.path.abspath(__file__))
 
-        def open_yaml(filename):
-            return open(os.path.join(path, "config", "{}.yaml").format(filename))
+        def abs_path(filename):
+            return os.path.join(path, "config", "{}.yaml".format(filename))
 
-        with open_yaml("default") as c:
+        with open(abs_path("default")) as c:
             self.keys = yaml.load(c)
 
-        with open_yaml("credentials") as c:
-            self.keys['credentials'] = yaml.load(c)
+        self.keys['credentials'] = {}
+        if os.path.exists(abs_path("credentials")):
+            with open(abs_path("credentials")) as c:
+                self.keys['credentials'] = yaml.load(c) or {}
 
         if config != "default":
-            with open_yaml(config) as c:
+            with open(abs_path(config)) as c:
                 self.keys.update(yaml.load(c))
 
 config = Config()
