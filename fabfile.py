@@ -15,18 +15,20 @@ env.user = 'ec2-user'
 env.hosts = ['52.91.194.132']
 
 gitfile = 'wordnik.git.zip'
+lambdafile = 'wordnik.lambda.zip'
+lambdafunction = 'WordTask'
+
+
+def upgrade():
+    # Make sure machine and dev tools are up to date
+    sudo('sudo yum -y update')
+    sudo('yum -y upgrade')
+    sudo('yum -y install python27-devel python27-pip')
 
 
 def pack():
     # create a new source distribution zipfile
     local('git archive --format=zip HEAD -o %s' % gitfile, capture=False)
-
-
-def deploy():
-    # Make sure machine and dev tools are up to date
-    sudo('sudo yum -y update')
-    sudo('yum -y upgrade')
-    sudo('yum -y install python27-devel python27-pip')
 
     # upload the source zipfile to the temporary folder on the server
     deploy_filename = '/tmp/wordnik.%s.zip' % str(time.time())
@@ -51,19 +53,13 @@ def deploy():
         run('source venv/bin/activate && pip install -r requirements.txt')
 
         run('zip -9r wordnik.zip *')
-    # # now that all is set up, delete the folder again
-    # run('rm -rf /tmp/yourapplication /tmp/yourapplication.tar.gz')
-    # # and finally touch the .wsgi file so that mod_wsgi triggers
-    # # a reload of the application
-    # run('touch /var/www/yourapplication.wsgi')
 
-    lambdafile = 'wordnik.lambda.zip'
-    lambdafunction = 'WordTask'
+    # Get the file back onto our local machine
     local('scp %s@%s:~/lambda/wordnik.zip %s' % (env.user, env.hosts[0], lambdafile))
 
-    cwd = local('pwd', capture=True).strip()
 
+def deploy():
     # If this says that the function is not found, create it first:
     # aws lambda create-function --region us-east-1 --function-name WordTask --zip-file fileb://wordnik.lambda.zip --handler lambda_handler.handler --runtime python2.7 --timeout 10 --memory-size 512 --role arn:aws:iam::054978852993:role/lambda_basic_execution
-
+    cwd = local('pwd', capture=True).strip()
     local('aws lambda update-function-code --region us-east-1 --function-name %s --zip-file fileb://%s/%s' % (lambdafunction, cwd, lambdafile))
