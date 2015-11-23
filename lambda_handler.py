@@ -43,8 +43,11 @@ def handler(event, context):
         bucket = record['s3']['bucket']['name']
         key = record['s3']['object']['key']
         print(json.dumps(event))
-        task, _, _ = key.replace("%3A", ":").split(":")  # That's my URLDeode.
-        message = json.loads(s3.Object(bucket, key).get()['Body'].read())
+        key = key.replace("%3A", ":")  # That's my URLDeode.
+        task, _, _ = key.split(":")
+        contents = s3.Object(bucket, key).get()
+        print(contents)
+        message = json.loads(contents['Body'].read())
 
         # Execute task
         tasks_map[task](message)
