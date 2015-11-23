@@ -70,8 +70,9 @@ def update():
     # Updates code in zip file with current Master without going to EC2 first.
     local('git archive --format=zip HEAD -o %s' % gitfile, capture=False)
     local('unzip -d git_tmp -o -u %s' % gitfile)
-    with lcd('cd git_tmp'):
+    with lcd('git_tmp'):
         local('zip -9r ../%s .' % lambdafile)
+    local('zip -9 %s wordnik/config/credentials.yaml' % lambdafile)
     local('rm -r git_tmp')
 
 

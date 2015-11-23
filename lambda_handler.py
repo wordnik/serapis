@@ -18,8 +18,17 @@ from wordnik.config import config
 config.load()  # Needs to be loaded before we import tasks
 from wordnik import tasks
 
+print(json.dumps(config.keys))
 
-s3 = boto3.resource('s3', region_name=config.region)
+if "aws_access_key" in config.credentials:
+    s3 = boto3.resource(
+        's3',
+        region_name=config.region,
+        aws_access_key_id=config.credentials['aws_access_key'],
+        aws_secret_access_key=config.credentials['aws_access_secret']
+    )
+else:
+    s3 = boto3.resource('s3', region_name=config.region)
 
 tasks_map = {
     "search": tasks.search,
