@@ -19,6 +19,12 @@ lambdafile = 'wordnik.lambda.zip'
 lambdafunction = 'WordTask'
 
 
+def pack_local():
+    local('pushd $VIRTUAL_ENV/lib/python2.7/site-packages ; zip -9r {} . ; popd'.format(lambdafile))
+    local('mv $VIRTUAL_ENV/lib/python2.7/site-packages/{} .'.format(lambdafile))
+    update()
+
+
 def pack():
     # Make sure machine and dev tools are up to date
     sudo('sudo yum -y update')
@@ -63,7 +69,7 @@ def update():
     # Updates code in zip file with current Master without going to EC2 first.
     local('git archive --format=zip HEAD -o %s' % gitfile, capture=False)
     local('unzip -d git_tmp -o -u %s' % gitfile)
-    local('zip -9r %s git_tmp/*' % lambdafile)
+    local('cd git_tmp ; zip -9r ../%s . ; cd ..' % lambdafile)
     local('rm -r git_tmp')
 
 
@@ -71,4 +77,4 @@ def deploy():
     # If this says that the function is not found, create it first:
     # aws lambda create-function --region us-east-1 --function-name WordTask --zip-file fileb://wordnik.lambda.zip --handler lambda_handler.handler --runtime python2.7 --timeout 10 --memory-size 512 --role arn:aws:iam::054978852993:role/lambda_basic_execution
     cwd = local('pwd', capture=True).strip()
-    local('aws lambda update-function-code --region us-east-1 --function-name %s --zip-file fileb://%s/%s' % (lambdafunction, cwd, lambdafile))
+    local('aws lambda update-function-code --region us-east-1 --function-name %s --zip-file fileb://%s/%s --profile wordnik' % (lambdafunction, cwd, lambdafile))

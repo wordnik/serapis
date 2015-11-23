@@ -33,6 +33,10 @@ def handler(event, context):
     for record in event['Records']:
         bucket = record['s3']['bucket']['name']
         key = record['s3']['object']['key']
+        print(key)
+        print(bucket)
+        print(event)
+        print(context)
         task, _, _ = key.split(":")
         message = json.loads(s3.Object(bucket, key).get()['Body'].read())
 
