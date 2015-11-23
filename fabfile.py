@@ -51,7 +51,7 @@ def pack():
         making sure any extensions are in a subdirectory of ~/lambda so that they are zipped
         """
         run('virtualenv venv')
-        run('source venv/bin/activate && pip install -r requirements.txt')
+        run('source venv/bin/activate && pip install -r requirements.txt -t .')
 
         run('zip -9r wordnik.zip *')
 
@@ -62,7 +62,7 @@ def pack():
 def update():
     local('git archive --format=zip HEAD -o %s' % gitfile, capture=False)
     local('unzip -d git_tmp -o -u %s' % gitfile)
-    local('zip -9r %s git_tmp' % lambdafile)
+    local('zip -9r %s git_tmp/*' % lambdafile)
     local('rm -r git_tmp')
 
 
