@@ -22,6 +22,8 @@ pip install -r requirements.txt
 python -m textblob.download_corpora
 ```
 
+(If you run into permissions issues, try `pip install -r ../../requirements.txt`, or from another parent dir)
+
 Create a file called `wordnik/config/credentials.yaml` with the required tokens:
 
 ```yaml
