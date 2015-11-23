@@ -33,6 +33,7 @@ def handler(event, context):
     for record in event['Records']:
         bucket = record['s3']['bucket']['name']
         key = record['s3']['object']['key']
+        print(json.dumps(event))
         task, _, _ = key.replace("%3A", ":").split(":")  # That's my URLDeode.
         message = json.loads(s3.Object(bucket, key).get()['Body'].read())
 

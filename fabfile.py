@@ -6,7 +6,7 @@ Steps:
 http://www.perrygeo.com/running-python-with-compiled-code-on-aws-lambda.html
 """
 
-from fabric.api import local, sudo, run, warn_only, env, put, cd
+from fabric.api import local, sudo, run, warn_only, env, put, cd, lcd
 import time
 
 # the user to use for the remote commands
@@ -20,7 +20,8 @@ lambdafunction = 'WordTask'
 
 
 def pack_local():
-    local('pushd $VIRTUAL_ENV/lib/python2.7/site-packages ; zip -9r {} . ; popd'.format(lambdafile))
+    with lcd("$VIRTUAL_ENV/lib/python2.7/site-packages"):
+        local('zip -9r {} .'.format(lambdafile))
     local('mv $VIRTUAL_ENV/lib/python2.7/site-packages/{} .'.format(lambdafile))
     update()
 
@@ -69,7 +70,8 @@ def update():
     # Updates code in zip file with current Master without going to EC2 first.
     local('git archive --format=zip HEAD -o %s' % gitfile, capture=False)
     local('unzip -d git_tmp -o -u %s' % gitfile)
-    local('cd git_tmp ; zip -9r ../%s . ; cd ..' % lambdafile)
+    with lcd('cd git_tmp'):
+        local('zip -9r ../%s .' % lambdafile)
     local('rm -r git_tmp')
 
 
