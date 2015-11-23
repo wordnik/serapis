@@ -19,14 +19,12 @@ lambdafile = 'wordnik.lambda.zip'
 lambdafunction = 'WordTask'
 
 
-def upgrade():
+def pack():
     # Make sure machine and dev tools are up to date
     sudo('sudo yum -y update')
     sudo('yum -y upgrade')
     sudo('yum -y install python27-devel python27-pip')
 
-
-def pack():
     # create a new source distribution zipfile
     local('git archive --format=zip HEAD -o %s' % gitfile, capture=False)
 
@@ -40,6 +38,7 @@ def pack():
     with warn_only():
         run('rm -rf ~/lambda')
     run('mkdir ~/lambda')
+
     with cd('~/lambda'):
         run('unzip %s' % deploy_filename)
         # now setup the package with our virtual environment's
@@ -51,15 +50,17 @@ def pack():
         making sure any extensions are in a subdirectory of ~/lambda so that they are zipped
         """
         run('virtualenv venv')
-        run('source venv/bin/activate && pip install -r requirements.txt -t .')
+        run('source venv/bin/activate && pip install -r requirements.txt')
 
-        run('zip -9r wordnik.zip *')
+        run('zip -9r wordnik.zip $VIRTUAL_ENV/lib/python2.7/site-packages')
 
     # Get the file back onto our local machine
     local('scp %s@%s:~/lambda/wordnik.zip %s' % (env.user, env.hosts[0], lambdafile))
+    update()
 
 
 def update():
+    # Updates code in zip file with current Master without going to EC2 first.
     local('git archive --format=zip HEAD -o %s' % gitfile, capture=False)
     local('unzip -d git_tmp -o -u %s' % gitfile)
     local('zip -9r %s git_tmp/*' % lambdafile)
