@@ -57,7 +57,6 @@ def pack():
 
     # Get the file back onto our local machine
     local('scp %s@%s:~/lambda/wordnik.zip %s' % (env.user, env.hosts[0], lambdafile))
-    update()
 
 
 def update():
