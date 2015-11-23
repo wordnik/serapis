@@ -137,4 +137,7 @@ def save(message):
         with open(resultfile, 'w') as f:
             print("Saving results to '{}".format(resultfile))
             json.dump(message, f)
+    else:
+        # Just save it to the logs
+        print(json.dumps(message))
     return message
