@@ -12,14 +12,14 @@ __date__ = "2015-11-09"
 __email__ = "manuel@summer.ai"
 
 import argparse
-from wordnik.config import config
-from wordnik import util
+from serapis.config import config
+from serapis import util
 
 tasks_map = {}
 
 
 def add(word):
-    from wordnik import tasks
+    from serapis import tasks
     message = {'word': args.word, 'hashslug': util.hashslug(args.word)}
     tasks.write_message('search', message)
     print("Added task '{}'".format(message['hashslug']))
