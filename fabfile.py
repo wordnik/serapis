@@ -7,16 +7,20 @@ http://www.perrygeo.com/running-python-with-compiled-code-on-aws-lambda.html
 """
 
 from fabric.api import local, sudo, run, warn_only, env, put, cd, lcd
+import yaml
 import time
+
+with open("wordnik/config/default.yaml") as f:
+    config = yaml.load(f)
 
 # the user to use for the remote commands
 env.user = 'ec2-user'
 # the servers where the commands are executed
-env.hosts = ['52.91.194.132']
+env.hosts = [config['ec2_ip']]
 
 gitfile = 'wordnik.git.zip'
 lambdafile = 'wordnik.lambda.zip'
-lambdafunction = 'WordTask'
+lambdafunction = config['lambda_function_name']
 
 
 def pack_local():
