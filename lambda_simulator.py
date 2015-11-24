@@ -19,8 +19,8 @@ import argparse
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
-from wordnik import util
-from wordnik.config import config
+from serapis import util
+from serapis.config import config
 
 tasks_map = {}
 
@@ -41,7 +41,7 @@ class TaskHandler(FileSystemEventHandler):
 
 
 def watch():
-    from wordnik import tasks
+    from serapis import tasks
     global tasks_map
     tasks_map = {
         "search": tasks.search,

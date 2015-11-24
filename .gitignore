@@ -56,7 +56,7 @@ docs/_build/
 # PyBuilder
 target/
 
-wordnik/config/credentials.yaml
+serapis/config/credentials.yaml
 
 # Virtualenv
 venv/

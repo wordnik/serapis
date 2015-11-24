@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 # coding=utf-8
 """
-Searcher
+AWS Lambda Handler
 """
 from __future__ import unicode_literals
 from __future__ import absolute_import
@@ -14,9 +14,9 @@ __email__ = "manuel@summer.ai"
 import boto3
 import json
 
-from wordnik.config import config
+from serapis.config import config
 config.load()  # Needs to be loaded before we import tasks
-from wordnik import tasks
+from serapis import tasks
 
 print(json.dumps(config.keys))
 

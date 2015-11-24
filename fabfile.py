@@ -10,7 +10,7 @@ from fabric.api import local, sudo, run, warn_only, env, put, cd, lcd
 import yaml
 import time
 
-with open("wordnik/config/default.yaml") as f:
+with open("serapis/config/default.yaml") as f:
     config = yaml.load(f)
 
 # the user to use for the remote commands
@@ -18,8 +18,8 @@ env.user = 'ec2-user'
 # the servers where the commands are executed
 env.hosts = [config['ec2_ip']]
 
-gitfile = 'wordnik.git.zip'
-lambdafile = 'wordnik.lambda.zip'
+gitfile = 'serapis.git.zip'
+lambdafile = 'serapis.lambda.zip'
 lambdafunction = config['lambda_function_name']
 
 
@@ -76,7 +76,7 @@ def update():
     local('unzip -d git_tmp -o -u %s' % gitfile)
     with lcd('git_tmp'):
         local('zip -9r ../%s .' % lambdafile)
-    local('zip -9 %s wordnik/config/credentials.yaml' % lambdafile)
+    local('zip -9 %s serapis/config/credentials.yaml' % lambdafile)
     local('rm -r git_tmp')
 
 
