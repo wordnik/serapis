@@ -5,6 +5,7 @@ Utility belt
 """
 from __future__ import unicode_literals
 from __future__ import absolute_import
+from functools import wraps
 
 __author__ = "Manuel Ebert"
 __copyright__ = "Copyright 2015, summer.ai"
@@ -15,14 +16,27 @@ import slugify
 import hashlib
 
 
-def singleton(class_):
+class Collector(object):
+    """Collector decorator"""
+    all = []
+
+    def __init__(self, func):
+        self.func = func
+        self.all.append(func)
+        wraps(func)(self)
+
+    def __call__(self, *args, **kwargs):
+        return self.func(*args, **kwargs)
+
+
+def singleton(cls):
     """Singleton decorator"""
     instances = {}
 
     def getinstance(*args, **kwargs):
-        if class_ not in instances:
-            instances[class_] = class_(*args, **kwargs)
-        return instances[class_]
+        if cls not in instances:
+            instances[cls] = cls(*args, **kwargs)
+        return instances[cls]
     return getinstance
 
 
