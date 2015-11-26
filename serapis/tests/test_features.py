@@ -30,4 +30,4 @@ def test_wordnik_patterns_match():
     with open("serapis/tests/data/patterns.yaml") as f:
         test_cases = yaml.load(f)
     for rule, sentence in test_cases.items():
-        assert match(sentence)[rule], "Rule {} does not match '{}'".format(rule, sentence)
+        assert rule in match(sentence, "_TERM_"), "Rule {} does not match '{}'".format(rule, sentence)

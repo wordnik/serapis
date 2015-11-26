@@ -19,6 +19,12 @@ for rule, pattern in patterns.items():
     patterns[rule] = re.compile(pattern, re.IGNORECASE)
 
 
-def match(sentence):
-    clean = sentence.lower().replace(",", "").replace("'_term_'", "_term_")
-    return {rule: bool(pattern.search(clean)) for rule, pattern in patterns.items()}
+def match(sentence, term):
+    """Returns all rules that match the sentence. E.g.
+
+        match("A tattoo of Donald Trump, or, in other words, a Trump Stamp.", "Trump Stamp")
+
+    Returns [u'KO16', u'KO3']
+    """
+    clean = sentence.lower().replace(",", "").replace(term.lower(), "_term_").replace("'_term_'", "_term_")
+    return [rule for rule, pattern in patterns.items() if pattern.search(clean)]
