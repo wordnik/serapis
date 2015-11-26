@@ -12,9 +12,9 @@ __date__ = "2015-11-24"
 __email__ = "manuel@summer.ai"
 
 import re
-import serapis.compile.patterns
+import serapis.patterns
 
-patterns = serapis.compile.patterns.compile()
+patterns = serapis.patterns.compile()
 for rule, pattern in patterns.items():
     patterns[rule] = re.compile(pattern, re.IGNORECASE)
 

@@ -16,7 +16,8 @@ __copyright__ = "Copyright 2015, Manuel Ebert"
 __date__ = "2015-11-25"
 __email__ = "manuel@1450.me"
 
-from . import patterns
+from serapis import patterns
 
 if __name__ == "__main__":
+    print("Compiling patterns...")
     patterns = patterns.compile()
