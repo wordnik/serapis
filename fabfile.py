@@ -24,6 +24,8 @@ lambdafunction = config['lambda_function_name']
 
 
 def pack_local():
+    # Run tests
+    local("py.test")
     with lcd("$VIRTUAL_ENV/lib/python2.7/site-packages"):
         local('zip -9r {} .'.format(lambdafile))
     local('mv $VIRTUAL_ENV/lib/python2.7/site-packages/{} .'.format(lambdafile))
@@ -71,6 +73,9 @@ def pack():
 
 
 def update():
+    # Run tests
+    local("py.test")
+
     # Updates code in zip file with current Master without going to EC2 first.
     local('git archive --format=zip HEAD -o %s' % gitfile, capture=False)
     local('unzip -d git_tmp -o -u %s' % gitfile)
