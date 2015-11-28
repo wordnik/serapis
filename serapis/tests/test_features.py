@@ -17,6 +17,7 @@ __email__ = "manuel@summer.ai"
 
 import yaml
 import re
+import csv
 
 
 def test_wordnik_patterns_compile():
@@ -31,3 +32,14 @@ def test_wordnik_patterns_match():
         test_cases = yaml.load(f)
     for rule, sentence in test_cases.items():
         assert rule in match(sentence, "_TERM_"), "Rule {} does not match '{}'".format(rule, sentence)
+
+
+def test_wordnik_patterns_perc():
+    from serapis.features import match
+    min_coverage = 0.2
+    matches = 0.0
+    with open("serapis/tests/data/frds_wordnik.csv") as f:
+        test_cases = list(csv.reader(f))
+    for term, sentence in test_cases:
+        matches += 1 if match(sentence, term) else 0
+    assert matches / len(test_cases) > min_coverage, "Only matched {:.2f}% of data set".format(100 * matches / len(test_cases))
