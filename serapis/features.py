@@ -5,6 +5,7 @@ DOC
 """
 from __future__ import unicode_literals
 from __future__ import absolute_import
+from unidecode import unidecode
 
 __author__ = "Manuel Ebert"
 __copyright__ = "Copyright 2015, summer.ai"
@@ -26,5 +27,5 @@ def match(sentence, term):
 
     Returns [u'KO16', u'KO3']
     """
-    clean = sentence.lower().replace(",", "").replace(term.lower(), "_term_").replace("'_term_'", "_term_")
+    clean = unidecode(sentence).lower().replace(",", "").replace(unidecode(term).lower(), "_term_").replace("'_term_'", "_term_")
     return [rule for rule, pattern in patterns.items() if pattern.search(clean)]
