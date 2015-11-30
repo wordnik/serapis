@@ -1,0 +1,310 @@
+AAVE
+Acadian
+African American Vernacular English
+African-American Vernacular English
+Afrikaans
+Albanian
+Aleutian
+American
+Amharic
+Amlish
+Angaur
+Angleutsch
+Anglicaan
+Anglikaans
+Anglo-Saxon
+Middle English
+Old English
+Old Norse
+Old French
+High German
+Anglonorsk
+Arabic
+Arablish
+Aranese
+Armenian
+Asian
+Assamese
+Aymara
+Azeri
+Basque
+beeb speak
+beeb-speak
+beebspeak
+Belarusian
+Bengali
+Benglish
+Bislama
+Black American English
+Black english
+Black slang
+Bonglish
+Bosnian
+Bowery Dialect
+Brooklynese
+Bulgarian
+Bunting
+bureaucrat-ese
+bureaucratese
+Burmese
+business speak
+business-speak
+businessspeak
+Cajun
+Camfranglais
+cant
+Catalan
+Changlish
+chat speak
+chat-speak
+chatspeak
+Chicagoese
+Chichewa
+Chinese
+Chinglish
+Chipewyan
+Cockney
+computer-ese
+computerese
+cop speak
+cop-speak
+copspeak
+Cree
+Creole
+Croatian
+Czech
+Danish
+Dari
+Denglish
+Deutschlish
+Dhivehi
+Dogrib
+Dutch
+Dutchlish
+Dzongkha
+Ebonic
+Ebonics
+Englañol
+English
+Englog
+Eskimo
+Espanglish
+Estonian
+Eurolish
+fannish
+Faroese
+Fijian
+Filipino
+Finglish
+Fingliska
+Finnish
+Franglais
+French
+Frenglish
+Gagauz
+Galician
+Georgian
+Gerlish
+German
+Germerican
+Germish
+Gernglish
+Greek
+Greeklish
+Gringoñol
+Gujarati
+Hawaiian
+Hawaiian Creole
+Hebrew
+Hindi
+Hindlish
+Hindustani
+Hinglish
+Hispanic
+Honglais
+Houstonese
+Hungarian
+Hunglish
+Icelandic
+Indlish
+Indo-European
+Indoglish
+Indonesian
+Indonglish
+Irish
+Italglish
+Italian
+Italian-American
+Jamlish
+Janglish
+Japanese
+Japanglish
+Japenglish
+Japglais
+Japlish
+jive
+jive talk
+jivetalk
+journalese
+Kalaallisut
+Kannada
+Kashmiri
+Kazakh
+Khmer
+Konglish
+Korean
+Krautlish
+Kurdish
+Kyrgyz
+l33t speak
+l33t-speak
+l33tspeak
+Lao
+Latin
+Latino
+Latvian
+leet speak
+leet-speak
+leetspeak
+legal-ese
+legalese
+Lithuanian
+LOL speak
+lol-speak
+lolspeak
+Luxembourgish
+Macedonian
+Malagasy
+Malay
+Malayalam
+Malish
+Maltese
+management-ese
+managementese
+Manglish
+Maori
+Marathi
+marketer speak
+marketer-speak
+marketerspeak
+marketing speak
+marketing-speak
+marketingspeak
+Marshallese
+Maya
+Mexican Spanish
+Minglish
+Moldovan
+Mongolian
+Montenegrin
+mother-tongue
+National
+Nauruan
+Ndebele
+Nepali
+New Yorker
+New Yorkese
+newscasterese
+North American Indian
+Norwegian
+Occitan
+Oriya
+Pashto
+Pentagon-ese
+Persian
+pidgin
+pisin
+pol-speak
+Polish
+polspeak
+Portuguese
+psycho-babble
+psychobabble
+Punglish
+Punjabi
+Punjlish
+Quebecois
+Québecois
+Québécois
+Quebecois French
+Québecois French
+Québécois French
+Quechua
+Romanian
+Romansh
+Runglish
+Russian
+Russlish
+Rusyn
+Sanskrit
+Serbian
+Shona
+Simlish
+Sindhi
+Singaporean English
+Singlish
+Sinhala
+Slavic
+Slavonic
+Slovak
+Slovene
+Somali
+Sotho
+Southern
+Southron
+Spanglish
+Spanish
+sportscasterese
+Strine
+Swahili
+Swati
+Swedish
+Swedlish
+Swenglish
+Tagalog
+Taglish
+Tahitian
+Tajik
+Tamil
+Tamlish
+Tanglish
+Telugu
+Tex-Mex
+Texanese
+Thai
+Thanglish
+Tibetan
+Tinglish
+trend speak
+trend-speak
+trendoid
+trendspeak
+Tsonga
+Tswana
+Turkish
+Turkmen
+Ukrainian
+Urdu
+Uyghur
+Uzbek
+Venda
+vernacular
+Vietnamese
+Washington-ese
+Washingtonese
+Welsh
+Wenglish
+Xhosa
+Yiddish
+Yinglish
+Youper
+Zhuang
+Zulu
+short
+shorthand
+doubletalk
+double-talk
+double talk
+code
+pig latin
+Pig Latin

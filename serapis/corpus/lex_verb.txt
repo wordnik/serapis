@@ -1,0 +1,19 @@
+term(?:ing|ed|s)?
+call(?:ing|ed|s)?
+coin(?:ing|ed|s)?
+dub(?:bing|bed|s)?
+label(?:ling|ing|led|s)?
+refer(?:ring|s|red)? to as
+defin(?:e|es|ed|ing) as
+classif(?:ying|ies|ied|y) as
+known as
+spoke of as
+speak(?:ing|s)? of as
+identif(?:ying|ie(?:d|s)|y) as
+describ(?:ing|es|ed|e) as
+characteriz(?:ing|es|ed|e)? (?:as|by)
+allud(?:ing|es|ed|e) to as
+(?:en)?titled
+baptiz(?:ing|ed|es|e)
+refer(?:ring|s|red)? to(?: as)?
+entail?
