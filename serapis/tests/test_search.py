@@ -16,6 +16,8 @@ __email__ = "manuel@summer.ai"
 
 
 import csv
+from serapis.config import config
+config.load()
 
 
 def test_language_detection():
@@ -39,3 +41,9 @@ def test_english_detection():
             assert detected_english, "Falsely classified '{}...' as non-English".format(sentence[:40])
         else:
             assert not detected_english, "Falsely classified '{}...' as English".format(sentence[:40])
+
+
+def test_duckduckgo():
+    from serapis.search import search_duckduckgo
+    result = search_duckduckgo("egregore")
+    assert result
