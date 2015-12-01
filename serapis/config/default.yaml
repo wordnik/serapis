@@ -10,3 +10,9 @@ local_s3: local_bucket
 local_s3_results: local_result_bucket
 ec2_ip: 52.91.194.132
 lambda_function_name: WordTask
+duckduckgo_sources:  # Acceptable sources for DuckDuckGo's instant answer API
+    - Wikipedia
+    - wiktionary
+    - Star Wars Fanon Wiki  # May the dictionary be with you.
+    - Abbreviations.com
+    - Jargon
