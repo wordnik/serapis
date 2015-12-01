@@ -39,3 +39,32 @@ def search_diffbot_cache(word):
             }
             results.append(result)
     return results
+
+
+def search_duckduckgo(term):
+    result = []
+    try:
+        req = requests.get('http://api.duckduckgo.com/?q={}&format=json'.format(term)).json()
+    except:
+        return result
+    if req['AbstractSource'] not in config.duckduckgo_sources:
+        return result
+    if req.get('Abstract'):
+        result.append({
+            'title': req['Heading'],
+            'url': req['AbstractURL'],
+            'author': None,
+            'date': None,
+            'source': req['AbstractSource'],
+            'doc': req['Abstract']
+        })
+    if req.get('Definition'):
+        result.append({
+            'title': req['Heading'],
+            'url': req['DefinitionURL'],
+            'source': req['DefinitionSource'],
+            'author': None,
+            'date': None,
+            'doc': req['Definition']
+        })
+    return result
