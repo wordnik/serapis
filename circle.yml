@@ -1,3 +1,6 @@
+dependencies:
+    pre:
+        - python -m nltk.downloader punkt
 test:
     override:
         - py.test serapis/tests/
