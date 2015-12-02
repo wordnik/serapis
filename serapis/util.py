@@ -12,8 +12,9 @@ __copyright__ = "Copyright 2015, summer.ai"
 __date__ = "2015-11-09"
 __email__ = "manuel@summer.ai"
 
-import slugify
 import hashlib
+import re
+from unidecode import unidecode
 
 
 class Collector(object):
@@ -40,6 +41,18 @@ def singleton(cls):
     return getinstance
 
 
+def slugify(string):
+    """
+    Slugify a unicode string.
+
+        >>> slugify(u"Héllø Wörld")
+        u"hello-world"
+    """
+    return re.sub(r'[-\s]+', '-',
+                  re.sub(r'[^\w\s-]', '', unidecode(string))
+                  ).strip().lower()
+
+
 def hashslug(word):
     """returns a slug and a short hash for a word, separated by a colon. EG
 
@@ -50,7 +63,7 @@ def hashslug(word):
     if not isinstance(word, unicode):
         word = word.decode('utf-8')
     return "{}:{}".format(
-        slugify.slugify(word),
+        slugify(word),
         hashlib.md5(word).hexdigest()[:6]
     )
 
