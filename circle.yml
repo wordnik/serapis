@@ -7,3 +7,4 @@ dependencies:
 test:
     override:
         - py.test serapis/tests/
+        - "flake8 . --ignore=E501,W293 --count"
