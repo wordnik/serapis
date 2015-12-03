@@ -25,12 +25,14 @@ class Config(object):
     """
     Singleton config object. Usage:
 
-        from config import config  # Wherever you need it
-        config.load('dev')  # Override default values, only once
-        print(config.aws_secret_token)
+    >>> from config import config  # Wherever you need it
 
-    This will use the config parameters from the config/dev.yaml file, and
-    fall back on config/default.yaml.
+    This loads the default config. To override this, you can either set the
+    $WORDNIK_CONFIG environment variable to e.g. 'dev' to override the default
+    config with the contents of confif/dev.yaml, or override it later by
+    calling
+
+    >>> config.load('dev'
     """
     keys = {}
     config = None
@@ -57,4 +59,5 @@ class Config(object):
             with open(abs_path(config)) as c:
                 self.keys.update(yaml.load(c))
 
-config = Config()
+config = Config(os.environ.get('WORDNIK_CONFIG', 'default'))
+print config.save_messages
