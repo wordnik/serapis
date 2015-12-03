@@ -1,5 +1,5 @@
 dependencies:
-    pre:
+    post:
         - python -m nltk.downloader punkt
 test:
     override:
