@@ -16,8 +16,6 @@ __email__ = "manuel@summer.ai"
 
 
 import csv
-from serapis.config import config
-config.load()
 
 
 def test_language_detection():

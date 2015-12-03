@@ -13,18 +13,26 @@ import yaml
 import os
 from util import singleton
 
+path = os.path.dirname(os.path.abspath(__file__))
+
+
+def abs_path(filename):
+    return os.path.join(path, "config", "{}.yaml".format(filename))
+
 
 @singleton
 class Config(object):
     """
     Singleton config object. Usage:
 
-        from config import config  # Wherever you need it
-        config.load('dev')  # Only once, anywhere in your code
-        print(config.aws_secret_token)
+    >>> from config import config  # Wherever you need it
 
-    This will use the config parameters from the config/dev.yaml file, and
-    fall back on config/default.yaml.
+    This loads the default config. To override this, you can either set the
+    $WORDNIK_CONFIG environment variable to e.g. 'dev' to override the default
+    config with the contents of confif/dev.yaml, or override it later by
+    calling
+
+    >>> config.load('dev'
     """
     keys = {}
     config = None
@@ -34,13 +42,8 @@ class Config(object):
             raise RuntimeError("Config is not loaded yet.")
         return self.keys[key]
 
-    def load(self, config="default"):
+    def __init__(self, config='default'):
         self.config = config
-        path = os.path.dirname(os.path.abspath(__file__))
-
-        def abs_path(filename):
-            return os.path.join(path, "config", "{}.yaml".format(filename))
-
         with open(abs_path("default")) as c:
             self.keys = yaml.load(c)
 
@@ -48,9 +51,13 @@ class Config(object):
         if os.path.exists(abs_path("credentials")):
             with open(abs_path("credentials")) as c:
                 self.keys['credentials'] = yaml.load(c) or {}
+        
+        self.load(config)
 
-        if config != "default":
+    def load(self, config="default"):
+        if config != 'default':
             with open(abs_path(config)) as c:
                 self.keys.update(yaml.load(c))
 
-config = Config()
+config = Config(os.environ.get('WORDNIK_CONFIG', 'default'))
+print config.save_messages
