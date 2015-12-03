@@ -13,6 +13,12 @@ import yaml
 import os
 from util import singleton
 
+path = os.path.dirname(os.path.abspath(__file__))
+
+
+def abs_path(filename):
+    return os.path.join(path, "config", "{}.yaml".format(filename))
+
 
 @singleton
 class Config(object):
@@ -20,7 +26,7 @@ class Config(object):
     Singleton config object. Usage:
 
         from config import config  # Wherever you need it
-        config.load('dev')  # Only once, anywhere in your code
+        config.load('dev')  # Override default values, only once
         print(config.aws_secret_token)
 
     This will use the config parameters from the config/dev.yaml file, and
@@ -34,13 +40,8 @@ class Config(object):
             raise RuntimeError("Config is not loaded yet.")
         return self.keys[key]
 
-    def load(self, config="default"):
+    def __init__(self, config='default'):
         self.config = config
-        path = os.path.dirname(os.path.abspath(__file__))
-
-        def abs_path(filename):
-            return os.path.join(path, "config", "{}.yaml".format(filename))
-
         with open(abs_path("default")) as c:
             self.keys = yaml.load(c)
 
@@ -48,8 +49,11 @@ class Config(object):
         if os.path.exists(abs_path("credentials")):
             with open(abs_path("credentials")) as c:
                 self.keys['credentials'] = yaml.load(c) or {}
+        
+        self.load(config)
 
-        if config != "default":
+    def load(self, config="default"):
+        if config != 'default':
             with open(abs_path(config)) as c:
                 self.keys.update(yaml.load(c))
 

@@ -58,6 +58,7 @@ def search(message):
 
         {
             word: ...
+            'hashslug': ...
             urls: [
                 {
                     url: ...
@@ -70,6 +71,11 @@ def search(message):
         }
 
     Where doc contains the parsed body text.
+
+    Args:
+        message: dict --  A message dictionary
+    Returns:
+        dict -- A message dictionary
     """
     word = message['word']
     message['urls'] = search_helper.search_diffbot_cache(word)
@@ -90,6 +96,7 @@ def detect(message):
                     author: ...
                     date: ...
                     doc: ...
+                    features: { ... }
                     sentences: [
                         {
                         s: ...
