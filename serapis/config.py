@@ -60,4 +60,3 @@ class Config(object):
                 self.keys.update(yaml.load(c))
 
 config = Config(os.environ.get('WORDNIK_CONFIG', 'default'))
-print config.save_messages
