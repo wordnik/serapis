@@ -15,9 +15,9 @@ import os
 import json
 import boto3
 import logging
-from textblob import TextBlob
+from nltk.tokenize import sent_tokenize
 from .config import config
-from . import search as search_helper
+import serapis.search
 
 logging.basicConfig(filename='serapis.log', level=logging.INFO)
 
@@ -81,7 +81,7 @@ def search(message):
         dict -- A message dictionary
     """
     word = message['word']
-    message['urls'] = search_helper.search_diffbot_cache(word)
+    message['urls'] = serapis.search.search(word)
     return write_message('detect', message)
 
 
@@ -115,12 +115,11 @@ def detect(message):
     """
     word = message['word']
     for url in message['urls']:
-        doc = TextBlob(url['doc'])
         url['sentences'] = []
-        for sentence in doc.sentences:
+        for sentence in sent_tokenize(url['doc']):
             if word.lower() in sentence.lower():
                 result = {
-                    's': str(sentence),
+                    's': sentence,
                     'frd': 0  # Detect if this is an FRD
                 }
                 url['sentences'].append(result)

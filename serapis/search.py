@@ -12,8 +12,91 @@ __date__ = "2015-11-20"
 __email__ = "manuel@summer.ai"
 
 import requests
+import pattern
 from dateutil.parser import parse as parse_date
 from .config import config  # Make sure to use absolute imports here
+from serapis.language import is_english
+import pattern.web
+from pattern.web import asynchronous as async
+import time
+
+GOOGLE = pattern.web.Google(license=config.credentials.get('google'), language='en')
+
+
+def search(term):
+    """
+    Performs an asynchronous search operation on various services.
+
+    Args:
+        term: str -- term to search for
+    Returns:
+        list -- List of url objects containing url, doc, author, and other keys.
+    """
+    ddg = async(search_duckduckgo, term)
+    search = async(search_and_parse, search_google, term)
+
+    while not (ddg.done and search.done):
+        time.sleep(.5)
+    combined = (ddg.value or []) + (search.value or [])
+    return [url_object for url_object in combined if url_object.get('doc')]
+
+
+def search_and_parse(search_func, term):
+    """
+    Wrapper for asynchronous search and parsing. Performs a search and calls
+    diffbot's API for each result in parallel. Returns after all results are
+    parsed by diffbot.
+
+    Args:
+        search_func: function -- Search function, e.g. search_google
+        term: str -- Term to search for
+    Returns:
+         list -- List of url objects containing url, doc, author, and other keys.
+    """
+    result = search_func(term)
+    # diffbot_parse_batch(result)  # @TODO
+    jobs = [async(diffbot_parse, url_object) for url_object in result]
+    while not all(job.done for job in jobs):
+        time.sleep(.5)
+    return result
+
+
+def diffbot_parse(url_object):
+    """
+    Returns the article text for a single URL.
+
+    Args:
+        url_object: dict -- Containing at least a 'url' item
+    Returns:
+        dict -- the url_object, extended with text, author, and features
+    """
+    response = requests.get("http://api.diffbot.com/v3/article", params={
+        "token": config.credentials['diffbot'],
+        "url": url_object['url'],
+        "discussion": False
+    })
+    json = response.json()
+    # assert json.get('objects')
+    result = json['objects'][0]
+    url_object['doc'] = result.get('text', "")
+    url_object['author'] = result.get('author')
+    url_object['source'] = result.get('siteName')
+    url_object['features'] = html_to_features(result.get('html'), "")
+    return url_object
+
+
+def html_to_features(html, term):
+    """
+    Detects features present in a html document.
+
+    Args:
+        html: str -- String containing HTML code
+        term: str -- Term to search for
+    Returns:
+        dict -- Feature flags
+    """
+    # @TODO
+    return {}
 
 
 def search_diffbot_cache(word):
@@ -67,4 +150,18 @@ def search_duckduckgo(term):
             'date': None,
             'doc': req['Definition']
         })
+    return result
+
+
+def search_google(term):
+    result = []
+    response = GOOGLE.search(term, type=pattern.web.SEARCH)
+    for url_object in response:
+        if is_english(url_object['text']) and \
+           'wikipedia.org' not in url_object['url']:  # We get this from DuckDuckGo
+            result.append({
+                'url_object': url_object['url'],
+                'date': parse_date(url_object.get('date')).isoformat(),
+                'title': url_object['title']
+            })
     return result
