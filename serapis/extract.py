@@ -32,9 +32,9 @@ class DiffbotRequest:
     def get_article(self, url):
         self.params['url'] = url
         self.response = requests.get(self.diff_article_api, params=self.params).json()
-        if not response.get('objects'):
-            if response.get('error'):
-                print("Response Error '{}' (code: {})".format(response['error'], response['errorCode']))
+        if not self.response.get('objects'):
+            if self.response.get('error'):
+                print("Response Error '{}' (code: {})".format(self.response['error'], self.response['errorCode']))
             else:
                 print("NO RESULTS")
                 raise Exception
