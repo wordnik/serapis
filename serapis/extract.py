@@ -14,8 +14,70 @@ __email__ = "clare@summer.ai"
 import requests
 import json
 from .config import config  # Make sure to use absolute imports here
+from lxml.html.clean import Cleaner
+from lxml import etree
 
-print config.keys
+class PageRequest:
+    """
+    Request for single page
+
+    initialize with param
+    `url`
+
+    returns attributes
+    .response
+    .structured
+
+        'url'
+        'html'
+        'text'
+        'title' - TODO
+        'author' - TODOD
+
+    """
+    def request_page(self):
+        try:
+            self.response = requests.get(self.url)
+            return self.response
+        except:
+            print("Failed to return page")
+            raise Exception
+
+    def parse_from_unicode(self, unicode_str):
+        utf8_parser = etree.HTMLParser(encoding='utf-8')
+        s = unicode_str.encode('utf-8')
+        return etree.fromstring(s, parser=utf8_parser)
+
+    def get_text(self, html):
+        t = self.parse_from_unicode(html)
+        paragraphs = t.xpath('//p')
+        return [unicode(el.text).strip('\n') for el in paragraphs \
+            if el.text and len(el.text.strip('\n')) > 8] # lists of paragraph text
+
+    def get_structured_page(self):
+        text_cleaner = Cleaner(page_structure=False, links=False, \
+            scripts=False, javascript=False)
+        header_cleaner = Cleaner(page_structure=True)
+
+        if not self.response:
+            self.response = self.request_page()
+
+        text = self.get_text(text_cleaner.clean_html(self.response.text))
+
+        self.structured = {
+            "url": self.url,
+            "html": self.response.text,
+            "text": text,
+            "title": None,
+            "author": None,
+        }
+        return self.structured
+
+    def __init__(self, url):
+        self.url = url
+        self.response = None
+        self.structured = None
+
 
 class DiffbotRequest:
     """
@@ -25,8 +87,6 @@ class DiffbotRequest:
     `url`
 
     Diffbot API returns json object
-
-    Instance???
 
     """
     def get_article(self, url):
@@ -70,12 +130,4 @@ class DiffbotRequest:
             'url': None
         }
 
-class DiffbotBatchRequest(object):
-    """
-    STUB
 
-    Diffbot batch
-
-    """
-    def __init__(self):
-        self.name = None
