@@ -31,8 +31,9 @@ class PageRequest(object):
         'url'
         'html'
         'text'
-        'title' - TODO
-        'author' - TODOD
+        'title'
+        'author'
+        'date'
 
     """
     def request_page(self):
