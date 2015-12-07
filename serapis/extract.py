@@ -72,18 +72,22 @@ class PageRequest(object):
         """
         Scan meta tags for keys: 'title', 'author', 'date'
 
-        Note: Date may not always resolve to the same form  TODO
-
         If 'parsely-page' attribute exists, use those values
 
         Currently arbitrarily returns the first found value for each key
+
+        TODO
+        - Date may not always resolve to the same form
+        - Metadata is sometimes in XML <PageMap> object
 
         """
         meta_html = self.parse_from_unicode(self.response.text)
 
         paragraphs = meta_html.xpath('//meta')
-        meta_values = [{'name': m.attrib.get('name'),
+        meta_values = [{'name': m.attrib.get('name') or m.attrib.get('property'),
                         'value': m.attrib.get('content')} for m in paragraphs]
+
+        print meta_values
 
         meta_structured = {
             'author': None,
@@ -91,17 +95,19 @@ class PageRequest(object):
             'date': None
         }
 
-        parsely_key = [v for v in meta_values if v['name'] == 'parsely-page'][0].get('value')
-        if parsely_key:
-            parsley_dict = json.loads(parsely_key)
+        parsely_key = [v for v in meta_values if v['name'] == 'parsely-page']
+
+        try:
+            parsley_dict = json.loads(parsely_key[0].get('value'))
             meta_structured['author'] = parsley_dict.get('author')
             meta_structured['title'] = parsley_dict.get('title')
             meta_structured['date'] = parsley_dict.get('pub_date')
-        else:
+        except:
             for key in meta_structured.keys():
                 values = [v['value'] for v in meta_values if v['name'] and v['name'].find(key) > -1]
                 meta_structured[key] = values[0] if values else None
 
+        print meta_structured
         return meta_structured
 
     def get_structured_page(self):
