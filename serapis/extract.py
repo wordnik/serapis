@@ -80,14 +80,18 @@ class PageRequest:
             'date' : None
         }
 
-        parsely = [] #[v for v in meta_values if v['name'] == 'parsely-page'][0].get('value')
-        print parsely
-
-        if not parsely:
+        parsely_key = [v for v in meta_values if v['name'] == 'parsely-page'][0].get('value')
+        if parsely_key:
+            parsley_dict = json.loads(parsely_key)
+            meta_structured['author'] = parsley_dict.get('author')
+            meta_structured['title'] = parsley_dict.get('title')
+            meta_structured['date'] = parsley_dict.get('pub_date')
+        else:
             for key in meta_structured.keys():
                 values = [v['value'] for v in meta_values if v['name'] and v['name'].find(key) > -1]
                 meta_structured[key] = values[0] if values else None
 
+        print meta_structured
         return meta_structured
 
     def get_structured_page(self):
