@@ -15,6 +15,30 @@ __email__ = "manuel@summer.ai"
 import hashlib
 import re
 from unidecode import unidecode
+import threading
+
+
+class AsynchronousRequest(object):
+    def __init__(self, function, *args, **kwargs):
+        self.value = None
+        self.error = None
+        self._function = function
+        self._thread = threading.Thread(target=self._fetch, args=(function,) + args, kwargs=kwargs)
+        self._thread.start()
+
+    def _fetch(self, function, *args, **kwargs):
+        try:
+            self.value = function(*args, **kwargs)
+        except Exception, e:
+            self.error = e
+
+    @property
+    def done(self):
+        return not self._thread.isAlive()
+
+
+def async(function, *args, **kwargs):
+    return AsynchronousRequest(function, *args, **kwargs)
 
 
 class Collector(object):

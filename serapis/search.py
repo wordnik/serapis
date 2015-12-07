@@ -18,7 +18,7 @@ from .config import config  # Make sure to use absolute imports here
 from serapis.language import is_english
 from serapis.extract import PageRequest
 import pattern.web
-from pattern.web import asynchronous as async
+from serapis.util import async
 import time
 import logging
 log = logging.getLogger('serapis')
