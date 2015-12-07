@@ -19,6 +19,8 @@ from serapis.language import is_english
 import pattern.web
 from pattern.web import asynchronous as async
 import time
+import logging
+log = logging.getLogger('serapis')
 
 GOOGLE = pattern.web.Google(license=config.credentials.get('google'), language='en')
 
@@ -32,13 +34,16 @@ def search(term):
     Returns:
         list -- List of url objects containing url, doc, author, and other keys.
     """
+    log.info("Sarching for '{}'".format(term))
     ddg = async(search_duckduckgo, term)
     search = async(search_and_parse, search_google, term)
 
     while not (ddg.done and search.done):
         time.sleep(.5)
     combined = (ddg.value or []) + (search.value or [])
-    return [url_object for url_object in combined if url_object.get('doc')]
+    result = [url_object for url_object in combined if url_object.get('doc')]
+    log.info("Parsing URLs for '{}' yielded {} results".format(term, len(result)))
+    return result
 
 
 def search_and_parse(search_func, term):
@@ -58,6 +63,7 @@ def search_and_parse(search_func, term):
     jobs = [async(diffbot_parse, url_object) for url_object in result]
     while not all(job.done for job in jobs):
         time.sleep(.5)
+    log.info("Parsing URLs for '{}' yielded {} results".format(term, len(result)))
     return result
 
 
@@ -70,6 +76,7 @@ def diffbot_parse(url_object):
     Returns:
         dict -- the url_object, extended with text, author, and features
     """
+    log.info("Using diffbot to parse {}".format(url_object['url']))
     response = requests.get("http://api.diffbot.com/v3/article", params={
         "token": config.credentials['diffbot'],
         "url": url_object['url'],
@@ -150,6 +157,7 @@ def search_duckduckgo(term):
             'date': None,
             'doc': req['Definition']
         })
+    log.info("Searching DuckDuckGo for '{}' returned {} results".format(term, len(result)))
     return result
 
 
@@ -164,4 +172,5 @@ def search_google(term):
                 'date': parse_date(url_object.get('date')).isoformat(),
                 'title': url_object['title']
             })
+    log.info("Searching Google for '{}' returned {} results".format(term, len(result)))
     return result
