@@ -17,7 +17,7 @@ from .config import config  # Make sure to use absolute imports here
 from lxml.html.clean import Cleaner
 from lxml import etree
 
-class PageRequest:
+class PageRequest(object):
     """
     Request for single page
 
