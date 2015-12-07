@@ -36,6 +36,10 @@ class PageRequest(object):
 
     """
     def request_page(self):
+        """
+        Returns a utf-8 encoded string
+
+        """
         try:
             self.response = requests.get(self.url)
             return self.response
