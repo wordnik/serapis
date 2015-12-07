@@ -67,9 +67,7 @@ class PageRequest:
         Currently arbitrarily returns the first found value for each key
 
         """
-        meta_cleaner = Cleaner(page_structure=True)
-        utf8_parser = etree.HTMLParser(encoding='utf-8')
-        meta_html = etree.fromstring(self.response.text, parser=utf8_parser)
+        meta_html = self.parse_from_unicode(self.response.text)
 
         paragraphs = meta_html.xpath('//meta')
         meta_values = [{'name':m.attrib.get('name'), 'value':m.attrib.get('content')} for m in paragraphs]
@@ -91,7 +89,6 @@ class PageRequest:
                 values = [v['value'] for v in meta_values if v['name'] and v['name'].find(key) > -1]
                 meta_structured[key] = values[0] if values else None
 
-        print meta_structured
         return meta_structured
 
     def get_structured_page(self):
