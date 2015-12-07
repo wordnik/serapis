@@ -2,6 +2,7 @@
 # coding=utf-8
 """
 Extract module
+
 """
 from __future__ import unicode_literals
 from __future__ import absolute_import
@@ -16,6 +17,7 @@ import json
 from .config import config  # Make sure to use absolute imports here
 from lxml.html.clean import Cleaner
 from lxml import etree
+
 
 class PageRequest(object):
     """
@@ -54,19 +56,22 @@ class PageRequest(object):
         return etree.fromstring(s, parser=utf8_parser)
 
     def get_text(self):
-        text_cleaner = Cleaner(page_structure=False, links=False, \
-            scripts=False, javascript=False)
+        """
+        Returns
+        List of paragraph texts
+
+        """
+        text_cleaner = Cleaner(page_structure=False, links=False, scripts=False, javascript=False)
 
         self.unicode_html = self.parse_from_unicode(text_cleaner.clean_html(self.response.text))
 
         paragraphs = self.unicode_html.xpath('//p')
-        return [unicode(el.text).strip('\n') for el in paragraphs \
-            if el.text and len(el.text.strip('\n')) > 8] # lists of paragraph text
+        return [unicode(el.text).strip('\n') for el in paragraphs if el.text and len(el.text.strip('\n')) > 8]
 
     def get_meta(self):
         """
         Scan meta tags for keys: 'title', 'author', 'date'
-        
+
         If 'parsely-page' attribute exists, use those values
 
         Currently arbitrarily returns the first found value for each key
@@ -75,12 +80,13 @@ class PageRequest(object):
         meta_html = self.parse_from_unicode(self.response.text)
 
         paragraphs = meta_html.xpath('//meta')
-        meta_values = [{'name':m.attrib.get('name'), 'value':m.attrib.get('content')} for m in paragraphs]
+        meta_values = [{'name': m.attrib.get('name'),
+                        'value': m.attrib.get('content')} for m in paragraphs]
 
         meta_structured = {
             'author': None,
-            'title' : None,
-            'date' : None
+            'title': None,
+            'date': None
         }
 
         parsely_key = [v for v in meta_values if v['name'] == 'parsely-page'][0].get('value')
@@ -97,6 +103,10 @@ class PageRequest(object):
         return meta_structured
 
     def get_structured_page(self):
+        """
+        Returns elements extracted from html
+
+        """
         if not self.response:
             self.response = self.request_page()
 
@@ -169,5 +179,3 @@ class DiffbotRequest:
             'token': config.credentials['diffbot'],
             'url': None
         }
-
-
