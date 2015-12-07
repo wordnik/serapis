@@ -48,28 +48,45 @@ class PageRequest:
         s = unicode_str.encode('utf-8')
         return etree.fromstring(s, parser=utf8_parser)
 
-    def get_text(self, html):
-        t = self.parse_from_unicode(html)
-        paragraphs = t.xpath('//p')
+    def get_text(self):
+        text_cleaner = Cleaner(page_structure=False, links=False, \
+            scripts=False, javascript=False)
+
+        self.unicode_html = self.parse_from_unicode(text_cleaner.clean_html(self.response.text))
+
+        paragraphs = self.unicode_html.xpath('//p')
         return [unicode(el.text).strip('\n') for el in paragraphs \
             if el.text and len(el.text.strip('\n')) > 8] # lists of paragraph text
 
-    def get_structured_page(self):
-        text_cleaner = Cleaner(page_structure=False, links=False, \
-            scripts=False, javascript=False)
-        header_cleaner = Cleaner(page_structure=True)
+    def get_meta(self):
+        meta_cleaner = Cleaner(page_structure=True)
+        utf8_parser = etree.HTMLParser(encoding='utf-8')
+        meta_html = etree.fromstring(self.response.text, parser=utf8_parser)
 
+        paragraphs = meta_html.xpath('//meta')
+        meta_values = [{'name':m.attrib.get('name'), 'value':m.attrib.get('content')} for m in paragraphs]
+
+        # find title and author and date
+        # if 'parsely-page' -- use those attrs
+        # 'og:title' or 'title'
+        # 'author'
+
+        print meta_values
+        return meta_values
+
+    def get_structured_page(self):
         if not self.response:
             self.response = self.request_page()
 
-        text = self.get_text(text_cleaner.clean_html(self.response.text))
+        text = self.get_text()
+        metadata = self.get_meta()
 
         self.structured = {
             "url": self.url,
             "html": self.response.text,
             "text": text,
-            "title": None,
-            "author": None,
+            "title": None, # .get('title')
+            "author": None, # .get('author')
         }
         return self.structured
 
