@@ -118,14 +118,13 @@ class PageRequest(object):
         if not self.response:
             return None
 
-        text = self.get_text()
+        text = " ".join(self.get_text())
         metadata = self.get_meta()
 
         self.structured = {
             "url": self.url,
             "html": self.response.text,
-            "text_list": text,
-            "text": " ".join(text),
+            "doc": text,
             "date": metadata.get('date'),
             "title": metadata.get('title'),
             "author": metadata.get('author')
