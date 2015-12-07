@@ -87,8 +87,6 @@ class PageRequest(object):
         meta_values = [{'name': m.attrib.get('name') or m.attrib.get('property'),
                         'value': m.attrib.get('content')} for m in paragraphs]
 
-        print meta_values
-
         meta_structured = {
             'author': None,
             'title': None,
@@ -107,7 +105,6 @@ class PageRequest(object):
                 values = [v['value'] for v in meta_values if v['name'] and v['name'].find(key) > -1]
                 meta_structured[key] = values[0] if values else None
 
-        print meta_structured
         return meta_structured
 
     def get_structured_page(self):
