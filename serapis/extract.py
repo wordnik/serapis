@@ -139,8 +139,8 @@ class DiffbotRequest:
     Diffbot API returns json object
 
     """
-    def get_article(self, url):
-        self.params['url'] = url
+    def get_article(self):
+        self.params['url'] = self.url
         self.response = requests.get(self.diff_article_api, params=self.params).json()
         if not self.response.get('objects'):
             if self.response.get('error'):
@@ -151,9 +151,9 @@ class DiffbotRequest:
 
         return self.response
 
-    def get_structured_response(self, url):
-        self.params['url'] = url
-        self.response = self.get_article(url)
+    def get_structured_response(self):
+        self.params['url'] = self.url
+        self.response = self.get_article(self.url)
 
         results = list()
         for object in self.response.get('objects', []):
@@ -171,11 +171,12 @@ class DiffbotRequest:
         self.structured = results
         return results
 
-    def __init__(self):
+    def __init__(self, url):
+        self.url = url
         self.response = None
         self.structured = None
         self.diff_article_api = 'http://api.diffbot.com/v3/article'
         self.params = {
             'token': config.credentials['diffbot'],
-            'url': None
+            'url': self.url
         }
