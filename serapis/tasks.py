@@ -14,9 +14,12 @@ __email__ = "manuel@summer.ai"
 import os
 import json
 import boto3
+import logging
 from textblob import TextBlob
 from .config import config
 from . import search as search_helper
+
+logging.basicConfig(filename='serapis.log', level=logging.INFO)
 
 if "aws_access_key" in config.credentials:
     s3 = boto3.resource(
