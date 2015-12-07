@@ -121,7 +121,8 @@ class PageRequest(object):
         self.structured = {
             "url": self.url,
             "html": self.response.text,
-            "text": text,
+            "text_list": text,
+            "text": " ".join(text),
             "date": metadata.get('date'),
             "title": metadata.get('title'), 
             "author": metadata.get('author') 
@@ -130,8 +131,8 @@ class PageRequest(object):
 
     def __init__(self, url):
         self.url = url
-        self.response = None
-        self.structured = None
+        self.response = self.request_page()
+        self.structured = self.get_structured_page()
 
 
 class DiffbotRequest:
