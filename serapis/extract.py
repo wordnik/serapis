@@ -47,7 +47,7 @@ class PageRequest(object):
 
         """
         try:
-            self.response = requests.get(self.url)
+            self.response = requests.get(self.url, timeout=3)
             return self.response
         except:
             log.error("Failed to return page for url: %s" % self.url)
@@ -87,7 +87,7 @@ class PageRequest(object):
         meta_html = self.parse_from_unicode(self.response.text)
 
         paragraphs = meta_html.xpath('//meta')
-        meta_values = [{'name': m.attrib.get('name') or m.attrib.get('property'),
+        meta_values = [{'name': m.attrib.get('property') or m.attrib.get('name'),
                         'value': m.attrib.get('content')} for m in paragraphs]
 
         meta_structured = {
@@ -105,7 +105,7 @@ class PageRequest(object):
             meta_structured['date'] = parsley_dict.get('pub_date')
         except:
             for key in meta_structured.keys():
-                values = [v['value'] for v in meta_values if v['name'] and v['name'].find(key) > -1]
+                values = [v['value'] for v in meta_values if v['name'] and v['name'] == key or v['name'] == 'og:' + key]
                 meta_structured[key] = values[0] if values else None
 
         return meta_structured
