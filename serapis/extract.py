@@ -59,6 +59,14 @@ class PageRequest:
             if el.text and len(el.text.strip('\n')) > 8] # lists of paragraph text
 
     def get_meta(self):
+        """
+        Scan meta tags for keys: 'title', 'author', 'date'
+        
+        If 'parsely-page' attribute exists, use those values
+
+        Currently arbitrarily returns the first found value for each key
+
+        """
         meta_cleaner = Cleaner(page_structure=True)
         utf8_parser = etree.HTMLParser(encoding='utf-8')
         meta_html = etree.fromstring(self.response.text, parser=utf8_parser)
@@ -66,13 +74,21 @@ class PageRequest:
         paragraphs = meta_html.xpath('//meta')
         meta_values = [{'name':m.attrib.get('name'), 'value':m.attrib.get('content')} for m in paragraphs]
 
-        # find title and author and date
-        # if 'parsely-page' -- use those attrs
-        # 'og:title' or 'title'
-        # 'author'
+        meta_structured = {
+            'author': None,
+            'title' : None,
+            'date' : None
+        }
 
-        print meta_values
-        return meta_values
+        parsely = [] #[v for v in meta_values if v['name'] == 'parsely-page'][0].get('value')
+        print parsely
+
+        if not parsely:
+            for key in meta_structured.keys():
+                values = [v['value'] for v in meta_values if v['name'] and v['name'].find(key) > -1]
+                meta_structured[key] = values[0] if values else None
+
+        return meta_structured
 
     def get_structured_page(self):
         if not self.response:
@@ -85,8 +101,9 @@ class PageRequest:
             "url": self.url,
             "html": self.response.text,
             "text": text,
-            "title": None, # .get('title')
-            "author": None, # .get('author')
+            "date": metadata.get('date'),
+            "title": metadata.get('title'), 
+            "author": metadata.get('author') 
         }
         return self.structured
 
