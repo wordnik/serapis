@@ -16,6 +16,7 @@ import pattern
 from dateutil.parser import parse as parse_date
 from .config import config  # Make sure to use absolute imports here
 from serapis.language import is_english
+from serapis.extract import PageRequest
 import pattern.web
 from pattern.web import asynchronous as async
 import time
@@ -41,7 +42,7 @@ def search(term):
     while not (ddg.done and search.done):
         time.sleep(.5)
     combined = (ddg.value or []) + (search.value or [])
-    result = [url_object for url_object in combined if url_object.get('doc')]
+    result = [url_object for url_object in combined if url_object and url_object.get('doc')]
     log.info("Parsing URLs for '{}' yielded {} results".format(term, len(result)))
     return result
 
@@ -58,13 +59,18 @@ def search_and_parse(search_func, term):
     Returns:
          list -- List of url objects containing url, doc, author, and other keys.
     """
-    result = search_func(term)
+    search_result = search_func(term)
     # diffbot_parse_batch(result)  # @TODO
-    jobs = [async(diffbot_parse, url_object) for url_object in result]
+    jobs = [async(extract_wrapper, url_object, term) for url_object in search_result]
     while not all(job.done for job in jobs):
         time.sleep(.5)
+    result = [job.value for job in jobs if job.value]
     log.info("Parsing URLs for '{}' yielded {} results".format(term, len(result)))
     return result
+
+
+def extract_wrapper(url_object, term):
+    return PageRequest(url_object['url']).get_structured_page()
 
 
 def diffbot_parse(url_object):
@@ -168,7 +174,7 @@ def search_google(term):
         if is_english(url_object['text']) and \
            'wikipedia.org' not in url_object['url']:  # We get this from DuckDuckGo
             result.append({
-                'url_object': url_object['url'],
+                'url': url_object['url'],
                 'date': parse_date(url_object.get('date')).isoformat(),
                 'title': url_object['title']
             })
