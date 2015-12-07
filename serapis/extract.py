@@ -19,7 +19,7 @@ from lxml.html.clean import Cleaner
 from lxml import etree
 
 import logging
-log = logging.getLogger('serapis.extract')
+log = logging.getLogger('serapis')
 
 
 class PageRequest(object):
@@ -127,8 +127,8 @@ class PageRequest(object):
             "text_list": text,
             "text": " ".join(text),
             "date": metadata.get('date'),
-            "title": metadata.get('title'), 
-            "author": metadata.get('author') 
+            "title": metadata.get('title'),
+            "author": metadata.get('author')
         }
         return self.structured
 
