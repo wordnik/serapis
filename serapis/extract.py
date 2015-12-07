@@ -72,6 +72,8 @@ class PageRequest(object):
         """
         Scan meta tags for keys: 'title', 'author', 'date'
 
+        Note: Date may not always resolve to the same form  TODO
+
         If 'parsely-page' attribute exists, use those values
 
         Currently arbitrarily returns the first found value for each key
