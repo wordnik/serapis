@@ -18,6 +18,9 @@ from .config import config  # Make sure to use absolute imports here
 from lxml.html.clean import Cleaner
 from lxml import etree
 
+import logging
+log = logging.getLogger('serapis.extract')
+
 
 class PageRequest(object):
     """
@@ -47,8 +50,8 @@ class PageRequest(object):
             self.response = requests.get(self.url)
             return self.response
         except:
-            print("Failed to return page")
-            raise Exception
+            log.error("Failed to return page for url: %s" % self.url)
+            return None
 
     def parse_from_unicode(self, unicode_str):
         utf8_parser = etree.HTMLParser(encoding='utf-8')
@@ -113,7 +116,7 @@ class PageRequest(object):
 
         """
         if not self.response:
-            self.response = self.request_page()
+            return None
 
         text = self.get_text()
         metadata = self.get_meta()
