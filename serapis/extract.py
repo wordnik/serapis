@@ -126,8 +126,8 @@ class PageRequest(object):
             "html": self.response.text,
             "doc": text,
             "date": metadata.get('date'),
-            "title": metadata.get('title'), 
-            "author": metadata.get('author') 
+            "title": metadata.get('title'),
+            "author": metadata.get('author')
         }
         return self.structured
 

@@ -16,3 +16,4 @@ duckduckgo_sources:  # Acceptable sources for DuckDuckGo's instant answer API
     - Star Wars Fanon Wiki  # May the dictionary be with you.
     - Abbreviations.com
     - Jargon
+remove_messages: true

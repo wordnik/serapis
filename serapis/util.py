@@ -15,6 +15,70 @@ __email__ = "manuel@summer.ai"
 import hashlib
 import re
 from unidecode import unidecode
+import threading
+
+
+class AsynchronousRequest(object):
+    """Class for threaded function calls. Usage:
+
+    >>> urls = ("http://summer.ai", "http://google.com")
+    >>> jobs = [AsynchronousRequest(crawl, url) for url in urls]
+    >>> while not all(jobs):
+    >>>     time.sleep(.5)
+    >>> results = [job.value for job in jobs]
+
+    Note that AsynchronousRequest will be falsey until the function
+    returns or raises an exception. You can explicitly check whether
+    the request is completed with AsynchronousRequest.done
+
+    Properties:
+        value -- return value of the function (or None)
+        error -- Exception raised, if any
+        done -- True if the function has returned or raised an Exception
+    """
+    def __init__(self, function, *args, **kwargs):
+        """
+        Args:
+            function: func -- function to call asynchronously
+            args, kwargs -- arguments to the function
+        Returns:
+            AsynchronousRequest
+        """
+        self.value = None
+        self.error = None
+        self._function = function
+        self._thread = threading.Thread(target=self._fetch, args=(function,) + args, kwargs=kwargs)
+        self._thread.start()
+
+    def _fetch(self, function, *args, **kwargs):
+        try:
+            self.value = function(*args, **kwargs)
+        except Exception as e:
+            self.error = e
+
+    @property
+    def done(self):
+        return not self._thread.isAlive()
+
+    def __nonzero__(self):
+        return self.done
+
+
+def merge_dict(target, *to_merge):
+    """Merges dictionaries into a target. If keys already exist,
+    only merges target if they are not falsey.
+
+    Args:
+        target: dict -- Will be modified
+        *to_merge: dicts -- Will be merged into target
+    Returns:
+        dict -- modified target
+    """
+    for d in to_merge:
+        for k, v in d.items():
+            if k not in target or d[k]:
+                target[k] = d[k]
+    return target
 
 
 class Collector(object):

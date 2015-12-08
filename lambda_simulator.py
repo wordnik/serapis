@@ -33,7 +33,8 @@ class TaskHandler(FileSystemEventHandler):
         with open(event.src_path) as f:
             message = json.load(f)
             tasks_map[task](message)
-        os.remove(event.src_path)
+        if config.remove_messages:
+            os.remove(event.src_path)
 
     def on_modified(self, event):
         if not os.path.isdir(event.src_path):

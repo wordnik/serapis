@@ -36,8 +36,6 @@ def test_page_structure():
 
     assert p.structured['title'] == test_response['title']
     assert p.structured['url'] == test_response['url']
-    assert len(p.structured['text_list']) > 0
     assert p.structured['author'] == test_response['author']
-    assert len(p.structured['html']) > 0
-    assert len(p.structured['text']) > 0
+    assert len(p.structured['doc']) > 0
     assert p.structured['date'] == test_response['date']
