@@ -73,44 +73,6 @@ def extract_wrapper(url_object, term):
     return PageRequest(url_object['url']).get_structured_page()
 
 
-def diffbot_parse(url_object):
-    """
-    Returns the article text for a single URL.
-
-    Args:
-        url_object: dict -- Containing at least a 'url' item
-    Returns:
-        dict -- the url_object, extended with text, author, and features
-    """
-    log.info("Using diffbot to parse {}".format(url_object['url']))
-    response = requests.get("http://api.diffbot.com/v3/article", params={
-        "token": config.credentials['diffbot'],
-        "url": url_object['url'],
-        "discussion": False
-    })
-    json = response.json()
-    # assert json.get('objects')
-    result = json['objects'][0]
-    url_object['doc'] = result.get('text', "")
-    url_object['author'] = result.get('author')
-    url_object['source'] = result.get('siteName')
-    url_object['features'] = html_to_features(result.get('html'), "")
-    return url_object
-
-
-def html_to_features(html, term):
-    """
-    Detects features present in a html document.
-
-    Args:
-        html: str -- String containing HTML code
-        term: str -- Term to search for
-    Returns:
-        dict -- Feature flags
-    """
-    # @TODO
-    return {}
-
 
 def search_diffbot_cache(word):
     response = requests.get('http://api.diffbot.com/v3/search', params={
