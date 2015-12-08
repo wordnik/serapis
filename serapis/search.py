@@ -129,15 +129,35 @@ def search_duckduckgo(term):
     return result
 
 
+def qualify_search_result(url, text, date):
+    """Heuristically determines if a search result is worth parsing.
+
+    Args:
+        url: str
+        text: str -- Preview or summary
+        date: str -- ISO8601 formatted
+    Returns:
+        bool -- True if the search result is worth parsing.
+    """
+    for domain in config.exclude_domains:
+        if domain in url:
+            return False
+    if text and not is_english(text):
+        return False
+    if url.endswith(".pdf"):
+        return False
+    return True
+
+
 def search_google(term):
     result = []
     response = GOOGLE.search(term, type=pattern.web.SEARCH)
     for url_object in response:
-        if is_english(url_object['text']) and \
-           'wikipedia.org' not in url_object['url']:  # We get this from DuckDuckGo
+        date = parse_date(url_object.get('date')).isoformat()
+        if qualify_search_result(url_object['url'], url_object['text'], date):
             result.append({
                 'url': url_object['url'],
-                'date': parse_date(url_object.get('date')).isoformat(),
+                'date': date,
                 'title': url_object['title']
             })
     log.info("Searching Google for '{}' returned {} results".format(term, len(result)))
