@@ -17,8 +17,11 @@ import json
 from .config import config  # Make sure to use absolute imports here
 from lxml.html.clean import Cleaner
 from lxml import etree
-
+from unidecode import unidecode
+import re
 import logging
+
+
 log = logging.getLogger('serapis.extract')
 
 
@@ -27,7 +30,7 @@ class PageRequest(object):
     Request for single page
 
     initialize with param
-    `url`
+    `url` and `term`
 
     returns attributes
     .response
@@ -41,6 +44,10 @@ class PageRequest(object):
         'date'
 
     """
+
+    OPENING_QUOTE = '|'.join(("\"", "'", "&quot;", "“", "&ldquo;", "‘", "&lsquo;", "«", "&laquo;", "‹", "&lsaquo;", "„", "&bdquo;", "‚", "&sbquo;"))
+    CLOSING_QUOTE = '|'.join(("'", "&quot;", "”", "&rdquo;", "’", "&rsquo;", "»", "&raquo;", "›", "&rsaquo;", "“", "&ldquo;", "‘", "&lsquo;"))
+
     def request_page(self):
         """
         Returns a utf-8 encoded string
@@ -80,7 +87,6 @@ class PageRequest(object):
         Currently arbitrarily returns the first found value for each key
 
         TODO
-        - Date may not always resolve to the same form
         - Metadata is sometimes in XML <PageMap> object
 
         """
@@ -110,6 +116,25 @@ class PageRequest(object):
 
         return meta_structured
 
+    def get_html_features(self):
+        """Detects whether the search term exists is highlighted (bolded, emphasised) or
+        in quotes. Needs to be called after self.request_page.
+
+        Returns:
+            dict -- dict of bools for different features.
+        """
+        minimal_html = unidecode(self.response.text).replace("-", "").replace(" ", "")
+        minimal_term = unidecode(self.term).replace("-", "").replace(" ", "")
+
+        highlight_re = r"<(em|i|b|strong|span)[^>]*> *{}[ ,:]*</\1>".format(minimal_term)
+        quote_re = r"<({})[^>]*> *{}[ ,:]*</({})>".format(self.OPENING_QUOTE, minimal_term, self.CLOSING_QUOTE)
+
+        features = {
+            "highlighted": bool(re.search(highlight_re, minimal_html, re.IGNORECASE)),
+            "quotes": bool(re.search(quote_re, minimal_html, re.IGNORECASE)),
+        }
+        return features
+        
     def get_structured_page(self):
         """
         Returns elements extracted from html
@@ -126,13 +151,19 @@ class PageRequest(object):
             "html": self.response.text,
             "doc": text,
             "date": metadata.get('date'),
+            "features": self.get_html_features(),
             "title": metadata.get('title'),
             "author": metadata.get('author')
         }
+
+        if config.save_html:
+            self.structured["html"] = self.response.text
+
         return self.structured
 
-    def __init__(self, url):
+    def __init__(self, url, term):
         self.url = url
+        self.term = term
         self.response = self.request_page()
         self.structured = self.get_structured_page()
 
