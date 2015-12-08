@@ -17,7 +17,7 @@ import boto3
 import logging
 from nltk.tokenize import sent_tokenize
 from .config import config
-import serapis.search
+from serapis.search import search_all
 
 logging.basicConfig(filename='serapis.log', level=logging.INFO)
 
@@ -81,7 +81,7 @@ def search(message):
         dict -- A message dictionary
     """
     word = message['word']
-    message['urls'] = serapis.search.search_all(word)
+    message['urls'] = search_all(word)
     return write_message('detect', message)
 
 

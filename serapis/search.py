@@ -51,8 +51,8 @@ def search_all(term):
 def search_and_parse(search_func, term):
     """
     Wrapper for asynchronous search and parsing. Performs a search and calls
-    diffbot's API for each result in parallel. Returns after all results are
-    parsed by diffbot.
+    serapis.extract for each result in parallel. Returns after all results are
+    parsed and extracted.
 
     Args:
         search_func: function -- Search function, e.g. search_google
@@ -61,7 +61,6 @@ def search_and_parse(search_func, term):
          list -- List of url objects containing url, doc, author, and other keys.
     """
     search_result = search_func(term)
-    # diffbot_parse_batch(result)  # @TODO
     jobs = [async(extract_wrapper, url_object, term) for url_object in search_result]
     while not all(jobs):
         time.sleep(.5)
