@@ -22,6 +22,7 @@ from serapis.util import AsynchronousRequest as async
 from serapis.util import merge_dict
 import time
 import logging
+import urlparse
 log = logging.getLogger('serapis.search')
 
 GOOGLE = pattern.web.Google(license=config.credentials.get('google'), language='en')
@@ -144,7 +145,8 @@ def qualify_search_result(url, text, date):
             return False
     if text and not is_english(text):
         return False
-    if url.endswith(".pdf"):
+    parts = urlparse.urlparse(url)
+    if parts.path.endswith(".pdf"):
         return False
     return True
 

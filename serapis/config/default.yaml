@@ -21,3 +21,4 @@ save_html: false
 exclude_domains:
     - youtube.com
     - wikipedia.org
+    - amazon.com
