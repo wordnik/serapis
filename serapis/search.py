@@ -160,6 +160,7 @@ def search_google(term):
             result.append({
                 'url': url_object['url'],
                 'date': date,
+                'summary': url_object['text'],
                 'title': url_object['title']
             })
     log.info("Searching Google for '{}' returned {} results".format(term, len(result)))
