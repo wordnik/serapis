@@ -19,6 +19,7 @@ from serapis.language import is_english
 from serapis.extract import PageRequest
 import pattern.web
 from serapis.util import AsynchronousRequest as async
+from serapis.util import merge_dict
 import time
 import logging
 log = logging.getLogger('serapis.search')
@@ -70,8 +71,8 @@ def search_and_parse(search_func, term):
 
 
 def extract_wrapper(url_object, term):
-    return PageRequest(url_object['url']).get_structured_page()
-
+    result = PageRequest(url_object['url']).get_structured_page()
+    return merge_dict(url_object, result)
 
 
 def search_diffbot_cache(word):
