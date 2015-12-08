@@ -17,3 +17,4 @@ duckduckgo_sources:  # Acceptable sources for DuckDuckGo's instant answer API
     - Abbreviations.com
     - Jargon
 remove_messages: true
+save_html: false

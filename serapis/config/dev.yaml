@@ -1,3 +1,4 @@
 min_frd_rating: 0.0
 save_messages: false
 remove_messages: false
+save_html: true
