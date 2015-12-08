@@ -18,7 +18,7 @@ from .config import config  # Make sure to use absolute imports here
 from serapis.language import is_english
 from serapis.extract import PageRequest
 import pattern.web
-from serapis.util import async
+from serapis.util import AsynchronousRequest as async
 import time
 import logging
 log = logging.getLogger('serapis')
@@ -62,7 +62,7 @@ def search_and_parse(search_func, term):
     search_result = search_func(term)
     # diffbot_parse_batch(result)  # @TODO
     jobs = [async(extract_wrapper, url_object, term) for url_object in search_result]
-    while not all(job.done for job in jobs):
+    while not all(jobs):
         time.sleep(.5)
     result = [job.value for job in jobs if job.value]
     log.info("Parsing URLs for '{}' yielded {} results".format(term, len(result)))
