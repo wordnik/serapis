@@ -43,7 +43,7 @@ def write_message(task, message):
         s3.Object(config.bucket, key).put(Body=json.dumps(message))
     else:
         with open(os.path.join(config.local_s3, key), 'w') as f:
-            json.dump(message, f)
+            json.dump(message, f, indent=2)
     return message
 
 

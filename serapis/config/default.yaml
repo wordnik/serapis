@@ -18,3 +18,8 @@ duckduckgo_sources:  # Acceptable sources for DuckDuckGo's instant answer API
     - Jargon
 remove_messages: true
 save_html: false
+exclude_domains:
+    - youtube.com
+    - wikipedia.org
+    - amazon.com
+    - airbnb.com
