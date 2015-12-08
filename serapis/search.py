@@ -153,7 +153,7 @@ def qualify_search_result(url, text, date):
 
 def search_google(term):
     result = []
-    response = GOOGLE.search(term, type=pattern.web.SEARCH)
+    response = GOOGLE.search('"{}"'.format(term), type=pattern.web.SEARCH)
     for url_object in response:
         date = parse_date(url_object.get('date')).isoformat()
         if qualify_search_result(url_object['url'], url_object['text'], date):
