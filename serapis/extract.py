@@ -145,13 +145,14 @@ class PageRequest(object):
 
         text = " ".join(self.get_text())
         self.html = self.response.text
+        self.features = self.get_html_features()
         metadata = self.get_meta()
 
         self.structured = {
             "url": self.url,
             "doc": text,
             "date": metadata.get('date'),
-            "features": self.get_html_features(),
+            "features": self.features,
             "title": metadata.get('title'),
             "author": metadata.get('author')
         }
