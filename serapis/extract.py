@@ -19,7 +19,7 @@ from lxml.html.clean import Cleaner
 from lxml import etree
 
 import logging
-log = logging.getLogger('serapis')
+log = logging.getLogger('serapis.extract')
 
 
 class PageRequest(object):

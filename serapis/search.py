@@ -21,12 +21,12 @@ import pattern.web
 from serapis.util import AsynchronousRequest as async
 import time
 import logging
-log = logging.getLogger('serapis')
+log = logging.getLogger('serapis.search')
 
 GOOGLE = pattern.web.Google(license=config.credentials.get('google'), language='en')
 
 
-def search(term):
+def search_all(term):
     """
     Performs an asynchronous search operation on various services.
 

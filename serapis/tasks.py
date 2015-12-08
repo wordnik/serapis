@@ -81,7 +81,7 @@ def search(message):
         dict -- A message dictionary
     """
     word = message['word']
-    message['urls'] = serapis.search.search(word)
+    message['urls'] = serapis.search.search_all(word)
     return write_message('detect', message)
 
 
