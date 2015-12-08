@@ -25,17 +25,32 @@ test_response = {
 
 def test_page_request():
     from serapis.extract import PageRequest
-    p = PageRequest('http://nytimes.com/2015/10/04/technology/scouring-the-web-to-make-new-words-lookupable.html')
+    p = PageRequest('http://nytimes.com/2015/10/04/technology/scouring-the-web-to-make-new-words-lookupable.html', "lookupable")
     print p.response
     assert p.response
 
 
 def test_page_structure():
     from serapis.extract import PageRequest
-    p = PageRequest('http://nytimes.com/2015/10/04/technology/scouring-the-web-to-make-new-words-lookupable.html')
+    p = PageRequest('http://nytimes.com/2015/10/04/technology/scouring-the-web-to-make-new-words-lookupable.html', "lookupable")
 
     assert p.structured['title'] == test_response['title']
     assert p.structured['url'] == test_response['url']
     assert p.structured['author'] == test_response['author']
     assert len(p.structured['doc']) > 0
     assert p.structured['date'] == test_response['date']
+
+
+def test_extract_html_features():
+    from serapis.extract import PageRequest
+
+    # Class that doesn't automatically fire off responses
+    class DummyPageRequest(PageRequest):
+        def __init__(self, url, term):
+            self.url = url
+            self.term = term
+
+    test_request = DummyPageRequest("http://thescene.whro.org/hear-cool-stuff", 'defenestration')
+    test_request.html = "<div><p><em><strong>de-fen-es-tra-tion</strong></em> (dee-fen-uh-STRAY-shun) |&nbsp;n. the act of throwing someone or something out of a window</p></div><div>"
+    features = test_request.get_html_features()
+    assert features['highlighted']

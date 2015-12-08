@@ -70,7 +70,7 @@ def search_and_parse(search_func, term):
 
 
 def extract_wrapper(url_object, term):
-    result = PageRequest(url_object['url']).get_structured_page()
+    result = PageRequest(url_object['url'], term).get_structured_page()
     return merge_dict(url_object, result)
 
 
