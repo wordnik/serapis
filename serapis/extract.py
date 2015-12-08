@@ -123,7 +123,7 @@ class PageRequest(object):
         Returns:
             dict -- dict of bools for different features.
         """
-        minimal_html = unidecode(self.response.text).replace("-", "").replace(" ", "")
+        minimal_html = unidecode(self.html).replace("-", "").replace(" ", "")
         minimal_term = unidecode(self.term).replace("-", "").replace(" ", "")
 
         highlight_re = r"<(em|i|b|strong|span)[^>]*> *{}[ ,:]*</\1>".format(minimal_term)
@@ -144,6 +144,7 @@ class PageRequest(object):
             return None
 
         text = " ".join(self.get_text())
+        self.html = self.response.text
         metadata = self.get_meta()
 
         self.structured = {
@@ -156,7 +157,7 @@ class PageRequest(object):
         }
 
         if config.save_html:
-            self.structured["html"] = self.response.text
+            self.structured["html"] = self.html
 
         return self.structured
 
