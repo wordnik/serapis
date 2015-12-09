@@ -106,6 +106,9 @@ class PageRequest(object):
         Returns:
             dict -- dict of bools for different features.
         """
+        if not self.term:
+            return None
+
         minimal_html = squashed(self.html, keep='<>/&;')
         minimal_term = squashed(self.term)
 
