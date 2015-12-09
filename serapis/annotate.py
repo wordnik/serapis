@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding=utf-8
 """
-Search module
+Annotate module
 """
 from __future__ import unicode_literals
 from __future__ import absolute_import
@@ -12,23 +12,48 @@ __date__ = "2015-12-07"
 __email__ = "clare@summer.ai"
 
 from textblob import TextBlob
+from nltk.tokenize import sent_tokenize
+import re
 
 
-def find_word(text, word):
+def get_snippets(word, doc):
     """
-    Given (text, word)
-    Returns sentence containing word and position  TODO
+    Given word and doc
+    Returns any snippets from doc containing word
+
+    NB: Does not always properly deal with em-dashes (u'\u2014')
 
     """
-    sentence = text
+    locations = [m.start() for m in re.finditer(word, doc)]
+
+    snippets = []
+
+    for loc in locations:
+        start = loc - 200
+        end = loc + len(word) + 200
+        tokenized = sent_tokenize(doc[start:end])
+        for i in tokenized:
+            if i.lower().find(word.lower()) > -1:
+                snippets.append(i)
+
+    return snippets
+
+
+def find_word(doc, word):
+    """
+    Given (doc, word)
+    Returns sentences containing word and position
+
+    """
+    sentence = doc
     positions = [i for i, x in enumerate(sentence.split()) if x == word]
     position = positions[0] or None
     return sentence, position
 
 
-def structure_sentence(text, word):
+def structure_sentence(doc, word):
     """
-    Given (text, word)
+    Given (doc, word)
 
     get sentence with word
     Stripped of all punctuation & accents, lower case, target term replaced with _TERM_
@@ -42,7 +67,7 @@ def structure_sentence(text, word):
         "pos":       ...,
         "features":  ...  }
     """
-    sentence, position = find_word(text, word)
+    sentence, position = find_word(doc, word)
     blob = TextBlob(sentence)
     pos = blob.pos_tags
 
