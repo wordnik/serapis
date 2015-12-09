@@ -105,6 +105,9 @@ class PageRequest(object):
         Returns:
             dict -- dict of bools for different features.
         """
+        if not self.term:
+            return None
+
         minimal_html = unidecode(html).replace("-", "").replace(" ", "")
         minimal_term = unidecode(self.term).replace("-", "").replace(" ", "")
 
