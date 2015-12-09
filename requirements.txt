@@ -7,3 +7,4 @@ Unidecode==0.4.18
 lxml==3.5.0
 Pattern==2.6
 html2text==2015.11.4
+functools32==3.2.3.post2
