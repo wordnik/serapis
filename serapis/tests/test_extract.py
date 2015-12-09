@@ -17,8 +17,7 @@ __email__ = "clare@summer.ai"
 
 test_response = {
     'url': 'http://nytimes.com/2015/10/04/technology/scouring-the-web-to-make-new-words-lookupable.html',
-    'title': u'Scouring the Web to Make New Words \u2018Lookupable\u2019',
-    'date': None,
+    'title': u'Scouring the Web to Make New Words \u2018Lookupable\u2019 - The New York Times',
     'author': 'Natasha Singer'
 }
 
@@ -26,7 +25,6 @@ test_response = {
 def test_page_request():
     from serapis.extract import PageRequest
     p = PageRequest('http://nytimes.com/2015/10/04/technology/scouring-the-web-to-make-new-words-lookupable.html', "lookupable")
-    print p.response
     assert p.response
 
 
@@ -38,7 +36,6 @@ def test_page_structure():
     assert p.structured['url'] == test_response['url']
     assert p.structured['author'] == test_response['author']
     assert len(p.structured['doc']) > 0
-    assert p.structured['date'] == test_response['date']
 
 
 def test_extract_html_features():
