@@ -16,7 +16,7 @@ import requests
 from lxml import etree
 from .config import config  # Make sure to use absolute imports here
 import html2text
-from unidecode import unidecode
+from serapis.util import squashed
 import re
 import logging
 
@@ -106,8 +106,8 @@ class PageRequest(object):
         Returns:
             dict -- dict of bools for different features.
         """
-        minimal_html = unidecode(self.html).replace("-", "").replace(" ", "")
-        minimal_term = unidecode(self.term).replace("-", "").replace(" ", "")
+        minimal_html = squashed(self.html, keep='<>&;')
+        minimal_term = squashed(self.term)
 
         highlight_re = r"<(em|i|b|strong|span)[^>]*> *{}[ ,:]*</\1>".format(minimal_term)
         quote_re = r"<({})[^>]*> *{}[ ,:]*</({})>".format(self.OPENING_QUOTE, minimal_term, self.CLOSING_QUOTE)

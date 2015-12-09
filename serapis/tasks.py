@@ -18,6 +18,7 @@ import logging
 from nltk.tokenize import sent_tokenize
 from .config import config
 from serapis.search import search_all
+from serapis.util import squashed
 
 logging.basicConfig(filename='serapis.log', level=logging.INFO)
 
@@ -116,13 +117,15 @@ def detect(message):
     word = message['word']
     for url in message['urls']:
         url['sentences'] = []
-        for sentence in sent_tokenize(url['doc']):
-            if word.lower() in sentence.lower():
-                result = {
-                    's': sentence,
-                    'frd': 0  # Detect if this is an FRD
-                }
-                url['sentences'].append(result)
+        for paragraph in url['doc'].split('\n\n'):
+            if len(paragraph) > 30:
+                for sentence in sent_tokenize(paragraph):
+                    if squashed(word) in squashed(sentence):
+                        result = {
+                            's': sentence.strip(" *#"),
+                            'frd': 0  # Detect if this is an FRD
+                        }
+                        url['sentences'].append(result)
     return write_message('rate', message)
 
 
