@@ -13,16 +13,17 @@ __date__ = "2015-11-20"
 __email__ = "clare@summer.ai"
 
 import requests
-import json
-from .config import config  # Make sure to use absolute imports here
-from lxml.html.clean import Cleaner
 from lxml import etree
+from .config import config  # Make sure to use absolute imports here
+import html2text
 from unidecode import unidecode
 import re
 import logging
 
 
 log = logging.getLogger('serapis.extract')
+html_parser = html2text.HTML2Text()
+html_parser.ignore_links = html_parser.ignore_images = html_parser.ignore_emphasis = True
 
 
 class PageRequest(object):
@@ -60,24 +61,6 @@ class PageRequest(object):
             log.error("Failed to return page for url: %s" % self.url)
             return None
 
-    def parse_from_unicode(self, unicode_str):
-        utf8_parser = etree.HTMLParser(encoding='utf-8')
-        s = unicode_str.encode('utf-8')
-        return etree.fromstring(s, parser=utf8_parser)
-
-    def get_text(self):
-        """
-        Returns
-        List of paragraph texts
-
-        """
-        text_cleaner = Cleaner(page_structure=False, links=False, scripts=False, javascript=False)
-
-        self.unicode_html = self.parse_from_unicode(text_cleaner.clean_html(self.response.text))
-
-        paragraphs = self.unicode_html.xpath('//p')
-        return [unicode(el.text).strip('\n') for el in paragraphs if el.text and len(el.text.strip('\n')) > 8]
-
     def get_meta(self):
         """
         Scan meta tags for keys: 'title', 'author', 'date'
@@ -90,31 +73,30 @@ class PageRequest(object):
         - Metadata is sometimes in XML <PageMap> object
 
         """
-        meta_html = self.parse_from_unicode(self.response.text)
-
-        paragraphs = meta_html.xpath('//meta')
-        meta_values = [{'name': m.attrib.get('property') or m.attrib.get('name'),
-                        'value': m.attrib.get('content')} for m in paragraphs]
-
-        meta_structured = {
-            'author': None,
-            'title': None,
-            'date': None
+        # Common ways to encode authorship information
+        prop_names = {
+            "name": "author",  # W3C
+            "property": "og:author",  # Facebook OG
+            "property": "article:author",  # Pinterest and Twitter meta
         }
+        authors = []
 
-        parsely_key = [v for v in meta_values if v['name'] == 'parsely-page']
+        tree = etree.HTML(self.html)
+        for prop, value in prop_names.items():
+            tags = tree.xpath("//meta[@{}='{}']".format(prop, value))
+            authors.extend([tag.attrib.get('content') for tag in tags])
 
-        try:
-            parsley_dict = json.loads(parsely_key[0].get('value'))
-            meta_structured['author'] = parsley_dict.get('author')
-            meta_structured['title'] = parsley_dict.get('title')
-            meta_structured['date'] = parsley_dict.get('pub_date')
-        except:
-            for key in meta_structured.keys():
-                values = [v['value'] for v in meta_values if v['name'] and v['name'] == key or v['name'] == 'og:' + key]
-                meta_structured[key] = values[0] if values else None
+        # Pick the first author that looks reasonable
+        authors = filter(lambda author: author and not author.startswith("http"), authors)
+        author = authors[0] if authors else None
 
-        return meta_structured
+        title_tags = tree.xpath("//title")
+        title = title_tags[0].text if title_tags else None
+
+        return {
+            'author': author,
+            'title': title
+        }
 
     def get_html_features(self):
         """Detects whether the search term exists is highlighted (bolded, emphasised) or
@@ -143,19 +125,16 @@ class PageRequest(object):
         if not self.response:
             return None
 
-        text = " ".join(self.get_text())
-        self.html = self.response.text
+        self.text = html_parser.handle(self.html)
         self.features = self.get_html_features()
-        metadata = self.get_meta()
 
         self.structured = {
             "url": self.url,
-            "doc": text,
-            "date": metadata.get('date'),
+            "doc": self.text,
             "features": self.features,
-            "title": metadata.get('title'),
-            "author": metadata.get('author')
         }
+
+        self.structured.update(self.get_meta())
 
         if config.save_html:
             self.structured["html"] = self.html
@@ -166,6 +145,7 @@ class PageRequest(object):
         self.url = url
         self.term = term
         self.response = self.request_page()
+        self.html = self.response.text
         self.structured = self.get_structured_page()
 
 
