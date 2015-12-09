@@ -129,6 +129,7 @@ class PageRequest(object):
         self.features = self.get_html_features()
 
         self.structured = {
+            "term": self.term,
             "url": self.url,
             "doc": self.text,
             "features": self.features,
