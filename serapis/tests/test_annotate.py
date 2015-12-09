@@ -30,8 +30,8 @@ test_output = {
 
 
 def test_page_structure():
-    from serapis.annotate import structure_sentence
-    output = structure_sentence(test_text, test_term)
+    from serapis.annotate import annotate_sentence
+    output = annotate_sentence(test_text, test_term)
 
     for key in test_output.keys():
         assert output[key] == test_output[key]
