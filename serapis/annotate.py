@@ -51,7 +51,7 @@ def find_word(doc, word):
     return sentence, position
 
 
-def structure_sentence(doc, word):
+def annotate_sentence(doc, word):
     """
     Given (doc, word)
 
