@@ -6,5 +6,6 @@ dependencies:
         - python -m nltk.downloader punkt
 test:
     override:
-        - py.test serapis/tests/ --junitxml=$CIRCLE_TEST_REPORTS
+        - mkdir -p $CIRCLE_TEST_REPORTS/pytest
+        - py.test serapis/tests/ --junitxml=$CIRCLE_TEST_REPORTS/pytest/tests.pytest
         - "flake8 . --ignore=E501,W293,W291,N813,E128 --count"
