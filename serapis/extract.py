@@ -81,7 +81,7 @@ class PageRequest(object):
         }
         authors = []
 
-        tree = etree.HTML(self.html)
+        tree = etree.HTML(self.response.text)  # TODO may change this to response.content, access as bytes
         for prop, value in prop_names.items():
             tags = tree.xpath("//meta[@{}='{}']".format(prop, value))
             authors.extend([tag.attrib.get('content') for tag in tags])
@@ -98,14 +98,14 @@ class PageRequest(object):
             'title': title
         }
 
-    def get_html_features(self):
+    def get_html_features(self, html):
         """Detects whether the search term exists is highlighted (bolded, emphasised) or
         in quotes. Needs to be called after self.request_page.
 
         Returns:
             dict -- dict of bools for different features.
         """
-        minimal_html = unidecode(self.html).replace("-", "").replace(" ", "")
+        minimal_html = unidecode(html).replace("-", "").replace(" ", "")
         minimal_term = unidecode(self.term).replace("-", "").replace(" ", "")
 
         highlight_re = r"<(em|i|b|strong|span)[^>]*> *{}[ ,:]*</\1>".format(minimal_term)
@@ -125,8 +125,9 @@ class PageRequest(object):
         if not self.response:
             return None
 
-        self.text = html_parser.handle(self.html)
-        self.features = self.get_html_features()
+        html = self.response.text
+        self.text = html_parser.handle(html)
+        self.features = self.get_html_features(html)
 
         self.structured = {
             "term": self.term,
@@ -138,7 +139,7 @@ class PageRequest(object):
         self.structured.update(self.get_meta())
 
         if config.save_html:
-            self.structured["html"] = self.html
+            self.structured["html"] = html
 
         return self.structured
 
@@ -146,7 +147,6 @@ class PageRequest(object):
         self.url = url
         self.term = term
         self.response = self.request_page()
-        self.html = self.response.text
         self.structured = self.get_structured_page()
 
 

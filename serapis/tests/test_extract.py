@@ -48,6 +48,6 @@ def test_extract_html_features():
             self.term = term
 
     test_request = DummyPageRequest("http://thescene.whro.org/hear-cool-stuff", 'defenestration')
-    test_request.html = "<div><p><em><strong>de-fen-es-tra-tion</strong></em> (dee-fen-uh-STRAY-shun) |&nbsp;n. the act of throwing someone or something out of a window</p></div><div>"
-    features = test_request.get_html_features()
+    test_html = "<div><p><em><strong>de-fen-es-tra-tion</strong></em> (dee-fen-uh-STRAY-shun) |&nbsp;n. the act of throwing someone or something out of a window</p></div><div>"
+    features = test_request.get_html_features(test_html)
     assert features['highlighted']
