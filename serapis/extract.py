@@ -24,6 +24,7 @@ import logging
 log = logging.getLogger('serapis.extract')
 html_parser = html2text.HTML2Text()
 html_parser.ignore_links = html_parser.ignore_images = html_parser.ignore_emphasis = True
+html_parser.body_width = 0
 
 
 class PageRequest(object):
