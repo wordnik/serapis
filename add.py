@@ -20,7 +20,7 @@ tasks_map = {}
 
 def add(word):
     from serapis import tasks
-    message = {'word': args.word, 'hashslug': util.hashslug(args.word)}
+    message = {'word': word, 'hashslug': util.hashslug(word)}
     tasks.write_message('search', message)
     print("Added task '{}'".format(message['hashslug']))
 

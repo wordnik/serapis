@@ -148,7 +148,7 @@ def save(message):
         resultfile = os.path.join(config.local_s3_results, message['hashslug'])
         with open(resultfile, 'w') as f:
             print("Saving results to '{}".format(resultfile))
-            json.dump(message, f)
+            json.dump(message, f, indent=2)
     else:
         # Just save it to the logs
         print(json.dumps(message))
