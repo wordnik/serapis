@@ -149,6 +149,7 @@ class PageRequest(object):
         metadata = self.get_meta()
 
         self.structured = {
+            "term": self.term,
             "url": self.url,
             "doc": text,
             "date": metadata.get('date'),
