@@ -19,6 +19,7 @@ import html2text
 from serapis.util import squashed
 import re
 import logging
+from nltk.tokenize import sent_tokenize
 
 
 log = logging.getLogger('serapis.extract')
@@ -61,6 +62,24 @@ class PageRequest(object):
         except:
             log.error("Failed to return page for url: %s" % self.url)
             return None
+
+    def get_sanitized_page_text(self, page_text):
+        """
+        Returns page text as 
+
+        """
+        sentences = []
+        matches = []
+        for paragraph in self.text.split('\n\n'):
+            if len(paragraph) > 30:
+                for sentence in sent_tokenize(paragraph):
+                    sentences.append(sentence)
+                    if squashed(self.term) in squashed(sentence):
+                        matches.append({
+                            'term': self.term,
+                            'sentence': sentence.strip(" *#")
+                        })
+        return sentences
 
     def get_meta(self):
         """
@@ -130,7 +149,7 @@ class PageRequest(object):
             return None
 
         html = self.response.text
-        self.text = html_parser.handle(html)
+        self.text = self.get_sanitized_page_text(html_parser.handle(html))
         self.features = self.get_html_features(html)
 
         self.structured = {
@@ -138,6 +157,7 @@ class PageRequest(object):
             "url": self.url,
             "doc": self.text,
             "features": self.features,
+            "matches": self.matches
         }
 
         self.structured.update(self.get_meta())
