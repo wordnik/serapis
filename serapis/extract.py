@@ -69,13 +69,13 @@ class PageRequest(object):
 
         """
         sentences = []
-        matches = []
-        for paragraph in self.text.split('\n\n'):
+        self.matches = []
+        for paragraph in page_text.split('\n\n'):
             if len(paragraph) > 30:
                 for sentence in sent_tokenize(paragraph):
                     sentences.append(sentence)
-                    if squashed(self.term) in squashed(sentence):
-                        matches.append({
+                    if self.term and squashed(self.term) in squashed(sentence):
+                        self.matches.append({
                             'term': self.term,
                             'sentence': sentence.strip(" *#")
                         })
