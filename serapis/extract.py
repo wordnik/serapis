@@ -128,7 +128,7 @@ class PageRequest(object):
         if not self.term:
             return None
 
-        minimal_html = squashed(self.html, keep='<>/&;')
+        minimal_html = squashed(html, keep='<>/&;')
         minimal_term = squashed(self.term)
 
         highlight_re = r"<(em|i|b|strong|span)[^>]*> *{}[ ,:]*</\1>".format(minimal_term)
