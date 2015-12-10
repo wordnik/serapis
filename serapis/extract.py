@@ -106,7 +106,7 @@ class PageRequest(object):
         Returns:
             dict -- dict of bools for different features.
         """
-        minimal_html = squashed(self.html, keep='<>&;')
+        minimal_html = squashed(self.html, keep='<>/&;')
         minimal_term = squashed(self.term)
 
         highlight_re = r"<(em|i|b|strong|span)[^>]*> *{}[ ,:]*</\1>".format(minimal_term)
