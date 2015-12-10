@@ -16,6 +16,7 @@ import hashlib
 import re
 from unidecode import unidecode
 import threading
+import functools32 as functools
 
 
 class AsynchronousRequest(object):
@@ -79,6 +80,26 @@ def merge_dict(target, *to_merge):
             if k not in target or d[k]:
                 target[k] = d[k]
     return target
+
+
+@functools.lru_cache()
+def squashed(text, keep=''):
+    """Turns "I've had a Déjà Vu!" into 'ivehadadejavu'. It
+    will try to normalize all characters to ASCII and remove
+    anything that's not a letter or number.
+
+    >>> squashed('deja-vu') in squashed('I had a Déjà Vu')
+    >>> True
+
+    Results are cached.
+
+    Args:
+        text: str
+        keep: str -- Characters to keep, e.g. HTML tags.
+    Returns:
+        str
+    """
+    return re.sub(r"[^a-z0-9{}]".format(keep), "", unidecode(text).lower())
 
 
 class Collector(object):
