@@ -17,6 +17,8 @@ from lxml import etree
 from .config import config  # Make sure to use absolute imports here
 import html2text
 from serapis.util import squashed
+from serapis.util import collect_variants
+from serapis.util import multiple_replace
 import re
 import logging
 from nltk.tokenize import sent_tokenize
@@ -63,23 +65,36 @@ class PageRequest(object):
             log.error("Failed to return page for url: %s" % self.url)
             return None
 
-    def get_sanitized_page_text(self, page_text):
-        """
-        Returns page text as 
+    def extract_sentences(self, page_text):
+        """Finds all sentences that contain the term or a spelling variants.
+        Sets self.sentences ans self.variants.
 
+        Args:
+            page_text: str
+        Returns
+            str -- cleaned page text.
         """
-        sentences = []
-        self.matches = []
+        def qualify_paragraph(p):
+            if len(p) > 30 and \
+               p.count("\n") < 3 and \
+               p.count("---") < 3:
+                return True
+
+        doc = []
         for paragraph in page_text.split('\n\n'):
-            if len(paragraph) > 30:
+            if qualify_paragraph(paragraph):
                 for sentence in sent_tokenize(paragraph):
-                    sentences.append(sentence)
-                    if self.term and squashed(self.term) in squashed(sentence):
-                        self.matches.append({
-                            'term': self.term,
-                            'sentence': sentence.strip(" *#")
+                    sentence = sentence.strip(" *#")
+                    doc.append(sentence)
+                    variants = collect_variants(sentence, self.term)
+                    if variants:
+                        self.variants.update(variants)
+                        s_clean = multiple_replace(sentence, {v: "_TERM_" for v in variants})
+                        self.sentences.append({
+                            's': sentence,
+                            's_clean': s_clean
                         })
-        return sentences
+        return " ".join(doc)
 
     def get_meta(self):
         """
@@ -149,7 +164,7 @@ class PageRequest(object):
             return None
 
         html = self.response.text
-        self.text = self.get_sanitized_page_text(html_parser.handle(html))
+        self.text = self.extract_sentences(html_parser.handle(html))
         self.features = self.get_html_features(html)
 
         self.structured = {
@@ -157,7 +172,8 @@ class PageRequest(object):
             "url": self.url,
             "doc": self.text,
             "features": self.features,
-            "matches": self.matches
+            "variants": list(self.variants),  # Sets are not JSON serializable
+            "sentences": self.sentences
         }
 
         self.structured.update(self.get_meta())
@@ -170,6 +186,8 @@ class PageRequest(object):
     def __init__(self, url, term):
         self.url = url
         self.term = term
+        self.variants = set()
+        self.sentences = []
         self.response = self.request_page()
         self.structured = self.get_structured_page()
 
