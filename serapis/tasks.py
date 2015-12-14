@@ -15,10 +15,9 @@ import os
 import json
 import boto3
 import logging
-from nltk.tokenize import sent_tokenize
 from .config import config
 from serapis.search import search_all
-from serapis.util import squashed
+from serapis.annotate import batch_tag_sentences
 
 logging.basicConfig(filename='serapis.log', level=logging.INFO)
 
@@ -66,9 +65,14 @@ def search(message):
             urls: [
                 {
                     url: ...
+                    variants: ...
                     author: ...
                     date: ...
                     doc: ...
+                    sentences: [
+                        s: ...
+                        s_clean: ...
+                    ]
                 },
                 ...
             ]
@@ -114,18 +118,14 @@ def detect(message):
 
     Where s is the sentence and frd is the probability of this sentence being an FRD.
     """
-    word = message['word']
-    for url in message['urls']:
-        url['sentences'] = []
-        for paragraph in url['doc'].split('\n\n'):
-            if len(paragraph) > 30:
-                for sentence in sent_tokenize(paragraph):
-                    if squashed(word) in squashed(sentence):
-                        result = {
-                            's': sentence.strip(" *#"),
-                            'frd': 0  # Detect if this is an FRD
-                        }
-                        url['sentences'].append(result)
+    batch_tag_sentences(message)
+    # for page in message['urls']:
+    #     print "Url", page['url']
+    #     s = 1
+    #     for sentence in page['sentences']:
+    #         print "sentence {} / {}, '{}'".format(s, len(page['sentences']), sentence['s_clean'][:40])
+    #         s += 1
+    #         annotate_sentence(sentence, message['word'])
     return write_message('rate', message)
 
 
