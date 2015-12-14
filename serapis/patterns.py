@@ -14,9 +14,9 @@ __copyright__ = "Copyright 2015, Manuel Ebert"
 __date__ = "2015-11-25"
 __email__ = "manuel@1450.me"
 
-import re
 import os
 import codecs
+from serapis.util import multiple_replace
 
 VARS = {
     "_DET_": r"\b(another|their|your|the|his|her|our|yer|my|an|a)\b ?",
@@ -73,15 +73,6 @@ patterns = {
 }
 
 
-def multiple_replace(text, adict):
-    """Makes several replacements in a string."""
-    rx = re.compile('|'.join(map(re.escape, adict)))
-
-    def one_xlat(match):
-        return "({})".format(adict[match.group(0)])
-    return rx.sub(one_xlat, text)
-
-
 def compile():
     """Loads variable substitutions from files and applies them to the
     patterns. Makes sure all patterns compile to regular expressions.
@@ -92,6 +83,6 @@ def compile():
 
     # Prepare patterns
     for key, pattern in patterns.items():
-        patterns[key] = multiple_replace(pattern, VARS)
+        patterns[key] = multiple_replace(pattern, VARS, re_style=True)
 
     return patterns

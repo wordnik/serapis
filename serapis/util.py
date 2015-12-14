@@ -129,6 +129,24 @@ def collect_variants(text, term, replace="_TERM_"):
     return collected
 
 
+def multiple_replace(text, replacements, re_style=False):
+    """Makes several replacements in a string.
+
+    Args:
+        text: str
+        replacements: dict -- Maps parts to be replaced to substitutions
+        re_style: bool -- If True, wrap replacements in group brackets
+    Returns:
+        str
+    """
+    rx = re.compile('|'.join(map(re.escape, replacements)))
+    patch = "({})" if re_style else "{}"
+    
+    def one_xlat(match):
+        return patch.format(replacements[match.group(0)])
+    return rx.sub(one_xlat, text)
+
+
 class Collector(object):
     """Collector decorator"""
     all = []
