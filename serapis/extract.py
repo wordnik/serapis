@@ -17,8 +17,11 @@ from lxml import etree
 from .config import config  # Make sure to use absolute imports here
 import html2text
 from serapis.util import squashed
+from serapis.util import collect_variants
+from serapis.util import multiple_replace
 import re
 import logging
+from nltk.tokenize import sent_tokenize
 
 
 log = logging.getLogger('serapis.extract')
@@ -62,6 +65,37 @@ class PageRequest(object):
             log.error("Failed to return page for url: %s" % self.url)
             return None
 
+    def extract_sentences(self, page_text):
+        """Finds all sentences that contain the term or a spelling variants.
+        Sets self.sentences ans self.variants.
+
+        Args:
+            page_text: str
+        Returns
+            str -- cleaned page text.
+        """
+        def qualify_paragraph(p):
+            if len(p) > 30 and \
+               p.count("\n") < 3 and \
+               p.count("---") < 3:
+                return True
+
+        doc = []
+        for paragraph in page_text.split('\n\n'):
+            if qualify_paragraph(paragraph):
+                for sentence in sent_tokenize(paragraph):
+                    sentence = sentence.strip(" *#")
+                    doc.append(sentence)
+                    variants = collect_variants(sentence, self.term)
+                    if variants:
+                        self.variants.update(variants)
+                        s_clean = multiple_replace(sentence, {v: "_TERM_" for v in variants})
+                        self.sentences.append({
+                            's': sentence,
+                            's_clean': s_clean
+                        })
+        return " ".join(doc)
+
     def get_meta(self):
         """
         Scan meta tags for keys: 'title', 'author', 'date'
@@ -82,7 +116,7 @@ class PageRequest(object):
         }
         authors = []
 
-        tree = etree.HTML(self.html)
+        tree = etree.HTML(self.response.text)  # TODO may change this to response.content, access as bytes
         for prop, value in prop_names.items():
             tags = tree.xpath("//meta[@{}='{}']".format(prop, value))
             authors.extend([tag.attrib.get('content') for tag in tags])
@@ -99,14 +133,17 @@ class PageRequest(object):
             'title': title
         }
 
-    def get_html_features(self):
+    def get_html_features(self, html):
         """Detects whether the search term exists is highlighted (bolded, emphasised) or
         in quotes. Needs to be called after self.request_page.
 
         Returns:
             dict -- dict of bools for different features.
         """
-        minimal_html = squashed(self.html, keep='<>/&;')
+        if not self.term:
+            return None
+
+        minimal_html = squashed(html, keep='<>/&;')
         minimal_term = squashed(self.term)
 
         highlight_re = r"<(em|i|b|strong|span)[^>]*> *{}[ ,:]*</\1>".format(minimal_term)
@@ -126,27 +163,32 @@ class PageRequest(object):
         if not self.response:
             return None
 
-        self.text = html_parser.handle(self.html)
-        self.features = self.get_html_features()
+        html = self.response.text
+        self.text = self.extract_sentences(html_parser.handle(html))
+        self.features = self.get_html_features(html)
 
         self.structured = {
+            "term": self.term,
             "url": self.url,
             "doc": self.text,
             "features": self.features,
+            "variants": list(self.variants),  # Sets are not JSON serializable
+            "sentences": self.sentences
         }
 
         self.structured.update(self.get_meta())
 
         if config.save_html:
-            self.structured["html"] = self.html
+            self.structured["html"] = html
 
         return self.structured
 
     def __init__(self, url, term):
         self.url = url
         self.term = term
+        self.variants = set()
+        self.sentences = []
         self.response = self.request_page()
-        self.html = self.response.text
         self.structured = self.get_structured_page()
 
 
