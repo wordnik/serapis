@@ -14,7 +14,7 @@ test_term = 'kalyptic'
 test_output = {
     u's': 'A kalyptic culture is typified by peacefulness, tolerance and individualism.',
     u's_clean': u'A _TERM_ culture is typified by peacefulness, tolerance and individualism.',
-    u'pos_tags': u'A/DT _TERM_/JJ culture/NN is/VBZ typified/VBN by/IN peacefulness/NN tolerance/NN and/CC individualism/NN',
+    u'pos_tags': u'A/DT _TERM_/JJ culture/NN is/VBZ typified/VBN by/IN peacefulness/NN ,/, tolerance/NN and/CC individualism/NN ./.',
     u'features': {},
 }
 

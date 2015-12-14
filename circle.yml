@@ -8,5 +8,5 @@ dependencies:
 test:
     override:
         - mkdir -p $CIRCLE_TEST_REPORTS/pytest
-        - py.test serapis/tests/ --junitxml=$CIRCLE_TEST_REPORTS/pytest/tests.pytest
+        - py.test serapis/tests/ --junitxml=$CIRCLE_TEST_REPORTS/pytest/tests.pytest -v
         - "flake8 . --ignore=E501,W293,W291,N813,E128 --count"
