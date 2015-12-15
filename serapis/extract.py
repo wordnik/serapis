@@ -84,16 +84,17 @@ class PageRequest(object):
         for paragraph in page_text.split('\n\n'):
             if qualify_paragraph(paragraph):
                 for sentence in sent_tokenize(paragraph):
-                    sentence = sentence.strip(" *#")
-                    doc.append(sentence)
-                    variants = collect_variants(sentence, self.term)
-                    if variants:
-                        self.variants.update(variants)
-                        s_clean = multiple_replace(sentence, {v: "_TERM_" for v in variants})
-                        self.sentences.append({
-                            's': sentence,
-                            's_clean': s_clean
-                        })
+                    sentence = sentence.strip(" *#").replace("\n", " ")
+                    if sentence not in [s['s'] for s in self.sentences]:
+                        doc.append(sentence)
+                        variants = collect_variants(sentence, self.term)
+                        if variants:
+                            self.variants.update(variants)
+                            s_clean = multiple_replace(sentence, {v: "_TERM_" for v in variants})
+                            self.sentences.append({
+                                's': sentence,
+                                's_clean': s_clean
+                            })
         return " ".join(doc)
 
     def get_meta(self):

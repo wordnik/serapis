@@ -75,10 +75,10 @@ def extract_wrapper(url_object, term):
     return merge_dict(url_object, result)
 
 
-def search_diffbot_cache(word):
+def search_diffbot_cache(term):
     response = requests.get('http://api.diffbot.com/v3/search', params={
         'token': config.credentials['diffbot'],
-        'query': requests.utils.quote('"{}"'.format(word)),
+        'query': requests.utils.quote('"{}"'.format(term)),
         'col': 'GLOBAL-INDEX'
     }).json()
     if not response.get('objects'):
@@ -89,12 +89,16 @@ def search_diffbot_cache(word):
     results = []
     for object in response.get('objects', []):
         if object.get('text'):
+            pr = PageRequest(object.get('pageUrl'), term, run=False)
+            pr.extract_sentences(object.get('text'))
             result = {
                 "title": object.get('title'),
                 "url": object.get('pageUrl'),
                 "author": object.get('author'),
                 "date": parse_date(object.get('date', '')).isoformat(),
-                "doc": object.get('text')
+                "doc": object.get('text'),
+                "sentences": pr.sentences,
+                "variants": pr.variants
             }
             results.append(result)
     return results
@@ -109,22 +113,30 @@ def search_duckduckgo(term):
     if req['AbstractSource'] not in config.duckduckgo_sources:
         return result
     if req.get('Abstract'):
+        pr = PageRequest(req['AbstractURL'], term, run=False)
+        pr.extract_sentences(req['Abstract'])
         result.append({
             'title': req['Heading'],
             'url': req['AbstractURL'],
             'author': None,
             'date': None,
             'source': req['AbstractSource'],
-            'doc': req['Abstract']
+            'doc': req['Abstract'],
+            "sentences": pr.sentences,
+            "variants": pr.variants
         })
     if req.get('Definition'):
+        pr = PageRequest(req['DefinitionURL'], term, run=False)
+        pr.extract_sentences(req['Definition'])
         result.append({
             'title': req['Heading'],
             'url': req['DefinitionURL'],
             'source': req['DefinitionSource'],
             'author': None,
             'date': None,
-            'doc': req['Definition']
+            'doc': req['Definition'],
+            "sentences": pr.sentences,
+            "variants": pr.variants
         })
     log.info("Searching DuckDuckGo for '{}' returned {} results".format(term, len(result)))
     return result
