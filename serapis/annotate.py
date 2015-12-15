@@ -29,8 +29,8 @@ def get_snippets(word, doc):
     snippets = []
 
     for loc in locations:
-        start = loc - 200
-        end = loc + len(word) + 200
+        start = loc - 200  # if > 200?
+        end = loc + len(word) + 200  # this too
         tokenized = sent_tokenize(doc[start:end])
         for i in tokenized:
             if i.lower().find(word.lower()) > -1:
@@ -51,7 +51,40 @@ def find_word(doc, word):
     return sentence, position
 
 
-def annotate_sentence(doc, word):
+def annotate_sentence(doc, sentence):
+    """
+    Given (doc, sentence)
+
+    Stripped of all punctuation & accents, lower case, target term replaced with _TERM_
+    Tokenised and POS-Tagged (Penn Treebank)
+    Single feature marker for sentences, such as number of sub-clauses (os something that actually makes sense)
+    
+    Returns
+    {   "s":         ...,
+        "s_clean":   ...,
+        "pos_tags": ...,
+        "pos":       ...,
+        "features":  ...  }
+
+    """
+    blob = TextBlob(sentence)
+    pos = blob.pos_tags
+
+    pos_tags = ['/'.join([b[0], b[1]]) for b in pos]
+    pos = list(pos_tags)
+    pos[position] = '_TERM_'
+
+    structured = {
+        's': sentence,  # need to extract the sentence
+        's_clean': sentence.replace(word, '_TERM_'),
+        'pos_tags': ' '.join(pos_tags),
+        'pos': pos,
+        'features': None
+    }
+    return structured
+
+
+def annotate_document(doc, word):
     """
     Given (doc, word)
 
