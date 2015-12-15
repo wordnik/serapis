@@ -183,13 +183,14 @@ class PageRequest(object):
 
         return self.structured
 
-    def __init__(self, url, term):
+    def __init__(self, url, term, run=True):
         self.url = url
         self.term = term
         self.variants = set()
         self.sentences = []
-        self.response = self.request_page()
-        self.structured = self.get_structured_page()
+        if run:
+            self.response = self.request_page()
+            self.structured = self.get_structured_page()
 
 
 class DiffbotRequest:

@@ -41,13 +41,7 @@ def test_page_structure():
 def test_extract_html_features():
     from serapis.extract import PageRequest
 
-    # Class that doesn't automatically fire off responses
-    class DummyPageRequest(PageRequest):
-        def __init__(self, url, term):
-            self.url = url
-            self.term = term
-
-    test_request = DummyPageRequest("http://thescene.whro.org/hear-cool-stuff", 'defenestration')
+    test_request = PageRequest("http://thescene.whro.org/hear-cool-stuff", 'defenestration', run=False)
     test_html = "<div><p><em><strong>de-fen-es-tra-tion</strong></em> (dee-fen-uh-STRAY-shun) |&nbsp;n. the act of throwing someone or something out of a window</p></div><div>"
     features = test_request.get_html_features(test_html)
     assert features['highlighted']
