@@ -194,7 +194,7 @@ def hashslug(word):
         word = word.decode('utf-8')
     return "{}:{}".format(
         slugify(word),
-        hashlib.md5(word).hexdigest()[:6]
+        hashlib.md5(word.encode('utf-8')).hexdigest()[:6]
     )
 
 

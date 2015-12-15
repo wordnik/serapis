@@ -18,6 +18,8 @@ import logging
 from .config import config
 from serapis.search import search_all
 from serapis.annotate import batch_tag_sentences
+import codecs
+
 
 logging.basicConfig(filename='serapis.log', level=logging.INFO)
 
@@ -42,7 +44,7 @@ def write_message(task, message):
     if config.save_messages:
         s3.Object(config.bucket, key).put(Body=json.dumps(message))
     else:
-        with open(os.path.join(config.local_s3, key), 'w') as f:
+        with codecs.open(os.path.join(config.local_s3, key), 'w', 'utf-8') as f:
             json.dump(message, f, indent=2)
     return message
 
