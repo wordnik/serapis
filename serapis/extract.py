@@ -17,6 +17,7 @@ from lxml import etree
 from .config import config  # Make sure to use absolute imports here
 import html2text
 from serapis.util import squashed
+from serapis.language import is_english
 from serapis.util import collect_variants
 from serapis.util import multiple_replace
 import re
@@ -74,18 +75,22 @@ class PageRequest(object):
         Returns
             str -- cleaned page text.
         """
-        def qualify_paragraph(p):
-            if len(p) > 30 and \
+        def qualify_sentence(p):
+            if len(p) > 20 and \
                p.count("\n") < 3 and \
-               p.count("---") < 3:
+               "://" not in p and \
+               p.count("---") < 3 and \
+               p.count("#") < 3 and \
+               p.count("*") < 3 and \
+               p.count("|") < 3:
                 return True
 
         doc = []
         for paragraph in page_text.split('\n\n'):
-            if qualify_paragraph(paragraph):
+            if is_english(paragraph):
                 for sentence in sent_tokenize(paragraph):
                     sentence = sentence.strip(" *#").replace("\n", " ")
-                    if sentence not in [s['s'] for s in self.sentences]:
+                    if qualify_sentence(sentence) and sentence not in [s['s'] for s in self.sentences]:
                         doc.append(sentence)
                         variants = collect_variants(sentence, self.term)
                         if variants:
