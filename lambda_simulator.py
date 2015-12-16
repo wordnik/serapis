@@ -28,7 +28,12 @@ tasks_map = {}
 class TaskHandler(FileSystemEventHandler):
 
     def on_created(self, event):
-        task, slug, hsh = event.src_path.split("/")[-1].split(":")
+        try:
+            task, slug, hsh = event.src_path.split("/")[-1].split(":")
+        except ValueError:
+            print("ERROR: Invalid format for {}".format(event.src_path.split("/")[-1]))
+            return
+                        
         print("Calling {} for {}".format(task, slug))
         with open(event.src_path) as f:
             message = json.load(f)

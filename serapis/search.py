@@ -45,7 +45,7 @@ def search_all(term):
         time.sleep(.5)
     combined = (ddg.value or []) + (search.value or [])
     result = [url_object for url_object in combined if url_object and url_object.get('doc')]
-    log.info("Parsing URLs for '{}' yielded {} results".format(term, len(result)))
+    log.info("Searching URLs for '{}' yielded {} results".format(term, len(result)))
     return result
 
 
@@ -71,7 +71,12 @@ def search_and_parse(search_func, term):
 
 
 def extract_wrapper(url_object, term):
-    result = PageRequest(url_object['url'], term).get_structured_page()
+    try:
+        result = PageRequest(url_object['url'], term).get_structured_page()
+    except Exception:
+        import traceback
+        log.error("Failed to get page {} -- {} -- {}".format(url_object['url'], traceback.format_exc()))
+        return url_object
     return merge_dict(url_object, result)
 
 

@@ -16,7 +16,10 @@ import hashlib
 import re
 from unidecode import unidecode
 import threading
+import traceback
 import functools32 as functools
+import logging
+log = logging.getLogger('serapis.search')
 
 
 class AsynchronousRequest(object):
@@ -55,6 +58,7 @@ class AsynchronousRequest(object):
         try:
             self.value = function(*args, **kwargs)
         except Exception as e:
+            log.error("Exception in AsynchronousRequest '{}' -- {}".format(function.__name__, traceback.format_exc()))
             self.error = e
 
     @property
@@ -126,7 +130,7 @@ def collect_variants(text, term, replace="_TERM_"):
     collected = set()
     for m in re.finditer(term_re, clean_text):
         collected.add(text[m.start():m.end()])
-    return collected
+    return list(collected)
 
 
 def multiple_replace(text, replacements, re_style=False):
