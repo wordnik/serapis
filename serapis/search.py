@@ -65,6 +65,7 @@ def search_and_parse(search_func, term):
     jobs = [async(extract_wrapper, url_object, term) for url_object in search_result]
     while not all(jobs):
         time.sleep(.5)
+        
     result = [job.value for job in jobs if job.value]
     log.info("Parsing URLs for '{}' yielded {} results".format(term, len(result)))
     return result
@@ -103,7 +104,7 @@ def search_diffbot_cache(term):
                 "date": parse_date(object.get('date', '')).isoformat(),
                 "doc": object.get('text'),
                 "sentences": pr.sentences,
-                "variants": pr.variants
+                "variants": list(pr.variants)
             }
             results.append(result)
     return results
@@ -128,7 +129,7 @@ def search_duckduckgo(term):
             'source': req['AbstractSource'],
             'doc': req['Abstract'],
             "sentences": pr.sentences,
-            "variants": pr.variants
+            "variants": list(pr.variants)
         })
     if req.get('Definition'):
         pr = PageRequest(req['DefinitionURL'], term, run=False)
@@ -141,7 +142,7 @@ def search_duckduckgo(term):
             'date': None,
             'doc': req['Definition'],
             "sentences": pr.sentences,
-            "variants": pr.variants
+            "variants": list(pr.variants)
         })
     log.info("Searching DuckDuckGo for '{}' returned {} results".format(term, len(result)))
     return result
