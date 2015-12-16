@@ -80,9 +80,10 @@ def merge_dict(target, *to_merge):
         dict -- modified target
     """
     for d in to_merge:
-        for k, v in d.items():
-            if k not in target or d[k]:
-                target[k] = d[k]
+        if d:
+            for k, v in d.items():
+                if k not in target or d[k]:
+                    target[k] = d[k]
     return target
 
 

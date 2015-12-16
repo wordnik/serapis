@@ -65,7 +65,7 @@ def search_and_parse(search_func, term):
     jobs = [async(extract_wrapper, url_object, term) for url_object in search_result]
     while not all(jobs):
         time.sleep(.5)
-        
+
     result = [job.value for job in jobs if job.value]
     log.info("Parsing URLs for '{}' yielded {} results".format(term, len(result)))
     return result
@@ -76,7 +76,7 @@ def extract_wrapper(url_object, term):
         result = PageRequest(url_object['url'], term).get_structured_page()
     except Exception:
         import traceback
-        log.error("Failed to get page {} -- {} -- {}".format(url_object['url'], traceback.format_exc()))
+        log.error("Failed to get page {} -- {}".format(url_object['url'], traceback.format_exc()))
         return url_object
     return merge_dict(url_object, result)
 
