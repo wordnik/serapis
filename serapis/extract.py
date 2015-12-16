@@ -18,8 +18,7 @@ from .config import config  # Make sure to use absolute imports here
 import html2text
 from serapis.util import squashed
 from serapis.language import is_english
-from serapis.util import collect_variants
-from serapis.util import multiple_replace
+from serapis.util import clean_sentence
 import re
 import logging
 from nltk.tokenize import sent_tokenize
@@ -92,10 +91,9 @@ class PageRequest(object):
                     sentence = sentence.strip(" *#").replace("\n", " ")
                     if qualify_sentence(sentence) and sentence not in [s['s'] for s in self.sentences]:
                         doc.append(sentence)
-                        variants = collect_variants(sentence, self.term)
+                        s_clean, variants = clean_sentence(sentence, self.term)
                         if variants:
                             self.variants.update(variants)
-                            s_clean = multiple_replace(sentence, {v: "_TERM_" for v in variants})
                             self.sentences.append({
                                 's': sentence,
                                 's_clean': s_clean

@@ -69,6 +69,27 @@ class AsynchronousRequest(object):
         return self.done
 
 
+def clean_sentence(sentence, term, replacement='_TERM_'):
+    """Replaces all variants of term with a replacement.
+
+        >>> s_clean, variants = clean_sentence("I've had a Déjà Vu!", "deja-vu")
+        >> s_clean
+        "I've had a _TERM_"
+        >> variants
+        ["Déjà Vu"]
+
+    Args:
+        sentence: str
+        term: str
+        replacement: str
+    Returns:
+        tuple -- Contains the cleaned sentence and all variants found.
+    """
+    variants = collect_variants(sentence, term)
+    s_clean = multiple_replace(sentence, {v: replacement for v in variants}) if variants else sentence
+    return s_clean, variants
+
+
 def merge_dict(target, *to_merge):
     """Merges dictionaries into a target. If keys already exist,
     only merges target if they are not falsey.
