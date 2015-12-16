@@ -36,4 +36,6 @@ def is_english(sentence):
     This method is a lot faster than detect_language since we only have to run this
     procedure for one language."""
     tokens = [t.lower() for t in word_tokenize(sentence)]
+    if not tokens:
+        return False
     return float(sum(w in STOPWORDS['english'] for w in tokens)) / len(tokens) >= 0.1
