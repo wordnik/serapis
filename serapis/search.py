@@ -73,7 +73,7 @@ def search_and_parse(search_func, term):
 
 def extract_wrapper(url_object, term):
     try:
-        result = PageRequest(url_object['url'], term).get_structured_page()
+        result = PageRequest(url_object['url'], term).structured
     except Exception:
         import traceback
         log.error("Failed to get page {} -- {}".format(url_object['url'], traceback.format_exc()))
