@@ -32,32 +32,23 @@ html_parser.body_width = 0
 
 class PageRequest(object):
     """
-    Request for single page
+    Requests and parses a single page.
 
-    initialize with param
-    `url` and `term`
-
-    returns attributes
-    .response
-    .structured
-
-        'url'
-        'html'
-        'text'
-        'title'
-        'author'
-        'date'
-
+    Properties:
+        structured: dict -- Contains term, url, doc, features, variants,
+                    sentences, author, and title of the page
+    Methods:
+        request_page -- Loads the page (automatically called by __init__)
+        parse_response -- parses the page (automatically called by __init__)
+        extract_sentences -- sets self.sentences and self.variants
+        get_meta -- sets self.title and self.author from html
+        get_html_features -- sets self.features from html
     """
 
     OPENING_QUOTE = '|'.join(("\"", "'", "&quot;", "“", "&ldquo;", "‘", "&lsquo;", "«", "&laquo;", "‹", "&lsaquo;", "„", "&bdquo;", "‚", "&sbquo;"))
     CLOSING_QUOTE = '|'.join(("'", "&quot;", "”", "&rdquo;", "’", "&rsquo;", "»", "&raquo;", "›", "&rsaquo;", "“", "&ldquo;", "‘", "&lsquo;"))
 
     def request_page(self):
-        """
-        Returns a utf-8 encoded string
-
-        """
         try:
             self.response = requests.get(self.url, timeout=3)
             return self.response
@@ -100,17 +91,9 @@ class PageRequest(object):
                             })
         return " ".join(doc)
 
-    def get_meta(self):
+    def get_meta(self, page_html):
         """
-        Scan meta tags for keys: 'title', 'author', 'date'
-
-        If 'parsely-page' attribute exists, use those values
-
-        Currently arbitrarily returns the first found value for each key
-
-        TODO
-        - Metadata is sometimes in XML <PageMap> object
-
+        Scan meta tags of given html title and author.
         """
         # Common ways to encode authorship information
         prop_names = {
@@ -120,29 +103,21 @@ class PageRequest(object):
         }
         authors = []
 
-        tree = etree.HTML(self.response.text)  # TODO may change this to response.content, access as bytes
+        tree = etree.HTML(page_html)  # TODO may change this to response.content, access as bytes
         for prop, value in prop_names.items():
             tags = tree.xpath("//meta[@{}='{}']".format(prop, value))
             authors.extend([tag.attrib.get('content') for tag in tags])
 
         # Pick the first author that looks reasonable
         authors = filter(lambda author: author and not author.startswith("http"), authors)
-        author = authors[0] if authors else None
+        self.author = authors[0] if authors else None
 
         title_tags = tree.xpath("//title")
-        title = title_tags[0].text if title_tags else None
-
-        return {
-            'author': author,
-            'title': title
-        }
+        self.title = title_tags[0].text if title_tags else None
 
     def get_html_features(self, html):
         """Detects whether the search term exists is highlighted (bolded, emphasised) or
         in quotes. Needs to be called after self.request_page.
-
-        Returns:
-            dict -- dict of bools for different features.
         """
         if not self.term:
             return None
@@ -153,98 +128,91 @@ class PageRequest(object):
         highlight_re = r"<(em|i|b|strong|span)[^>]*> *{}[ ,:]*</\1>".format(minimal_term)
         quote_re = r"<({})[^>]*> *{}[ ,:]*</({})>".format(self.OPENING_QUOTE, minimal_term, self.CLOSING_QUOTE)
 
-        features = {
+        self.features = {
             "highlighted": bool(re.search(highlight_re, minimal_html, re.IGNORECASE)),
             "quotes": bool(re.search(quote_re, minimal_html, re.IGNORECASE)),
         }
-        return features
         
-    def get_structured_page(self):
+    def parse_response(self):
         """
         Returns elements extracted from html
 
         """
-        if not self.response:
-            return None
+        self.html = self.response.text
+        self.text = self.extract_sentences(html_parser.handle(self.html))
+        self.get_html_features(self.html)
+        self.get_meta(self.html)
 
-        html = self.response.text
-        self.text = self.extract_sentences(html_parser.handle(html))
-        self.features = self.get_html_features(html)
-
-        self.structured = {
+    @property
+    def structured(self):
+        structure = {
             "term": self.term,
             "url": self.url,
             "doc": self.text,
             "features": self.features,
             "variants": list(self.variants),  # Sets are not JSON serializable
-            "sentences": self.sentences
+            "sentences": self.sentences,
+            "author": self.author,
+            "title": self.title
         }
 
-        self.structured.update(self.get_meta())
-
         if config.save_html:
-            self.structured["html"] = html
-
-        return self.structured
+            structure["html"] = self.html
+        return structure
 
     def __init__(self, url, term, run=True):
+        """
+        Args:
+            url: str
+            term: str
+            run: bool -- If False, does not automatically request page
+        """
         self.url = url
         self.term = term
         self.variants = set()
         self.sentences = []
+        self.text = ""
+        self.html = ""
+        self.features = {}
+        self.author = None
+        self.title = None
+
         if run:
             self.response = self.request_page()
-            self.structured = self.get_structured_page()
+            self.parse_response()
 
 
-class DiffbotRequest:
+class DiffbotRequest(PageRequest):
     """
-    Request for single page from Diffbot
-
-    takes
-    `url`
-
-    Diffbot API returns json object
-
+    Uses Diffbot to parse a page. Same interface as PageRequest.
     """
-    def get_article(self):
-        self.params['url'] = self.url
-        self.response = requests.get(self.diff_article_api, params=self.params).json()
-        if not self.response.get('objects'):
-            if self.response.get('error'):
-                print("Response Error '{}' (code: {})".format(self.response['error'], self.response['errorCode']))
-            else:
-                print("NO RESULTS")
-                raise Exception
+
+    diff_article_api = 'http://api.diffbot.com/v3/article'
+
+    def request_page(self):
+        params = {
+            'token': config.credentials['diffbot'],
+            'url': self.url,
+            'mode': 'article',
+            'discussion': False
+        }
+
+        try:
+            self.response = requests.get(self.diff_article_api, params=params).json()
+            assert 'objects' in self.response
+            assert self.response['objects']
+        except:
+            log.error("Failed to return page for url: %s" % self.url)
+            return None
 
         return self.response
 
-    def get_structured_response(self):
-        self.params['url'] = self.url
-        self.response = self.get_article(self.url)
+    def parse_response(self):
+        obj = self.response['objects'][0]
+        self.text = obj.get('text')
+        self.html = obj.get('html')
+        self.author = obj.get('author')
+        self.title = obj.get('title')
 
-        results = list()
-        for object in self.response.get('objects', []):
-            if object.get('text'):
-                result = {
-                    "title": object.get('title'),
-                    "url": object.get('pageUrl'),
-                    "author": object.get('author'),
-                    "html": object.get('html'),
-                    "tags": object.get('tags'),
-                    "doc": object.get('text'),
-                    # "date": parse_date(object.get('date', '')).isoformat(),
-                }
-                results.append(result)
-        self.structured = results
-        return results
-
-    def __init__(self, url):
-        self.url = url
-        self.response = None
-        self.structured = None
-        self.diff_article_api = 'http://api.diffbot.com/v3/article'
-        self.params = {
-            'token': config.credentials['diffbot'],
-            'url': self.url
-        }
+        self.extract_sentences(self.html)
+        self.get_html_features(self.html)
