@@ -19,8 +19,10 @@ import argparse
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
-from serapis import util
 from serapis.config import config
+from add import add
+from serapis.qualify_word import clean_and_qualify
+from serapis.util import slugify
 
 tasks_map = {}
 
@@ -29,21 +31,45 @@ class TaskHandler(FileSystemEventHandler):
 
     def on_created(self, event):
         try:
-            task, slug, hsh = event.src_path.split("/")[-1].split(":")
-        except ValueError:
-            print("ERROR: Invalid format for {}".format(event.src_path.split("/")[-1]))
-            return
-                        
-        print("Calling {} for {}".format(task, slug))
-        with open(event.src_path) as f:
-            message = json.load(f)
-            tasks_map[task](message)
-        if config.remove_messages:
-            os.remove(event.src_path)
+            filename = event.src_path.split("/")[-1]
+            if filename.endswith(".wordlist"):
+                self.add_words(event.src_path)
+            elif filename.count(":") == 2:
+                self.run_task(event.src_path)
+            else:
+                raise ValueError
+        except:
+            print("ERROR: Invalid format for {}".format(filename))
 
     def on_modified(self, event):
         if not os.path.isdir(event.src_path):
             self.on_created(event)
+
+    def add_words(self, filename):
+        print("Adding words from {}...".format(filename))
+        added, skipped = set(), []
+        with open(filename) as f:
+            for term in f.readlines():
+                term = clean_and_qualify(term)
+                if term:
+                    slug = slugify(term)
+                    if slug not in added:
+                        added.add(slug)
+                        add(term)
+                    else:
+                        skipped.append(term)
+                else:
+                    skipped.append(term)
+        print "Added {} terms, skipped {}".format(len(added), len(skipped))
+
+    def run_task(self, filename):
+        task, slug, hsh = filename.split("/")[-1].split(":")
+        print("Calling {} for {}".format(task, slug))
+        with open(filename) as f:
+            message = json.load(f)
+            tasks_map[task](message)
+        if config.remove_messages:
+            os.remove(filename)
 
 
 def watch():
@@ -66,14 +92,6 @@ def watch():
     except KeyboardInterrupt:
         observer.stop()
     observer.join()
-
-
-def add(word):
-    message = {'word': args.word, 'hashslug': util.hashslug(args.word)}
-    task_name = "{}:{}".format('search', message['hashslug'])
-    with open(os.path.join(config.local_s3, task_name), 'w') as f:
-        json.dump(message, f)
-    print("Added task '{}'".format(task_name))
 
 
 if __name__ == "__main__":
