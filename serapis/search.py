@@ -100,6 +100,7 @@ def search_diffbot_cache(term):
             result = {
                 "title": object.get('title'),
                 "url": object.get('pageUrl'),
+                'search_provider': 'diffbot',
                 "author": object.get('author'),
                 "date": parse_date(object.get('date', '')).isoformat(),
                 "doc": object.get('text'),
@@ -124,6 +125,7 @@ def search_duckduckgo(term):
         result.append({
             'title': req['Heading'],
             'url': req['AbstractURL'],
+            'search_provider': 'duckduckgo',
             'author': None,
             'date': None,
             'source': req['AbstractSource'],
@@ -138,6 +140,7 @@ def search_duckduckgo(term):
             'title': req['Heading'],
             'url': req['DefinitionURL'],
             'source': req['DefinitionSource'],
+            'search_provider': 'duckduckgo',
             'author': None,
             'date': None,
             'doc': req['Definition'],
@@ -177,6 +180,7 @@ def search_google(term):
         if qualify_search_result(url_object['url'], url_object['text'], date):
             result.append({
                 'url': url_object['url'],
+                'search_provider': 'google',
                 'date': date,
                 'summary': url_object['text'],
                 'title': url_object['title']
