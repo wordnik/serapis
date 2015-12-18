@@ -20,6 +20,7 @@ import traceback
 import functools32 as functools
 import logging
 import unicodecsv as csv
+import datetime
 log = logging.getLogger('serapis.search')
 
 
@@ -89,6 +90,15 @@ def clean_sentence(sentence, term, replacement='_TERM_'):
     variants = collect_variants(sentence, term)
     s_clean = multiple_replace(sentence, {v: replacement for v in variants}) if variants else sentence
     return s_clean, variants
+
+
+def now():
+    """Returns the current date and time in ISO8601 format.
+
+    Returns:
+        str -- e.g. '2015-12-17T20:21:10'
+    """
+    return datetime.datetime.now().replace(microsecond=0,).isoformat()
 
 
 def merge_dict(target, *to_merge):
