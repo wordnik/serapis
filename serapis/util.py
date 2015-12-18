@@ -19,6 +19,7 @@ import threading
 import traceback
 import functools32 as functools
 import logging
+import unicodecsv as csv
 log = logging.getLogger('serapis.search')
 
 
@@ -222,6 +223,34 @@ def hashslug(word):
         slugify(word),
         hashlib.md5(word.encode('utf-8')).hexdigest()[:6]
     )
+
+
+def read_csv(filename, skip_header=False):
+    """Reads a CSV file and converts it into Unicode.
+
+    Args:
+        filename: str
+        skip_header: bool -- If true, ignores the first row.
+    """
+    with open(filename, 'rb') as f:
+        reader = csv.reader(f)
+        rows = list(reader)
+        return rows[1:] if skip_header else rows
+
+
+def write_csv(rows, filename, header=None):
+    """Writes a CSV file, encoding all text into UTF-8.
+
+    Args:
+        rows: iterable -- list of tuples or lists
+        filename: str -- output filename
+        header: tuple -- optional header row
+    """
+    with open(filename, 'wb') as f:
+        writer = csv.writer(f)
+        if header:
+                writer.writerow(header)
+        writer.writerows(rows)
 
 
 def batch(generator, batch_size=5):
