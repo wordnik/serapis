@@ -18,6 +18,7 @@ import logging
 from .config import config
 from serapis.search import search_all
 from serapis.annotate import batch_tag_sentences
+from serapis.util import now
 import codecs
 
 
@@ -89,6 +90,7 @@ def search(message):
     """
     word = message['word']
     message['urls'] = search_all(word)
+    message['crawl_date'] = now()
     return write_message('detect', message)
 
 

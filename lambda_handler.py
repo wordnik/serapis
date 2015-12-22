@@ -14,9 +14,10 @@ __email__ = "manuel@summer.ai"
 import boto3
 import json
 
-from serapis.config import config
-config.load()  # Needs to be loaded before we import tasks
 from serapis import tasks
+from serapis.config import config
+from serapis.qualify_word import clean_and_qualify
+from serapis.util import hashslug
 
 print(json.dumps(config.keys))
 
@@ -38,16 +39,42 @@ tasks_map = {
 }
 
 
+def run_task(bucket, key):
+    task, _, _ = key.split(":")
+    contents = s3.Object(bucket, key).get()
+    print(contents)
+    message = json.loads(contents['Body'].read())
+    tasks_map[task](message)
+
+
+def add_words(bucket, key):
+    contents = s3.Object(bucket, key).get()
+    words = contents['Body'].read().splitlines()
+    added, skipped = set(), []
+    for term in words:
+        term = clean_and_qualify(term)
+        if term:
+            slug = hashslug(term)
+            if slug not in added:
+                added.add(slug)
+                message = {'word': term, 'hashslug': slug}
+                tasks.write_message('search', message)
+            else:
+                skipped.append(term)
+        else:
+            skipped.append(term)
+    print "Added {} terms, skipped {}".format(len(added), len(skipped))
+
+
 def handler(event, context):
     for record in event['Records']:
         bucket = record['s3']['bucket']['name']
         key = record['s3']['object']['key']
         print(json.dumps(event))
-        key = key.replace("%3A", ":")  # That's my URLDeode.
-        task, _, _ = key.split(":")
-        contents = s3.Object(bucket, key).get()
-        print(contents)
-        message = json.loads(contents['Body'].read())
-
-        # Execute task
-        tasks_map[task](message)
+        key = key.replace("%3A", ":")  # That's my URLDecode.
+        if key.count(":") == 2:
+            return run_task(bucket, key)
+        elif key.endswith(".wordlist"):
+            return add_words(bucket, key)
+        else:
+            print "Don't know what to do with '{}'".format(key)
