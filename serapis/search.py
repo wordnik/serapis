@@ -39,7 +39,7 @@ def search_all(term):
     """
     log.info("Sarching for '{}'".format(term))
     ddg = async(search_duckduckgo, term)
-    search = async(search_and_parse, serach_bing, term)
+    search = async(search_and_parse, search_bing, term)
 
     while not (ddg.done and search.done):
         time.sleep(.5)
@@ -165,6 +165,7 @@ def qualify_search_result(url, text, date=None):
         if domain in url:
             return False
     if text and not is_english(text):
+        log.info("Excluded non-english result '{}'".format(text))
         return False
     parts = urlparse.urlparse(url)
     if parts.path.endswith(".pdf"):
@@ -189,7 +190,15 @@ def search_google(term):
     return result
 
 
-def serach_bing(term):
+def search_bing(term):
+    """
+    Uses the BING Api to search for a term.
+    
+    Args:
+        term: str
+    Returns
+        list -- up to 50 url_objects.
+    """
     result = []
     # For Bing, Username = Password = Key
     auth = requests.auth.HTTPBasicAuth(config.credentials['bing'], config.credentials['bing'])
@@ -197,9 +206,10 @@ def serach_bing(term):
     try:
         # Microsoft is still terrible at standards such as basic decency and wants us
         # to wrap SOME query parameters into single quotes but not others.
+        # Adult: Moderate filters graphically explicit content, but not text smut
         r = requests.post(
             'https://api.datamarket.azure.com/Bing/Search/Web',
-            params={'Query': "'{}'".format(term), "$format": "JSON", "Market": "'en-US'"},
+            params={'Query': "'{}'".format(term), "$format": "JSON", "Market": "'en-US'", "Options": "'DisableLocationDetection'", "Adult": "'Moderate'"},
             auth=auth, headers=headers
         )
         data = r.json().get('d', {}).get('results', [])
