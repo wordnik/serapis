@@ -16,6 +16,7 @@ import requests
 from lxml import etree
 from .config import config  # Make sure to use absolute imports here
 import html2text
+from bs4 import BeautifulSoup
 from serapis.util import squashed
 from serapis.language import is_english
 from serapis.util import clean_sentence
@@ -26,7 +27,8 @@ from nltk.tokenize import sent_tokenize
 
 log = logging.getLogger('serapis.extract')
 html_parser = html2text.HTML2Text()
-html_parser.ignore_links = html_parser.ignore_images = html_parser.ignore_emphasis = True
+for option in ('ignore_links', 'ignore_images', 'ignore_emphasis', 'bypass_tables', 'unicode_snob', 'ignore_anchors'):
+    setattr(html_parser, option, True)
 html_parser.body_width = 0
 
 
@@ -139,7 +141,16 @@ class PageRequest(object):
 
         """
         self.html = self.response.text
-        self.text = self.extract_sentences(html_parser.handle(self.html))
+        # Try Aaron's html2text first, and fall back on beautiful soup
+        try:
+            raw = html_parser.handle(self.html)
+        except:
+            log.info("Falling back on BeautifulSoup for '{}'".format(self.url))
+            soup = BeautifulSoup(self.html, 'lxml')
+            for el in soup(['head', 'script']) + soup(class_='comments') + soup(id="comments"):
+                el.extract()
+            raw = re.sub(r"\n+", "\n\n", soup.get_text())
+        self.text = self.extract_sentences(raw)
         self.get_html_features(self.html)
         self.get_meta(self.html)
 
