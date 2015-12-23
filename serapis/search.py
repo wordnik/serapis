@@ -34,8 +34,19 @@ def search_all(term):
         list -- List of url objects containing url, doc, author, and other keys.
     """
     log.info("Sarching for '{}'".format(term))
+
+    search_engine = {
+        'bing': search_bing,
+        'google': search_google
+    }.get(config.search_engine)
+
+    if not search_engine:
+        log.error("Invalid search engine '{}' defined in config".format(config.search_engine))
+        return []
+
     ddg = async(search_duckduckgo, term)
-    search = async(search_and_parse, search_bing, term)
+
+    search = async(search_and_parse, search_engine, term)
 
     while not (ddg.done and search.done):
         time.sleep(.5)
