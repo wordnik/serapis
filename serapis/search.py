@@ -12,20 +12,16 @@ __date__ = "2015-11-20"
 __email__ = "manuel@summer.ai"
 
 import requests
-import pattern
 from dateutil.parser import parse as parse_date
 from .config import config  # Make sure to use absolute imports here
 from serapis.language import is_english
 from serapis.extract import PageRequest
-import pattern.web
 from serapis.util import AsynchronousRequest as async
 from serapis.util import merge_dict
 import time
 import logging
 import urlparse
 log = logging.getLogger('serapis.search')
-
-GOOGLE = pattern.web.Google(license=config.credentials.get('google'), language='en')
 
 
 def search_all(term):
@@ -175,15 +171,23 @@ def qualify_search_result(url, text, date=None):
 
 def search_google(term):
     result = []
-    response = GOOGLE.search('"{}"'.format(term), type=pattern.web.SEARCH)
-    for search_result in response:
-        date = parse_date(search_result.get('date')).isoformat()
-        if qualify_search_result(search_result['url'], search_result['text'], date):
+    try:
+        r = requests.get(
+            'https://www.googleapis.com/customsearch/v1',
+            params={"key": config.credentials['google'], "cx": config.google_cse, 'q': term, "lr": "lang_en"}
+        )
+        data = r.json().get('items', [])
+    except:
+        log.error("GOOGLE search failed for '{}' (Status: {} / {})".format(term, r.status_code, r.reason))
+        return result
+
+    for search_result in data:
+        if qualify_search_result(search_result['link'], search_result['snippet']):
             result.append({
-                'url': search_result['url'],
+                'url': search_result['link'],
                 'search_provider': 'google',
-                'date': date,
-                'summary': search_result['text'],
+                'date': None,
+                'summary': search_result['snippet'],
                 'title': search_result['title']
             })
     log.info("Searching Google for '{}' returned {} results".format(term, len(result)))
@@ -193,7 +197,7 @@ def search_google(term):
 def search_bing(term):
     """
     Uses the BING Api to search for a term.
-    
+
     Args:
         term: str
     Returns
