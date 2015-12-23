@@ -12,20 +12,16 @@ __date__ = "2015-11-20"
 __email__ = "manuel@summer.ai"
 
 import requests
-import pattern
 from dateutil.parser import parse as parse_date
 from .config import config  # Make sure to use absolute imports here
 from serapis.language import is_english
 from serapis.extract import PageRequest
-import pattern.web
 from serapis.util import AsynchronousRequest as async
 from serapis.util import merge_dict
 import time
 import logging
 import urlparse
 log = logging.getLogger('serapis.search')
-
-GOOGLE = pattern.web.Google(license=config.credentials.get('google'), language='en')
 
 
 def search_all(term):
@@ -38,8 +34,19 @@ def search_all(term):
         list -- List of url objects containing url, doc, author, and other keys.
     """
     log.info("Sarching for '{}'".format(term))
+
+    search_engine = {
+        'bing': search_bing,
+        'google': search_google
+    }.get(config.search_engine)
+
+    if not search_engine:
+        log.error("Invalid search engine '{}' defined in config".format(config.search_engine))
+        return []
+
     ddg = async(search_duckduckgo, term)
-    search = async(search_and_parse, search_google, term)
+
+    search = async(search_and_parse, search_engine, term)
 
     while not (ddg.done and search.done):
         time.sleep(.5)
@@ -151,7 +158,7 @@ def search_duckduckgo(term):
     return result
 
 
-def qualify_search_result(url, text, date):
+def qualify_search_result(url, text, date=None):
     """Heuristically determines if a search result is worth parsing.
 
     Args:
@@ -165,6 +172,7 @@ def qualify_search_result(url, text, date):
         if domain in url:
             return False
     if text and not is_english(text):
+        log.info("Excluded non-english result '{}'".format(text))
         return False
     parts = urlparse.urlparse(url)
     if parts.path.endswith(".pdf"):
@@ -174,16 +182,63 @@ def qualify_search_result(url, text, date):
 
 def search_google(term):
     result = []
-    response = GOOGLE.search('"{}"'.format(term), type=pattern.web.SEARCH)
-    for url_object in response:
-        date = parse_date(url_object.get('date')).isoformat()
-        if qualify_search_result(url_object['url'], url_object['text'], date):
+    try:
+        r = requests.get(
+            'https://www.googleapis.com/customsearch/v1',
+            params={"key": config.credentials['google'], "cx": config.google_cse, 'q': term, "lr": "lang_en"}
+        )
+        data = r.json().get('items', [])
+    except:
+        log.error("GOOGLE search failed for '{}' (Status: {} / {})".format(term, r.status_code, r.reason))
+        return result
+
+    for search_result in data:
+        if qualify_search_result(search_result['link'], search_result['snippet']):
             result.append({
-                'url': url_object['url'],
+                'url': search_result['link'],
                 'search_provider': 'google',
-                'date': date,
-                'summary': url_object['text'],
-                'title': url_object['title']
+                'date': None,
+                'summary': search_result['snippet'],
+                'title': search_result['title']
             })
     log.info("Searching Google for '{}' returned {} results".format(term, len(result)))
+    return result
+
+
+def search_bing(term):
+    """
+    Uses the BING Api to search for a term.
+
+    Args:
+        term: str
+    Returns
+        list -- up to 50 url_objects.
+    """
+    result = []
+    # For Bing, Username = Password = Key
+    auth = requests.auth.HTTPBasicAuth(config.credentials['bing'], config.credentials['bing'])
+    headers = {'User-Agent': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; Trident/4.0; FDM; .NET CLR 2.0.50727; InfoPath.2; .NET CLR 1.1.4322)'}
+    try:
+        # Microsoft is still terrible at standards such as basic decency and wants us
+        # to wrap SOME query parameters into single quotes but not others.
+        # Adult: Moderate filters graphically explicit content, but not text smut
+        r = requests.post(
+            'https://api.datamarket.azure.com/Bing/Search/Web',
+            params={'Query': "'{}'".format(term), "$format": "JSON", "Market": "'en-US'", "Options": "'DisableLocationDetection'", "Adult": "'Moderate'"},
+            auth=auth, headers=headers
+        )
+        data = r.json().get('d', {}).get('results', [])
+    except:
+        log.error("BING search failed for '{}' (Status: {} / {})".format(term, r.status_code, r.reason))
+        return result
+    for search_result in data:
+        if qualify_search_result(search_result['Url'], search_result['Description']):
+            result.append({
+                'url': search_result['Url'],
+                'search_provider': 'bing',
+                'date': None,
+                'summary': search_result['Description'],
+                'title': search_result['Title']
+            })
+    log.info("Searching Bing for '{}' returned {} results (out of {})".format(term, len(result), len(data)))
     return result
