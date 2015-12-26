@@ -1,10 +1,15 @@
 dependencies:
+    pre:
+        - sudo apt-get update
+        - sudo apt-get install -y python-scipy
     override:
         - pip install -r requirements.txt
         - pip install -r requirements-dev.txt
     post:
         - python -m nltk.downloader punkt
         - python -m textblob.download_corpora
+        - pip --version
+        - pip freeze
 test:
     override:
         - mkdir -p $CIRCLE_TEST_REPORTS/pytest
