@@ -45,50 +45,29 @@ def vectorizer_to_str(obj):
 
 
 class PackagedEstimator(object):
-    def __init__(
-        self,
-        vectorizer, estimator, x_train, y_train, x_test, y_test, feature_names=None,
-        *args, **kwargs
-    ):
-        """
-        Package an estimator with a vectorizer for a predictive package.
+    """
+    Package an estimator with a vectorizer for a predictive package.
 
-        >>> PackagedEstimator(vectorizer, estimator, x_train, y_train, x_test, y_test, feature_names)
-        
-        Stores to local directory and S3
-        Model identified by `model_bucket` attr
+    >>> PackagedEstimator(vectorizer, estimator, x_train, y_train, x_test, y_test, feature_names)
+    
+    Stores to local directory and S3
+    Model identified by `model_bucket` attr
 
-        NB: Does _not_ employ versioning, assumes single model (identified by s3 bucket)
+    NB: Does _not_ employ versioning, assumes single model (identified by s3 bucket)
 
-        """
-        self._vectorizer = vectorizer
-        self._estimator = estimator
-        self._data = {
-            'x_train':      x_train,
-            'x_train_vec':  vectorizer.transform(x_test),
-            'y_train':      y_train,
-            'x_test':       x_test,
-            'x_test_vec':   vectorizer.transform(x_test),
-            'y_test':       y_test,
-        }
-        precision, recall, fscore, support = precision_recall_fscore_support(
-            y_test,
-            estimator.predict(self._data['x_train_vec'])
-        )
-        now = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+    """
 
-        self.metadata = {
-            'vectorizer':    vectorizer_to_str(vectorizer),
-            'model':         str(estimator),
-            'created_at':    now,
-            'feature_names': feature_names,
-            'git_hash':      get_git_hash(),
-            'precision':     [float(p) for p in precision],
-            'recall':        [float(r) for r in recall],
-            'fscore':        [float(f) for f in fscore],
-            'support':       [int(s) for s in support],
-        }
-        log.info('Initialized PackagedEstimator %s' % now)
+    @classmethod
+    def get_model(cls, model_bucket='wordnik.1m.frd_models'):
+        """ Retrieve the model from s3 """
+        filename = 'temp_models/estimator.zip'
+        try:
+            s3.download_file(model_bucket, 'estimator.zip', filename)
+            return cls.from_file(filename)
+        except Exception, e:
+            message = "Something went wrong pulling from s3: %s %s" % (e, type(e))
+            log.warning(message)
+            raise Exception(message)
 
     @classmethod
     def from_file(cls, f):
@@ -162,14 +141,37 @@ class PackagedEstimator(object):
             log.warning(message)
             raise Exception(message)
 
-    def get_model(self, model_bucket='wordnik.1m.frd_models'):
-        """ Retrieve the model from s3 """
-        filename = 'temp_models/estimator.zip'
-        try:
-            s3.download_file(model_bucket, 'estimator.zip', filename)
-            return self.from_file(filename)
-        except Exception, e:
-            message = "Something went wrong pulling from s3: %s %s" % (e, type(e))
-            log.warning(message)
-            raise Exception(message)
+    def __init__(
+        self,
+        vectorizer, estimator, x_train, y_train, x_test, y_test, feature_names=None,
+        *args, **kwargs
+    ):
+        if estimator:  # we're initializing and uploading an estimator
+            self._vectorizer = vectorizer
+            self._estimator = estimator
+            self._data = {
+                'x_train':       x_train,
+                'x_train_vec':   vectorizer.transform(x_test),
+                'y_train':       y_train,
+                'x_test':        x_test,
+                'x_test_vec':    vectorizer.transform(x_test),
+                'y_test':        y_test,
+            }
+            precision, recall, fscore, support = precision_recall_fscore_support(
+                y_test,
+                estimator.predict(self._data['x_train_vec'])
+            )
+            now = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
 
+            self.metadata = {
+                'vectorizer':    vectorizer_to_str(vectorizer),
+                'model':         str(estimator),
+                'created_at':    now,
+                'feature_names': feature_names,
+                'git_hash':      get_git_hash(),
+                'precision':     [float(p) for p in precision],
+                'recall':        [float(r) for r in recall],
+                'fscore':        [float(f) for f in fscore],
+                'support':       [int(s) for s in support],
+            }
+            log.info('Initialized PackagedEstimator %s' % now)
