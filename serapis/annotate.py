@@ -16,8 +16,11 @@ from .readability import Readability
 
 
 def batch_tag_sentences(message_dict):
-    """Uses a more efficient way of tagging all sentences for a given
-    message at once."""
+    """
+    Uses a more efficient way of tagging all sentences for a given
+    message at once.
+
+    """
     num_sentences = [len(page['sentences']) for page in message_dict['urls']]
     all_sentences = [word_tokenize(s['s_clean']) for page in message_dict['urls'] for s in page['sentences']]
     all_tags = pos_tag_sents(all_sentences)
@@ -30,8 +33,30 @@ def batch_tag_sentences(message_dict):
             message_dict['urls'][page_index]['sentences'][sentence_index]['pos_tags'] = ' '.join(pos_tags)
 
 
+def annotate_single_sentence(sentence):
+    tags = pos_tag(word_tokenize(sentence))
+    pos_tags = ['/'.join(b) for b in tags]
+    return " ".join(pos_tags)
+
+
+def annotate_pos_with_term(sentence):
+    """
+    POS-tag single sentence while preserving _TERM_
+
+    """
+    pos_term = []
+    tags = pos_tag(word_tokenize(sentence))
+    for tag in tags:
+        if tag[0] == '_TERM_':
+            pos_term.append('_TERM_')
+        else:
+            pos_term.append(tag[1])
+    return pos_term
+
+
 def annotate_sentence(sentence_dict, term):
-    """Annotates a sentence object from a message with Penn Treebank POS tags.
+    """
+    Annotates a sentence object from a message with Penn Treebank POS tags.
 
     Args:
         sentence_dict: dict -- Must contain 's' and 's_clean', which is the
@@ -39,6 +64,7 @@ def annotate_sentence(sentence_dict, term):
                        replaced with '_TERM-'
     Returns:
         dict -- updated sentence_dict with 'pos_tags' field.
+
     """
     tags = pos_tag(word_tokenize(sentence_dict['s_clean']))
     pos_tags = ['/'.join(b) for b in tags]
