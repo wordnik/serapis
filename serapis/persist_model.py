@@ -49,6 +49,9 @@ class PackagedEstimator(object):
     Package an estimator with a vectorizer for a predictive package.
 
     >>> PackagedEstimator(vectorizer, estimator, x_train, y_train, x_test, y_test, feature_names)
+
+    .save (for use during model development)
+    .get_model (for use in production)
     
     Stores to local directory and S3
     Model identified by `model_bucket` attr
