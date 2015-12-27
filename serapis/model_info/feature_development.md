@@ -57,12 +57,4 @@ Alphabetical list of part-of-speech tags used in the [Penn Treebank Project](htt
 | 33. | WDT | Wh-determiner |
 | 34. | WP | Wh-pronoun |
 | 35. | WP$ | Possessive wh-pronoun |
-<<<<<<< HEAD
-<<<<<<< HEAD
 | 36. | WRB | Wh-adverb |
-=======
-| 36. | WRB | Wh-adverb |
->>>>>>> 368ae98... documentation
-=======
-| 36. | WRB | Wh-adverb |
->>>>>>> b16835f... Update feature_development.md
