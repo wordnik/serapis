@@ -13,6 +13,9 @@ __email__ = "clare@summer.ai"
 
 from nltk import pos_tag, word_tokenize, pos_tag_sents
 from .readability import Readability
+import logging
+
+log = logging.getLogger('serapis.annotate')
 
 
 def batch_tag_sentences(message_dict):
@@ -40,10 +43,7 @@ def annotate_single_sentence(sentence):
 
 
 def annotate_pos_with_term(sentence):
-    """
-    POS-tag single sentence while preserving _TERM_
-
-    """
+    """ POS-tag single sentence while preserving _TERM_ """
     pos_term = []
     tags = pos_tag(word_tokenize(sentence))
     for tag in tags:
@@ -52,6 +52,27 @@ def annotate_pos_with_term(sentence):
         else:
             pos_term.append(tag[1])
     return pos_term
+
+
+def get_pos_term_context(sentence, ngrams=5):
+    """ 
+    Returns just POS tags while preserving _TERM_
+
+    Returns substring context around _TERM_ 
+    as defined by number of `ngrams` preceding and following _TERM_
+
+    """
+    s = sentence.split()
+    try:
+        loc = s.index("_TERM_")
+    except ValueError:
+        return ' '
+        log.warning("_TERM_ not found in pos tags.")
+    back = loc - ngrams + 1
+    if back < 0:  # we don't want negative indicies
+        back = 0
+    forward = loc + ngrams - 1
+    return ' '.join(s[back:forward])
 
 
 def annotate_sentence(sentence_dict, term):
