@@ -44,11 +44,11 @@ def vectorizer_to_str(obj):
     return str(clean_dict)
 
 
-class PackagedEstimator(object):
+class PackagedModel(object):
     """
-    Package an estimator with a vectorizer for a predictive package.
+    Package an model with a vectorizer for a predictive package.
 
-    >>> PackagedEstimator(vectorizer, estimator, x_train, y_train, x_test, y_test, feature_names)
+    >>> PackagedModel(vectorizer, model, x_train, y_train, x_test, y_test, feature_names)
 
     .save (for use during model development)
     .get_model (for use in production)
@@ -63,9 +63,9 @@ class PackagedEstimator(object):
     @classmethod
     def get_model(cls, model_bucket='wordnik.1m.frd_models'):
         """ Retrieve the model from s3 """
-        filename = 'temp_models/estimator.zip'
+        filename = 'temp_models/model.zip'
         try:
-            s3.download_file(model_bucket, 'estimator.zip', filename)
+            s3.download_file(model_bucket, 'model.zip', filename)
             return cls.from_file(filename)
         except Exception, e:
             message = "Something went wrong pulling from s3: %s %s" % (e, type(e))
@@ -74,7 +74,7 @@ class PackagedEstimator(object):
 
     @classmethod
     def from_file(cls, f):
-        """ Given filename, read file and load estimator """
+        """ Given filename, read file and load model """
         zfile = zipfile.ZipFile(f)
         extract_dir = tempfile.mkdtemp()
         try:
@@ -88,7 +88,7 @@ class PackagedEstimator(object):
                     data[filename[:-4]] = joblib.load(filename_full)
             return cls(
                 vectorizer=data['vectorizer'],
-                estimator=data['estimator'],
+                model=data['model'],
                 x_train=data['x_train'],
                 y_train=data['y_train'],
                 x_test=data['x_test'],
@@ -112,7 +112,7 @@ class PackagedEstimator(object):
 
         """
         if not filename:
-            filename = 'estimator_' + datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+            filename = 'model_' + datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
         filename += '.zip'
 
         try:
@@ -123,7 +123,7 @@ class PackagedEstimator(object):
         archive_name = os.path.join(path, filename)
         # joblib requires dump to disk
         joblib.dump(self._vectorizer, os.path.join(path, 'vectorizer.bin'), compress=9)
-        joblib.dump(self._estimator, os.path.join(path, 'estimator.bin'), compress=9)
+        joblib.dump(self._model, os.path.join(path, 'model.bin'), compress=9)
         joblib.dump(self._data['x_train'], os.path.join(path, 'x_train.bin'), compress=9)
         joblib.dump(self._data['y_train'], os.path.join(path, 'y_train.bin'), compress=9)
         joblib.dump(self._data['x_test'], os.path.join(path, 'x_test.bin'), compress=9)
@@ -133,12 +133,12 @@ class PackagedEstimator(object):
             f.write(json.dumps(self.metadata))
 
         with closing(zipfile.ZipFile(archive_name, 'w', zipfile.ZIP_DEFLATED)) as zfile:
-            for fn in ['vectorizer.bin', 'estimator.bin', 'x_train.bin', 'y_train.bin',
+            for fn in ['vectorizer.bin', 'model.bin', 'x_train.bin', 'y_train.bin',
                        'x_test.bin', 'y_test.bin', 'metadata.json']:
                 zfile.write(os.path.join(path, fn), fn)
         # Upload zipped file to S3
         try:
-            s3.upload_file(archive_name, model_bucket, 'estimator.zip')
+            s3.upload_file(archive_name, model_bucket, 'model.zip')
         except Exception, e:
             message = "Something went wrong pushing the zip to s3: %s %s" % (e, type(e))
             log.warning(message)
@@ -146,12 +146,12 @@ class PackagedEstimator(object):
 
     def __init__(
         self,
-        vectorizer, estimator, x_train, y_train, x_test, y_test, feature_names=None,
+        vectorizer, model, x_train, y_train, x_test, y_test, feature_names=None,
         *args, **kwargs
     ):
-        if estimator:  # we're initializing and uploading an estimator
+        if model:  # we're initializing and uploading an model
             self._vectorizer = vectorizer
-            self._estimator = estimator
+            self._model = model
             self._data = {
                 'x_train':       x_train,
                 'x_train_vec':   vectorizer.transform(x_test),
@@ -162,13 +162,13 @@ class PackagedEstimator(object):
             }
             precision, recall, fscore, support = precision_recall_fscore_support(
                 y_test,
-                estimator.predict(self._data['x_train_vec'])
+                model.predict(self._data['x_train_vec'])
             )
             now = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
 
             self.metadata = {
                 'vectorizer':    vectorizer_to_str(vectorizer),
-                'model':         str(estimator),
+                'model':         str(model),
                 'created_at':    now,
                 'feature_names': feature_names,
                 'git_hash':      get_git_hash(),
@@ -177,4 +177,4 @@ class PackagedEstimator(object):
                 'fscore':        [float(f) for f in fscore],
                 'support':       [int(s) for s in support],
             }
-            log.info('Initialized PackagedEstimator %s' % now)
+            log.info('Initialized PackagedModel %s' % now)
