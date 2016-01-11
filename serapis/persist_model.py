@@ -141,10 +141,10 @@ class PackagedModel(object):
 
     def __init__(
         self,
-        vectorizer, model, x_train, y_train, x_test, y_test, feature_names=None,
+        vectorizer, model, x_train, y_train, x_test, y_test, feature_names=None, metadata=None,
         *args, **kwargs
     ):
-        if model:  # we're initializing and uploading an model
+        if model:
             self._vectorizer = vectorizer
             self._model = model
             self._data = {
@@ -155,21 +155,23 @@ class PackagedModel(object):
                 'x_test_vec':    vectorizer.transform(x_test),
                 'y_test':        y_test,
             }
-            precision, recall, fscore, support = precision_recall_fscore_support(
-                y_test,
-                model.predict(self._data['x_train_vec'])
-            )
             now = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
 
-            self.metadata = {
-                'vectorizer':    vectorizer_to_str(vectorizer),
-                'model':         str(model),
-                'created_at':    now,
-                'feature_names': feature_names,
-                'git_hash':      get_git_hash(),
-                'precision':     [float(p) for p in precision],
-                'recall':        [float(r) for r in recall],
-                'fscore':        [float(f) for f in fscore],
-                'support':       [int(s) for s in support],
-            }
+            if not metadata:
+                precision, recall, fscore, support = precision_recall_fscore_support(
+                    y_test,
+                    model.predict(self._data['x_train_vec'])
+                )
+                self.metadata = {
+                    'vectorizer':    vectorizer_to_str(vectorizer),
+                    'model':         str(model),
+                    'created_at':    now,
+                    'feature_names': feature_names,
+                    'git_hash':      get_git_hash(),
+                    'precision':     [float(p) for p in precision],
+                    'recall':        [float(r) for r in recall],
+                    'fscore':        [float(f) for f in fscore],
+                    'support':       [int(s) for s in support],
+                }
+
             log.info('Initialized PackagedModel %s' % now)
