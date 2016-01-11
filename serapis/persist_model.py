@@ -29,12 +29,17 @@ from serapis.config import config
 
 log = logging.getLogger('serapis.persist_model')
 
+local_path = 'temp_models'
+model_filename = 'model_' + datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+
 s3 = boto3.client(
     's3',
     region_name=config.region,
     aws_access_key_id=config.credentials['aws_access_key'],
     aws_secret_access_key=config.credentials['aws_access_secret']
 )
+model_bucket = config.credentials['model_s3_bucket']
+model_zip_name = config.credentials['model_zip_name']
 
 
 def vectorizer_to_str(obj):
@@ -98,7 +103,7 @@ class PackagedModel(object):
         finally:
             shutil.rmtree(extract_dir)
 
-    def save(self, path='temp_models', model_bucket='wordnik.1m.frd_models', filename=None):
+    def save(self, local_path=local_path, model_bucket='wordnik.1m.frd_models', filename=model_filename):
         """
         Save the classifier under current path
 
@@ -111,34 +116,32 @@ class PackagedModel(object):
         No versioning employed in S3.
 
         """
-        if not filename:
-            filename = 'model_' + datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
         filename += '.zip'
 
         try:
-            os.makedirs(path)
+            os.makedirs(local_path)
         except OSError:  # directory exists, so we can use it
             pass
 
-        archive_name = os.path.join(path, filename)
+        archive_name = os.path.join(local_path, filename)
         # joblib requires dump to disk
-        joblib.dump(self._vectorizer, os.path.join(path, 'vectorizer.bin'), compress=9)
-        joblib.dump(self._model, os.path.join(path, 'model.bin'), compress=9)
-        joblib.dump(self._data['x_train'], os.path.join(path, 'x_train.bin'), compress=9)
-        joblib.dump(self._data['y_train'], os.path.join(path, 'y_train.bin'), compress=9)
-        joblib.dump(self._data['x_test'], os.path.join(path, 'x_test.bin'), compress=9)
-        joblib.dump(self._data['y_test'], os.path.join(path, 'y_test.bin'), compress=9)
+        joblib.dump(self._vectorizer, os.path.join(local_path, 'vectorizer.bin'), compress=9)
+        joblib.dump(self._model, os.path.join(local_path, 'model.bin'), compress=9)
+        joblib.dump(self._data['x_train'], os.path.join(local_path, 'x_train.bin'), compress=9)
+        joblib.dump(self._data['y_train'], os.path.join(local_path, 'y_train.bin'), compress=9)
+        joblib.dump(self._data['x_test'], os.path.join(local_path, 'x_test.bin'), compress=9)
+        joblib.dump(self._data['y_test'], os.path.join(local_path, 'y_test.bin'), compress=9)
 
-        with open(os.path.join(path, 'metadata.json'), 'wt') as f:
+        with open(os.path.join(local_path, 'metadata.json'), 'wt') as f:
             f.write(json.dumps(self.metadata))
 
         with closing(zipfile.ZipFile(archive_name, 'w', zipfile.ZIP_DEFLATED)) as zfile:
             for fn in ['vectorizer.bin', 'model.bin', 'x_train.bin', 'y_train.bin',
                        'x_test.bin', 'y_test.bin', 'metadata.json']:
-                zfile.write(os.path.join(path, fn), fn)
+                zfile.write(os.path.join(local_path, fn), fn)
         # Upload zipped file to S3
         try:
-            s3.upload_file(archive_name, model_bucket, 'model.zip')
+            s3.upload_file(archive_name, model_bucket, model_zip_name)
         except Exception, e:
             message = "Something went wrong pushing the zip to s3: %s %s" % (e, type(e))
             log.warning(message)
