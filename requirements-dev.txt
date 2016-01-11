@@ -13,3 +13,5 @@ boto3==1.2.2
 jupyter==1.0.0
 pandas==0.15.2
 awscli==1.9.21
+scipy==0.16.1
+scikitlearn==0.17
