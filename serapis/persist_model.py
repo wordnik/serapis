@@ -91,15 +91,7 @@ class PackagedModel(object):
                     data['metadata'] = json.loads(open(filename_full, 'rt').read())
                 else:
                     data[filename[:-4]] = joblib.load(filename_full)
-            return cls(
-                vectorizer=data['vectorizer'],
-                model=data['model'],
-                x_train=data['x_train'],
-                y_train=data['y_train'],
-                x_test=data['x_test'],
-                y_test=data['y_test'],
-                metadata=data['metadata'],
-            )
+            return cls(**data)
         finally:
             shutil.rmtree(extract_dir)
 
