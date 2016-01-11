@@ -66,7 +66,7 @@ class PackagedModel(object):
     """
 
     @classmethod
-    def get_model(cls, model_bucket='wordnik.1m.frd_models'):
+    def get_model(cls, model_bucket=model_bucket):
         """ Retrieve the model from s3 """
         filename = 'temp_models/model.zip'
         try:
@@ -95,7 +95,7 @@ class PackagedModel(object):
         finally:
             shutil.rmtree(extract_dir)
 
-    def save(self, local_path=local_path, model_bucket='wordnik.1m.frd_models', filename=model_filename):
+    def save(self, local_path=local_path, model_bucket=model_bucket, filename=model_filename):
         """
         Save the classifier under current path
 
