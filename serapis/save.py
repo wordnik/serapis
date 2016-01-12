@@ -74,7 +74,7 @@ def save_all(message):
     message['variants'] = collect_variants(message)
     for url_object in message['urls']:
         for sentence in url_object['sentences']:
-            if sentence.get('frd', 0) >= config.min_frd_rating:
+            if sentence.get('frd', 0) >= config.min_frd_prob:
                 result = assemble_result(message, url_object, sentence)
                 save_single(result)
 
@@ -95,3 +95,6 @@ def save_single(result):
             json.dump(result, f, indent=2)
     else:
         config.s3.Object(config.bucket, result_slug).put(Body=json.dumps(result))
+        if result['rating'] > config.min_frd_rating:
+            # @TODO save to ElasticSearch
+            pass

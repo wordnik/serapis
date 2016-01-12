@@ -1,4 +1,5 @@
 min_frd_rating: 0.75
+min_frd_prob: 0.75
 domains:
     - nytimes.com
     - theatlantic.com
