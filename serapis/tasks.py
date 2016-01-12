@@ -16,6 +16,7 @@ import json
 import logging
 from .config import config
 from serapis.search import search_all
+from serapis.save import save_all
 from serapis.annotate import batch_tag_sentences
 from serapis.util import now
 import codecs
@@ -133,15 +134,7 @@ def rate(message):
 
 def save(message):
     """
-    ...
+    Saves all words to the result bucket.
     """
-    if not config.save_messages:
-        # Write things locally!
-        resultfile = os.path.join(config.local_s3_results, message['hashslug'])
-        with open(resultfile, 'w') as f:
-            print("Saving results to '{}".format(resultfile))
-            json.dump(message, f, indent=2)
-    else:
-        # Just save it to the logs
-        print(json.dumps(message))
+    save_all(message)
     return message

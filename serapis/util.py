@@ -263,6 +263,19 @@ def write_csv(rows, filename, header=None):
         writer.writerows(rows)
 
 
+def numeric_hash(string, digest_size=4):
+    """
+    Returns an integer hash of a string.
+
+    Args:
+        string: str -- String to hash
+        digest_size: int -- Size of the digest in bytes. Max is 16.
+    Returns:
+        int
+    """
+    return int(hashlib.md5(string.encode("utf-8")).hexdigest()[:2 * digest_size], 16)
+
+
 def batch(generator, batch_size=5):
     """Wraps around a generator and yields results in batches.
 
