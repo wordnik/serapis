@@ -10,6 +10,7 @@ __date__ = "2015-11-09"
 __email__ = "manuel@summer.ai"
 
 import yaml
+import boto3
 import os
 from util import singleton
 
@@ -37,6 +38,23 @@ class Config(object):
     keys = {}
     config = None
 
+    @property
+    def s3(self):
+        if self._s3:
+            return self._s3
+
+        if "aws_access_key" in self.credentials:
+            self._s3 = boto3.resource(
+                's3',
+                region_name=self.region,
+                aws_access_key_id=self.credentials['aws_access_key'],
+                aws_secret_access_key=self.credentials['aws_access_secret']
+            )
+        else:
+            self._s3 = boto3.resource('s3', region_name=self.region)
+
+        return self._s3
+    
     def __getattr__(self, key):
         if not self.config:
             raise RuntimeError("Config is not loaded yet.")
@@ -44,6 +62,7 @@ class Config(object):
 
     def __init__(self, config='default'):
         self.config = config
+        self._s3 = None
         with open(abs_path("default")) as c:
             self.keys = yaml.load(c)
 

@@ -13,26 +13,15 @@ __email__ = "manuel@summer.ai"
 
 import os
 import json
-import boto3
 import logging
 from .config import config
 from serapis.search import search_all
+from serapis.save import save_all
 from serapis.annotate import batch_tag_sentences
 from serapis.util import now
 import codecs
 
-
 logging.basicConfig(filename='serapis.log', level=logging.INFO)
-
-if "aws_access_key" in config.credentials:
-    s3 = boto3.resource(
-        's3',
-        region_name=config.region,
-        aws_access_key_id=config.credentials['aws_access_key'],
-        aws_secret_access_key=config.credentials['aws_access_secret']
-    )
-else:
-    s3 = boto3.resource('s3', region_name=config.region)
 
 
 def write_message(task, message):
@@ -43,7 +32,7 @@ def write_message(task, message):
     """
     key = "{}:{}".format(task, message['hashslug'])
     if config.save_messages:
-        s3.Object(config.bucket, key).put(Body=json.dumps(message))
+        config.s3.Object(config.bucket, key).put(Body=json.dumps(message))
     else:
         with codecs.open(os.path.join(config.local_s3, key), 'w', 'utf-8') as f:
             json.dump(message, f, indent=2)
@@ -145,15 +134,7 @@ def rate(message):
 
 def save(message):
     """
-    ...
+    Saves all words to the result bucket.
     """
-    if not config.save_messages:
-        # Write things locally!
-        resultfile = os.path.join(config.local_s3_results, message['hashslug'])
-        with open(resultfile, 'w') as f:
-            print("Saving results to '{}".format(resultfile))
-            json.dump(message, f, indent=2)
-    else:
-        # Just save it to the logs
-        print(json.dumps(message))
+    save_all(message)
     return message

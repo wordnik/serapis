@@ -30,15 +30,12 @@ tasks_map = {}
 class TaskHandler(FileSystemEventHandler):
 
     def on_created(self, event):
-        try:
-            filename = event.src_path.split("/")[-1]
-            if filename.endswith(".wordlist"):
-                self.add_words(event.src_path)
-            elif filename.count(":") == 2:
-                self.run_task(event.src_path)
-            else:
-                raise ValueError
-        except:
+        filename = event.src_path.split("/")[-1]
+        if filename.endswith(".wordlist"):
+            self.add_words(event.src_path)
+        elif filename.count(":") == 2:
+            self.run_task(event.src_path)
+        else:
             print("ERROR: Invalid format for {}".format(filename))
 
     def on_modified(self, event):
