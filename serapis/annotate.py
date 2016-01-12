@@ -12,6 +12,7 @@ __date__ = "2015-12-07"
 __email__ = "clare@summer.ai"
 
 from nltk import pos_tag, word_tokenize, pos_tag_sents
+import readability
 
 
 def batch_tag_sentences(message_dict):
@@ -44,3 +45,15 @@ def annotate_sentence(sentence_dict, term):
     sentence_dict['pos_tags'] = " ".join(pos_tags)
     sentence_dict['features'] = {}
     return sentence_dict
+
+
+def readability_score(url_object):
+    """
+    Calculates the Fleisch Reading Ease (https://simple.wikipedia.org/wiki/Flesch_Reading_Ease)
+    for a document and saves it as 'readability_score' into the url_object
+
+    Args:
+        url_object: dict
+    """
+    scores = readability.getmeasures(url_object['doc'], merge=True)
+    url_object['readability_score'] = scores['FleschReadingEase']
