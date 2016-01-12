@@ -20,6 +20,7 @@ from bs4 import BeautifulSoup
 from serapis.util import squashed
 from serapis.language import is_english
 from serapis.util import clean_sentence
+from serapis.util import get_source_from_url
 import re
 import logging
 from nltk.tokenize import sent_tokenize
@@ -159,6 +160,7 @@ class PageRequest(object):
         structure = {
             "term": self.term,
             "url": self.url,
+            "source": get_source_from_url(self.url),
             "doc": self.text,
             "features": self.features,
             "variants": list(self.variants),  # Sets are not JSON serializable

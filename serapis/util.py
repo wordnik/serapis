@@ -21,6 +21,8 @@ import functools32 as functools
 import logging
 import unicodecsv as csv
 import datetime
+from urlparse import urlparse
+
 log = logging.getLogger('serapis.search')
 
 
@@ -274,6 +276,25 @@ def numeric_hash(string, digest_size=4):
         int
     """
     return int(hashlib.md5(string.encode("utf-8")).hexdigest()[:2 * digest_size], 16)
+
+
+def get_source_from_url(url):
+    """
+    Extracts the Domain name without TLD from a url.
+
+    >>> get_source_from_url('http://mashable.com/2013/10/30/new-media-technology/')
+    >>> Mashable
+
+    Args:
+        url: str
+    Returns:
+        str
+    """
+    hostname = urlparse(url).hostname
+    try:
+        return hostname.replace(".co.", ".co").split(".")[-2].capitalize()
+    except:
+        return hostname
 
 
 def batch(generator, batch_size=5):
