@@ -36,7 +36,7 @@ def pack():
     # Make sure machine and dev tools are up to date
     sudo('sudo yum -y update')
     sudo('yum -y upgrade')
-    sudo('yum -y install python27-devel python27-pip')
+    sudo('yum -y install python27-devel python27-pip libxml libxml2-devel libxslt-devel libyaml-devel')
 
     # create a new source distribution zipfile
     local('git archive --format=zip HEAD -o %s' % gitfile, capture=False)
@@ -64,7 +64,6 @@ def pack():
         """
         run('virtualenv venv')
         run('source venv/bin/activate && pip install -r requirements.txt')
-
         run('zip -9r wordnik.zip $VIRTUAL_ENV/lib/python2.7/site-packages')
 
     # Get the file back onto our local machine
