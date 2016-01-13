@@ -17,7 +17,14 @@ from nltk import sent_tokenize, word_tokenize
 
 
 class Readability(object):
+    """
+    This class computes various Readability metrics on documents.
+    """
     def __init__(self, doc):
+        """
+        Args:
+            doc: str
+        """
         self.doc = unidecode(doc)
         self.sentence_count = len(sent_tokenize(doc))
         words = word_tokenize(doc)
@@ -70,11 +77,32 @@ class Readability(object):
         return minsyl + maxsyl / 2.0
 
     def fleisch_reading_ease(self):
+        """
+        Fleisch Reading Ease.
+        https://en.wikipedia.org/wiki/Flesch%E2%80%93Kincaid_readability_tests
+
+        Returns:
+            float -- number between 0.0 (harderst to read) and 100 (easiest to read)
+        """
         return 0.39 * self.words_per_sentence + 11.8 * self.syllable_count / self.word_count - 15.59
 
     def smog(self):
+        """
+        Simple Measure of Gobbledygook.
+        https://en.wikipedia.org/wiki/SMOG
+
+        Returns:
+            float -- years of education required to comprehend text
+        """
         return math.sqrt(self.complex_word_count * (30 / self.sentence_count)) + 3
 
     def coleman_liau(self):
+        """
+        Coleman-Liau Index
+        https://en.wikipedia.org/wiki/Coleman%E2%80%93Liau_index
+
+        Returns:
+            float -- years of education required to comprehend text
+        """
         score = (5.89 * (self.char_count / self.word_count)) - (30 * (self.sentence_count / self.word_count)) - 15.8
         return round(score, 4)
