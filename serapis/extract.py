@@ -48,8 +48,8 @@ class PageRequest(object):
         get_html_features -- sets self.features from html
     """
 
-    OPENING_QUOTE = '|'.join(("\"", "'", "&quot;", "“", "&ldquo;", "‘", "&lsquo;", "«", "&laquo;", "‹", "&lsaquo;", "„", "&bdquo;", "‚", "&sbquo;"))
-    CLOSING_QUOTE = '|'.join(("'", "&quot;", "”", "&rdquo;", "’", "&rsquo;", "»", "&raquo;", "›", "&rsaquo;", "“", "&ldquo;", "‘", "&lsquo;"))
+    OPENING_QUOTES = ("\"", "'", "&quot;", "“", "&ldquo;", "‘", "&lsquo;", "«", "&laquo;", "‹", "&lsaquo;", "„", "&bdquo;", "‚", "&sbquo;")
+    CLOSING_QUOTES = ("'", "&quot;", "”", "&rdquo;", "’", "&rsquo;", "»", "&raquo;", "›", "&rsaquo;", "“", "&ldquo;", "‘", "&lsquo;")
 
     def request_page(self):
         try:
@@ -86,6 +86,7 @@ class PageRequest(object):
                     if qualify_sentence(sentence) and sentence not in [s['s'] for s in self.sentences]:
                         doc.append(sentence)
                         s_clean, variants = clean_sentence(sentence, self.term)
+                        s_clean = re.sub("|".join(set(self.CLOSING_QUOTES + self.OPENING_QUOTES)), '"', s_clean)
                         if variants:
                             self.variants.update(variants)
                             self.sentences.append({
@@ -129,7 +130,7 @@ class PageRequest(object):
         minimal_term = squashed(self.term)
 
         highlight_re = r"<(em|i|b|strong|span)[^>]*> *{}[ ,:]*</\1>".format(minimal_term)
-        quote_re = r"<({})[^>]*> *{}[ ,:]*</({})>".format(self.OPENING_QUOTE, minimal_term, self.CLOSING_QUOTE)
+        quote_re = r"<({})[^>]*> *{}[ ,:]*</({})>".format("|".join(self.OPENING_QUOTES), minimal_term, "|".join(self.CLOSING_QUOTES))
 
         self.features = {
             "highlighted": bool(re.search(highlight_re, minimal_html, re.IGNORECASE)),
@@ -141,7 +142,13 @@ class PageRequest(object):
         Returns elements extracted from html
 
         """
-        self.html = self.response.text
+        try:
+            self.html = self.response.text
+        except Exception as e:
+            print e
+            print self.response.status
+            print self.response.reason
+
         # Try Aaron's html2text first, and fall back on beautiful soup
         try:
             raw = html_parser.handle(self.html)
