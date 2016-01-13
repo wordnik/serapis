@@ -64,11 +64,15 @@ def pack():
         """
         run('virtualenv venv')
         run('source venv/bin/activate && pip install -r requirements.txt')
-        run('zip -9r wordnik.zip $VIRTUAL_ENV/lib/python2.7/site-packages')
+        run('zip -9r wordnik.zip venv/lib/python2.7/site-packages')
 
     # Get the file back onto our local machine
     local('scp %s@%s:~/lambda/wordnik.zip %s' % (env.user, env.hosts[0], lambdafile))
     update()
+
+
+def install_corpora():
+    local("python -m nltk.downloader -d nltk_data {}".format(" ".join(config['nltk_corpora'])))
 
 
 def update():
@@ -81,6 +85,7 @@ def update():
     with lcd('git_tmp'):
         local('zip -9r ../%s .' % lambdafile)
     local('zip -9 %s serapis/config/credentials.yaml' % lambdafile)
+    local('zip -9 %s nltk_data/' % lambdafile)
     local('rm -r git_tmp')
 
 

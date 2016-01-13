@@ -92,6 +92,9 @@ def watch():
 
 
 if __name__ == "__main__":
+    import nltk
+    nltk.data.path.append("nltk_data/")
+    
     parser = argparse.ArgumentParser(description='Simulate Lambda functions locally')
     parser.add_argument('--config', dest='config', default="default", help='Config file to use')
     args = parser.parse_args()

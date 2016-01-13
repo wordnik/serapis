@@ -69,5 +69,5 @@ venv/
 
 local_result_bucket/*
 local_bucket/*
-
+nltk_data/
 .ipynb_checkpoints

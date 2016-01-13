@@ -19,6 +19,9 @@ from serapis.config import config
 from serapis.qualify_word import clean_and_qualify
 from serapis.util import hashslug
 
+import nltk
+nltk.data.path.append("nltk_data/")
+
 print(json.dumps(config.keys))
 
 if "aws_access_key" in config.credentials:
