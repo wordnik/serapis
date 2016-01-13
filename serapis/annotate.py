@@ -12,7 +12,7 @@ __date__ = "2015-12-07"
 __email__ = "clare@summer.ai"
 
 from nltk import pos_tag, word_tokenize, pos_tag_sents
-import readability
+from .readability import Readability
 
 
 def batch_tag_sentences(message_dict):
@@ -55,5 +55,5 @@ def readability_score(url_object):
     Args:
         url_object: dict
     """
-    scores = readability.getmeasures(url_object['doc'], merge=True)
-    url_object['readability_score'] = scores['FleschReadingEase']
+    scores = Readability(url_object['doc'])
+    url_object['readability_score'] = scores.fleisch_reading_ease()

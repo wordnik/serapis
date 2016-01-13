@@ -17,7 +17,7 @@ import logging
 from .config import config
 from serapis.search import search_all
 from serapis.save import save_all
-from serapis.annotate import batch_tag_sentences
+from serapis.annotate import batch_tag_sentences, readability_score
 from serapis.util import now
 import codecs
 
@@ -112,13 +112,10 @@ def detect(message):
     Where s is the sentence and frd is the probability of this sentence being an FRD.
     """
     batch_tag_sentences(message)
-    # for page in message['urls']:
-    #     print "Url", page['url']
-    #     s = 1
-    #     for sentence in page['sentences']:
-    #         print "sentence {} / {}, '{}'".format(s, len(page['sentences']), sentence['s_clean'][:40])
-    #         s += 1
-    #         annotate_sentence(sentence, message['word'])
+    for url_object in message['urls']:
+        readability_score(url_object)
+        for sentence in url_object['sentences']:
+            pass
     return write_message('rate', message)
 
 
