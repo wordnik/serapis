@@ -38,8 +38,8 @@ s3 = boto3.client(
     aws_access_key_id=config.credentials['aws_access_key'],
     aws_secret_access_key=config.credentials['aws_access_secret']
 )
-model_bucket = config.credentials['model_s3_bucket']
-model_zip_name = config.credentials['model_zip_name']
+model_bucket = config.model_s3_bucket
+model_zip_name = config.model_zip_name
 
 
 def vectorizer_to_str(obj):
@@ -141,7 +141,9 @@ class PackagedModel(object):
 
     def __init__(
         self,
-        vectorizer, model, x_train, y_train, x_test, y_test, feature_names=None, metadata=None,
+        vectorizer=None, model=None, 
+        x_train=None, y_train=None, x_test=None, y_test=None, 
+        feature_names=None, metadata=None,
         *args, **kwargs
     ):
         if model:
