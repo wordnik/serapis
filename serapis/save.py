@@ -55,7 +55,8 @@ def assemble_result(message, url_object, sentence):
             "source": url_object.get('source'),
             "documentTitle": url_object.get('title'),
             "crawlDate": message.get('crawl_date'),  # ISO8601
-            "documentId": numeric_hash(url_object.get('url', ""))
+            "documentId": numeric_hash(url_object.get('url', "")),
+            "readability": url_object.get('readability_score')
         },
         "pub_date": url_object.get('pub_date'),
         "author": url_object.get('author'),
