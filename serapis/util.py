@@ -111,6 +111,27 @@ class AsynchronousRequest(object):
         return self.done
 
 
+def clean_sentence(sentence, term, replacement='_TERM_'):
+    """Replaces all variants of term with a replacement.
+
+        >>> s_clean, variants = clean_sentence("I've had a Déjà Vu!", "deja-vu")
+        >> s_clean
+        "I've had a _TERM_"
+        >> variants
+        ["Déjà Vu"]
+
+    Args:
+        sentence: str
+        term: str
+        replacement: str
+    Returns:
+        tuple -- Contains the cleaned sentence and all variants found.
+    """
+    variants = collect_variants(sentence, term)
+    s_clean = multiple_replace(sentence, {v: replacement for v in variants}) if variants else sentence
+    return ' '.join(s_clean.split()), variants
+
+
 def now():
     """Returns the current date and time in ISO8601 format.
 
