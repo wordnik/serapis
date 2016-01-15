@@ -50,6 +50,7 @@ class PageRequest(object):
 
     OPENING_QUOTES = ("\"", "'", "&quot;", "“", "&ldquo;", "‘", "&lsquo;", "«", "&laquo;", "‹", "&lsaquo;", "„", "&bdquo;", "‚", "&sbquo;")
     CLOSING_QUOTES = ("'", "&quot;", "”", "&rdquo;", "’", "&rsquo;", "»", "&raquo;", "›", "&rsaquo;", "“", "&ldquo;", "‘", "&lsquo;")
+    ALL_QUOTES = ("&quot;", "“", "&ldquo;", "&lsquo;", "«", "&laquo;", "‹", "&lsaquo;", "„", "&bdquo;", "‚", "&sbquo;", "”", "&rdquo;", "&rsquo;", "»", "&raquo;", "›", "&rsaquo;", "“", "&ldquo;", "&lsquo;")
 
     def request_page(self):
         try:
@@ -86,7 +87,8 @@ class PageRequest(object):
                     if qualify_sentence(sentence) and sentence not in [s['s'] for s in self.sentences]:
                         doc.append(sentence)
                         s_clean, variants = clean_sentence(sentence, self.term)
-                        s_clean = re.sub("|".join(set(self.CLOSING_QUOTES + self.OPENING_QUOTES)), '"', s_clean)
+                        s_clean = s_clean.replace("’", "'")
+                        s_clean = re.sub("|".join(self.ALL_QUOTES), '"', s_clean)
                         if variants:
                             self.variants.update(variants)
                             self.sentences.append({

@@ -90,6 +90,7 @@ def clean_sentence(sentence, term, replacement='_TERM_'):
         tuple -- Contains the cleaned sentence and all variants found.
     """
     variants = collect_variants(sentence, term)
+    sentence = " ".join(sentence.replace("_", " ").split())
     s_clean = multiple_replace(sentence, {v: replacement for v in variants}) if variants else sentence
     return s_clean, variants
 
@@ -159,13 +160,15 @@ def collect_variants(text, term, replace="_TERM_"):
     squashed_term = squashed(term)
     clean_text = unidecode(text).lower()
     # This RE allows for up to one non-letter character between all letters
-    term_re = r'\b' + \
-              ''.join("{}[^a-z0-9]?".format(c) for c in squashed_term[:-1]) + \
-              squashed_term[-1] + r'\b'
+    fuzzy_term = ''.join("{}[^a-z0-9]?".format(c) for c in squashed_term[:-1]) + squashed_term[-1]
+    term_re = r'\b({})s?\b'.format(fuzzy_term)  # s? for plurals
     collected = set()
     for m in re.finditer(term_re, clean_text):
-        collected.add(text[m.start():m.end()])
-    return list(collected)
+        variant = text[m.start():m.end()]
+        if variant.lower().endswith("s") and not term.lower().endswith("s"):
+            variant = variant[:-1]
+        collected.add(variant)
+    return collected
 
 
 def multiple_replace(text, replacements, re_style=False):
