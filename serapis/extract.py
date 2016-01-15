@@ -19,11 +19,10 @@ import html2text
 from bs4 import BeautifulSoup
 from serapis.util import squashed
 from serapis.language import is_english
-from serapis.util import clean_sentence
+from serapis.qualify import paragraph_to_sentences, qualify_sentence, clean_sentence
 from serapis.util import get_source_from_url
 import re
 import logging
-from nltk.tokenize import sent_tokenize
 
 
 log = logging.getLogger('serapis.extract')
@@ -69,27 +68,16 @@ class PageRequest(object):
         Returns
             str -- cleaned page text.
         """
-        def qualify_sentence(p):
-            if len(p) > 20 and \
-               p.count("\n") < 3 and \
-               "://" not in p and \
-               p.count("---") < 3 and \
-               p.count("#") < 3 and \
-               p.count("*") < 3 and \
-               p.count("|") < 3:
-                return True
-
         doc = []
         for paragraph in page_text.split('\n\n'):
             if is_english(paragraph):
-                for sentence in sent_tokenize(paragraph):
-                    sentence = sentence.strip(" *#").replace("\n", " ")
-                    if qualify_sentence(sentence) and sentence not in [s['s'] for s in self.sentences]:
+                for sentence in paragraph_to_sentences(paragraph):
+                    if qualify_sentence(sentence):
                         doc.append(sentence)
                         s_clean, variants = clean_sentence(sentence, self.term)
                         s_clean = s_clean.replace("’", "'")
                         s_clean = re.sub("|".join(self.ALL_QUOTES), '"', s_clean)
-                        if variants:
+                        if variants and s_clean not in [s['s_clean'] for s in self.sentences]:
                             self.variants.update(variants)
                             self.sentences.append({
                                 's': sentence,
@@ -144,12 +132,7 @@ class PageRequest(object):
         Returns elements extracted from html
 
         """
-        try:
-            self.html = self.response.text
-        except Exception as e:
-            print e
-            print self.response.status
-            print self.response.reason
+        self.html = self.response.text
 
         # Try Aaron's html2text first, and fall back on beautiful soup
         try:
@@ -201,7 +184,8 @@ class PageRequest(object):
 
         if run:
             self.response = self.request_page()
-            self.parse_response()
+            if self.response:
+                self.parse_response()
 
 
 class DiffbotRequest(PageRequest):
