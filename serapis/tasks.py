@@ -17,6 +17,7 @@ import logging
 from .config import config
 from serapis.search import search_all
 from serapis.save import save_all
+from serapis.features import match_wordnik_rules
 from serapis.annotate import batch_tag_sentences, readability_score
 from serapis.util import now
 import codecs
@@ -114,8 +115,9 @@ def detect(message):
     batch_tag_sentences(message)
     for url_object in message['urls']:
         readability_score(url_object)
-        for sentence in url_object['sentences']:
-            pass
+        for idx, sentence in enumerate(url_object['sentences']):
+            sentence_clean = url_object['sentences'][idx]['s_clean']
+            url_object['sentences'][idx]['patterns'] = match_wordnik_rules(sentence_clean)
     return write_message('rate', message)
 
 
