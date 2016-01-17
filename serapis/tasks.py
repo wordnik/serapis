@@ -118,6 +118,7 @@ def detect(message):
         for idx, sentence in enumerate(url_object['sentences']):
             sentence_clean = url_object['sentences'][idx]['s_clean']
             url_object['sentences'][idx]['patterns'] = match_wordnik_rules(sentence_clean)
+            url_object['sentences'][idx]['frd'] = 1 if url_object['sentences'][idx]['patterns'] else 0
     return write_message('rate', message)
 
 
