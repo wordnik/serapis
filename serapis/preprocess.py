@@ -16,6 +16,8 @@ from serapis.util import squashed, multiple_replace
 from nltk.tokenize import sent_tokenize
 import re
 
+QUOTES_RE = "|".join(("&quot;", "“", "«", "&laquo;", "‹", "&lsaquo;", "„", "&bdquo;", "‚", "&sbquo;", "”", "&rdquo;", "&rsquo;", "»", "&raquo;", "›", "&rsaquo;", "“", "&ldquo;", "&lsquo;"))
+
 # WORDS
 ########################
 
@@ -110,10 +112,11 @@ def paragraph_to_sentences(paragraph, term):
 ########################
 
 def preprocess_sentence(sentence, term):
-    sentence = sentence.strip(" *#>[].1234567890").replace("\n", " ").replace("_", " ")
-    re.sub(r"([^ ])([\(\[\"])", r"\1 \2", sentence)  # Give brackets space to breathe
-    re.sub(r"([\)\]\"\!\?:])([^ ])", r"\1 \2", sentence)  # Give brackets space to breathe
-    sentence = " ".join(sentence.split())
+    sentence = sentence.strip(" *#>[]1234567890").replace("\n", " ").replace("_", " ").replace("’", "'")
+    sentence = re.sub(r"([^ ])([\(\[\"])", r"\1 \2", sentence)  # Give brackets space to breathe
+    sentence = re.sub(r"([\)\]\"\!\?:])([^ ])", r"\1 \2", sentence)
+    sentence = re.sub(QUOTES_RE, '"', sentence)  # Normalise quotes
+    sentence = " ".join(sentence.split())  # Normalise whitespace
     
     # This is specific to Wiktionary
     m = re.search("Rate this definition: {}".format(term), sentence, re.IGNORECASE) or re.search(r"{} \((noun|verb|adj|adjective|adv|adverb)\)".format(term), sentence, re.IGNORECASE)
@@ -189,7 +192,7 @@ def qualify_sentence(p):
        "://" not in p and \
        "This page provides all possible meanings" not in p and \
        "What is the origin of the name" not in p and \
-       p.endswith("(more)") and \
+       not p.endswith("(more)") and \
        p.lower().count("search for") < 3 and \
        p.count("---") < 3 and \
        p.count("#") < 3 and \
