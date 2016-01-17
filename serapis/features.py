@@ -19,11 +19,12 @@ for rule, pattern in patterns.items():
     patterns[rule] = re.compile(pattern, re.IGNORECASE)
 
 
-def match_wordnik_rules(sentence_clean):
+def match_wordnik_rules(s_clean):
     """Returns all rules that match the sentence. E.g.
 
         match_wordnik_rules("A tattoo of Donald Trump, or, in other words, a Trump Stamp.", "Trump Stamp")
 
     Returns [u'KO16', u'KO3']
     """
-    return [rule for rule, pattern in patterns.items() if pattern.search(sentence_clean.lower())]
+    s_clean = s_clean.replace("'_TERM_'", "_TERM_").replace(",", "").lower()
+    return [rule for rule, pattern in patterns.items() if pattern.search(s_clean.lower())]
