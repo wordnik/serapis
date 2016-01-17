@@ -19,9 +19,10 @@ import html2text
 from bs4 import BeautifulSoup
 from serapis.util import squashed
 from serapis.language import is_english
-from serapis.qualify import paragraph_to_sentences, qualify_sentence, clean_sentence
+from serapis.preprocess import paragraph_to_sentences, qualify_sentence, clean_sentence
 from serapis.util import get_source_from_url
 import re
+import time
 import logging
 
 
@@ -49,15 +50,24 @@ class PageRequest(object):
 
     OPENING_QUOTES = ("\"", "'", "&quot;", "“", "&ldquo;", "‘", "&lsquo;", "«", "&laquo;", "‹", "&lsaquo;", "„", "&bdquo;", "‚", "&sbquo;")
     CLOSING_QUOTES = ("'", "&quot;", "”", "&rdquo;", "’", "&rsquo;", "»", "&raquo;", "›", "&rsaquo;", "“", "&ldquo;", "‘", "&lsquo;")
-    ALL_QUOTES = ("&quot;", "“", "&ldquo;", "&lsquo;", "«", "&laquo;", "‹", "&lsaquo;", "„", "&bdquo;", "‚", "&sbquo;", "”", "&rdquo;", "&rsquo;", "»", "&raquo;", "›", "&rsaquo;", "“", "&ldquo;", "&lsquo;")
 
     def request_page(self):
-        try:
-            self.response = requests.get(self.url, timeout=3)
-            return self.response
-        except:
-            log.error("Failed to return page for url: %s" % self.url)
-            return None
+        attempts = config.request_retry
+        while attempts:
+            try:
+                response = requests.get(self.url, timeout=10)
+            except:
+                response = None
+            if response and hasattr(response, "text"):
+                self.response = response
+                return self.response
+            else:
+                log.warning("Didn't get  url: %s" % self.url)
+                attempts -= 1
+                time.sleep(config.request_seconds_before_retry)
+        
+        log.error("Failed to return page for url: %s" % self.url)
+        return None
 
     def extract_sentences(self, page_text):
         """Finds all sentences that contain the term or a spelling variants.
@@ -71,12 +81,10 @@ class PageRequest(object):
         doc = []
         for paragraph in page_text.split('\n\n'):
             if is_english(paragraph):
-                for sentence in paragraph_to_sentences(paragraph):
+                for sentence in paragraph_to_sentences(paragraph, self.term):
                     if qualify_sentence(sentence):
                         doc.append(sentence)
                         s_clean, variants = clean_sentence(sentence, self.term)
-                        s_clean = s_clean.replace("’", "'")
-                        s_clean = re.sub("|".join(self.ALL_QUOTES), '"', s_clean)
                         if variants and s_clean not in [s['s_clean'] for s in self.sentences]:
                             self.variants.update(variants)
                             self.sentences.append({
@@ -97,6 +105,8 @@ class PageRequest(object):
         }
         authors = []
 
+        if isinstance(page_html, unicode):
+            page_html = page_html.encode('utf-8')
         tree = etree.HTML(page_html)  # TODO may change this to response.content, access as bytes
         for prop, value in prop_names.items():
             tags = tree.xpath("//meta[@{}='{}']".format(prop, value))
