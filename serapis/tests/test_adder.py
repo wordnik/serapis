@@ -14,17 +14,17 @@ __copyright__ = "Copyright 2015, summer.ai"
 __date__ = "2015-12-17"
 __email__ = "manuel@summer.ai"
 
-from serapis.qualify_word import clean_and_qualify
+from serapis.preprocess import clean_and_qualify_term
 import codecs
 
 
 def test_qualify():
     with codecs.open("serapis/tests/data/words_qualified.txt", 'r', 'utf-8') as wordlist:
         for word in wordlist.readlines():
-            assert clean_and_qualify(word), "Word '{}' falsely marked as invalid".format(word.strip())
+            assert clean_and_qualify_term(word), "Word '{}' falsely marked as invalid".format(word.strip())
 
 
 def test_disqualify():
     with codecs.open("serapis/tests/data/words_disqualified.txt", 'r', 'utf-8') as wordlist:
         for word in wordlist.readlines():
-            assert not clean_and_qualify(word), "Word '{}' falsely marked as valid".format(word.strip())
+            assert not clean_and_qualify_term(word), "Word '{}' falsely marked as valid".format(word.strip())
