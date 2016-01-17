@@ -31,9 +31,10 @@ class Readability(object):
         syllables = [self._count_syllables(word) for word in words]
         self.char_count = sum(len(word) for word in words)
         self.syllable_count = sum(syllables)
+        self._invalid = not self.sentence_count or not self.char_count
         self.complex_word_count = len(filter(lambda s: s >= 4, syllables))
         self.word_count = len(words)
-        self.words_per_sentence = 1.0 * self.word_count / self.sentence_count
+        self.words_per_sentence = 1.0 * self.word_count / self.sentence_count if not self._invalid else 0
 
     def _count_syllables(self, word):
         """
@@ -84,6 +85,8 @@ class Readability(object):
         Returns:
             float -- number between 0.0 (harderst to read) and 100 (easiest to read)
         """
+        if self._invalid:
+            return 0
         return 0.39 * self.words_per_sentence + 11.8 * self.syllable_count / self.word_count - 15.59
 
     def smog(self):
@@ -94,6 +97,8 @@ class Readability(object):
         Returns:
             float -- years of education required to comprehend text
         """
+        if self._invalid:
+            return 0
         return math.sqrt(self.complex_word_count * (30 / self.sentence_count)) + 3
 
     def coleman_liau(self):
@@ -104,5 +109,7 @@ class Readability(object):
         Returns:
             float -- years of education required to comprehend text
         """
+        if self._invalid:
+            return 0
         score = (5.89 * (self.char_count / self.word_count)) - (30 * (self.sentence_count / self.word_count)) - 15.8
         return round(score, 4)
