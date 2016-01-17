@@ -105,8 +105,6 @@ class PageRequest(object):
         }
         authors = []
 
-        if isinstance(page_html, unicode):
-            page_html = page_html.encode('utf-8')
         tree = etree.HTML(page_html)  # TODO may change this to response.content, access as bytes
         for prop, value in prop_names.items():
             tags = tree.xpath("//meta[@{}='{}']".format(prop, value))
