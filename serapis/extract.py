@@ -205,7 +205,7 @@ class DiffbotRequest(PageRequest):
 
     def request_page(self):
         params = {
-            'token': config.credentials['diffbot'],
+            'token': config.credentials.diffbot,
             'url': self.url,
             'mode': 'article',
             'discussion': False

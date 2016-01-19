@@ -12,7 +12,7 @@ __email__ = "manuel@summer.ai"
 import yaml
 import boto3
 import os
-from util import singleton
+from util import AttrDict
 
 path = os.path.dirname(os.path.abspath(__file__))
 
@@ -21,61 +21,29 @@ def abs_path(filename):
     return os.path.join(path, "config", "{}.yaml".format(filename))
 
 
-@singleton
-class Config(object):
-    """
-    Singleton config object. Usage:
+def load_config(config):
+    with open(abs_path("default")) as c:
+        keys = yaml.load(c)
 
-    >>> from config import config  # Wherever you need it
-
-    This loads the default config. To override this, you can either set the
-    $WORDNIK_CONFIG environment variable to e.g. 'dev' to override the default
-    config with the contents of confif/dev.yaml, or override it later by
-    calling
-
-    >>> config.load('dev'
-    """
-    keys = {}
-    config = None
-
-    @property
-    def s3(self):
-        if self._s3:
-            return self._s3
-
-        if "aws_access_key" in self.credentials:
-            self._s3 = boto3.resource(
-                's3',
-                region_name=self.region,
-                aws_access_key_id=self.credentials['aws_access_key'],
-                aws_secret_access_key=self.credentials['aws_access_secret']
-            )
-        else:
-            self._s3 = boto3.resource('s3', region_name=self.region)
-
-        return self._s3
+    keys['credentials'] = {}
+    if os.path.exists(abs_path("credentials")):
+        with open(abs_path("credentials")) as c:
+            keys['credentials'] = yaml.load(c) or {}
     
-    def __getattr__(self, key):
-        if not self.config:
-            raise RuntimeError("Config is not loaded yet.")
-        return self.keys[key]
+    if config != 'default':
+        with open(abs_path(config)) as c:
+            keys.update(yaml.load(c))
 
-    def __init__(self, config='default'):
-        self.config = config
-        self._s3 = None
-        with open(abs_path("default")) as c:
-            self.keys = yaml.load(c)
+    if "aws_access_key" in keys['credentials']:
+        keys['s3'] = boto3.resource(
+            's3',
+            region_name=keys['region'],
+            aws_access_key_id=keys['credentials']['aws_access_key'],
+            aws_secret_access_key=keys['credentials']['aws_access_secret']
+        )
+    else:
+        keys['s3'] = boto3.resource('s3', region_name=keys['region'])
 
-        self.keys['credentials'] = {}
-        if os.path.exists(abs_path("credentials")):
-            with open(abs_path("credentials")) as c:
-                self.keys['credentials'] = yaml.load(c) or {}
-        
-        self.load(config)
+    return AttrDict(keys)
 
-    def load(self, config="default"):
-        if config != 'default':
-            with open(abs_path(config)) as c:
-                self.keys.update(yaml.load(c))
-
-config = Config(os.environ.get('WORDNIK_CONFIG', 'default'))
+config = load_config(os.environ.get('WORDNIK_CONFIG', 'default'))

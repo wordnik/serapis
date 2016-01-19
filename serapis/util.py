@@ -22,8 +22,43 @@ import logging
 import unicodecsv as csv
 import datetime
 from urlparse import urlparse
+from collections import Mapping, MutableSequence
 
 log = logging.getLogger('serapis.search')
+
+
+class AttrDict(object):
+    """
+    Read-only dynamic attribute class for dictionaries.
+
+        >>> b = AttrDict({"x": {"foo": 2, "bar": [3, 4, 5]}})
+        >>> b.x
+        {"foo": 2, "bar": [3, 4, 5]}
+        >>> b.x.foo
+        2
+        >>> b.x.bar[-1]
+        5
+    """
+    def __init__(self, mapping):
+        self.__data = dict(mapping)
+    
+    def __getattr__(self, name):
+        if hasattr(self.__data, name):
+            return getattr(self.__data, name)
+        else:
+            return AttrDict.build(self.__data[name])
+
+    @classmethod
+    def build(cls, obj):
+        if isinstance(obj, Mapping):
+            return cls(obj)
+        elif isinstance(obj, MutableSequence):
+            return [cls.build(item) for item in obj]
+        else:
+            return obj
+
+    def __repr__(self):
+        return self.__data.__repr__()
 
 
 class AsynchronousRequest(object):

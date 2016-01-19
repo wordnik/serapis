@@ -90,7 +90,7 @@ def extract_wrapper(url_object, term):
 
 def search_diffbot_cache(term):
     response = requests.get('http://api.diffbot.com/v3/search', params={
-        'token': config.credentials['diffbot'],
+        'token': config.credentials.diffbot,
         'query': requests.utils.quote('"{}"'.format(term)),
         'col': 'GLOBAL-INDEX'
     }).json()
@@ -185,7 +185,7 @@ def search_google(term):
     try:
         r = requests.get(
             'https://www.googleapis.com/customsearch/v1',
-            params={"key": config.credentials['google'], "cx": config.google_cse, 'q': term, "lr": "lang_en"}
+            params={"key": config.credentials.google, "cx": config.google_cse, 'q': term, "lr": "lang_en"}
         )
         data = r.json().get('items', [])
     except:
@@ -216,7 +216,7 @@ def search_bing(term):
     """
     result = []
     # For Bing, Username = Password = Key
-    auth = requests.auth.HTTPBasicAuth(config.credentials['bing'], config.credentials['bing'])
+    auth = requests.auth.HTTPBasicAuth(config.credentials.bing, config.credentials.bing)
     headers = {'User-Agent': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; Trident/4.0; FDM; .NET CLR 2.0.50727; InfoPath.2; .NET CLR 1.1.4322)'}
     try:
         # Microsoft is still terrible at standards such as basic decency and wants us
