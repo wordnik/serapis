@@ -46,4 +46,11 @@ def load_config(config):
 
     return AttrDict(keys)
 
+
 config = load_config(os.environ.get('WORDNIK_CONFIG', 'default'))
+
+
+def update_config(config_name):
+    global config
+    with open(abs_path(config_name)) as c:
+        config.__data.update(yaml.load(c))

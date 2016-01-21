@@ -12,7 +12,7 @@ __date__ = "2015-11-09"
 __email__ = "manuel@summer.ai"
 
 import argparse
-from serapis.config import config
+from serapis.config import update_config
 from serapis import util
 
 tasks_map = {}
@@ -30,5 +30,5 @@ if __name__ == "__main__":
     parser.add_argument('word', help='Word to add')
     parser.add_argument('--config', dest='config', default="default", help='Config file to use')
     args = parser.parse_args()
-    config.load(args.config)
+    update_config(args.config)
     add(args.word)

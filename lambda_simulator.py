@@ -19,7 +19,7 @@ import argparse
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
-from serapis.config import config
+from serapis.config import config, update_config
 from add import add
 from serapis.qualify_word import clean_and_qualify
 from serapis.util import slugify
@@ -99,7 +99,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Simulate Lambda functions locally')
     parser.add_argument('--config', dest='config', default="default", help='Config file to use')
     args = parser.parse_args()
-    config.load(args.config)
+    update_config(args.config)
 
     for bucket in (config.local_s3_results, config.local_s3):
         if not os.path.exists(bucket):

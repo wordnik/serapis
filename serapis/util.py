@@ -43,6 +43,8 @@ class AttrDict(object):
         self.__data = dict(mapping)
     
     def __getattr__(self, name):
+        if name == "__data":
+            return self.__data
         if hasattr(self.__data, name):
             return getattr(self.__data, name)
         else:
