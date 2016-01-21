@@ -13,16 +13,13 @@ __email__ = "manuel@summer.ai"
 
 import os
 import json
-import logging
-from .config import config
+from serapis.config import config
 from serapis.search import search_all
 from serapis.save import save_all
 from serapis.features import match_wordnik_rules
 from serapis.annotate import batch_tag_sentences, readability_score
 from serapis.util import now
 import codecs
-
-logging.basicConfig(filename='serapis.log', level=logging.INFO)
 
 
 def write_message(task, message):

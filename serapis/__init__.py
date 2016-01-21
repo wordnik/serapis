@@ -16,15 +16,17 @@ __date__ = "2015-11-09"
 __email__ = "manuel@summer.ai"
 
 import logging
+from serapis.config import config
 
 logger = logging.getLogger('serapis')
 
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-fh = logging.FileHandler('serapis.log')
-fh.setLevel(logging.DEBUG)
-fh.setFormatter(formatter)
-logger.addHandler(fh)
+if config.log_to_file:
+    fh = logging.FileHandler('serapis.log')
+    fh.setLevel(logging.DEBUG)
+    fh.setFormatter(formatter)
+    logger.addHandler(fh)
 
 ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)

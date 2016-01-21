@@ -4,3 +4,4 @@ save_messages: false
 add_word_interval: 10
 remove_messages: false
 save_html: false
+log_to_file: true
