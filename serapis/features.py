@@ -5,7 +5,6 @@ DOC
 """
 from __future__ import unicode_literals
 from __future__ import absolute_import
-from unidecode import unidecode
 
 __author__ = "Manuel Ebert"
 __copyright__ = "Copyright 2015, summer.ai"
@@ -20,12 +19,12 @@ for rule, pattern in patterns.items():
     patterns[rule] = re.compile(pattern, re.IGNORECASE)
 
 
-def match(sentence, term):
+def match_wordnik_rules(s_clean):
     """Returns all rules that match the sentence. E.g.
 
-        match("A tattoo of Donald Trump, or, in other words, a Trump Stamp.", "Trump Stamp")
+        match_wordnik_rules("A tattoo of Donald Trump, or, in other words, a Trump Stamp.", "Trump Stamp")
 
     Returns [u'KO16', u'KO3']
     """
-    clean = unidecode(sentence).lower().replace(",", "").replace(unidecode(term).lower(), "_term_").replace("'_term_'", "_term_")
-    return [rule for rule, pattern in patterns.items() if pattern.search(clean)]
+    s_clean = s_clean.replace("'_TERM_'", "_TERM_").replace(",", "").lower()
+    return [rule for rule, pattern in patterns.items() if pattern.search(s_clean.lower())]

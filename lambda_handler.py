@@ -11,7 +11,6 @@ __copyright__ = "Copyright 2015, summer.ai"
 __date__ = "2015-11-09"
 __email__ = "manuel@summer.ai"
 
-import boto3
 import json
 
 from serapis import tasks
@@ -24,15 +23,6 @@ nltk.data.path.append("nltk_data/")
 
 print(json.dumps(config.keys))
 
-if "aws_access_key" in config.credentials:
-    s3 = boto3.resource(
-        's3',
-        region_name=config.region,
-        aws_access_key_id=config.credentials['aws_access_key'],
-        aws_secret_access_key=config.credentials['aws_access_secret']
-    )
-else:
-    s3 = boto3.resource('s3', region_name=config.region)
 
 tasks_map = {
     "search": tasks.search,
@@ -44,14 +34,14 @@ tasks_map = {
 
 def run_task(bucket, key):
     task, _, _ = key.split(":")
-    contents = s3.Object(bucket, key).get()
+    contents = config.s3.Object(bucket, key).get()
     print(contents)
     message = json.loads(contents['Body'].read())
     tasks_map[task](message)
 
 
 def add_words(bucket, key):
-    contents = s3.Object(bucket, key).get()
+    contents = config.s3.Object(bucket, key).get()
     words = contents['Body'].read().splitlines()
     added, skipped = set(), []
     for term in words:

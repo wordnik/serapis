@@ -51,6 +51,7 @@ class TaskHandler(FileSystemEventHandler):
                 if term:
                     slug = slugify(term)
                     if slug not in added:
+                        time.sleep(config.add_word_interval)
                         added.add(slug)
                         add(term)
                     else:

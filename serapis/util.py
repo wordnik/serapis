@@ -22,8 +22,43 @@ import logging
 import unicodecsv as csv
 import datetime
 from urlparse import urlparse
+from collections import Mapping, MutableSequence
 
 log = logging.getLogger('serapis.search')
+
+
+class AttrDict(object):
+    """
+    Read-only dynamic attribute class for dictionaries.
+
+        >>> b = AttrDict({"x": {"foo": 2, "bar": [3, 4, 5]}})
+        >>> b.x
+        {"foo": 2, "bar": [3, 4, 5]}
+        >>> b.x.foo
+        2
+        >>> b.x.bar[-1]
+        5
+    """
+    def __init__(self, mapping):
+        self.__data = dict(mapping)
+    
+    def __getattr__(self, name):
+        if hasattr(self.__data, name):
+            return getattr(self.__data, name)
+        else:
+            return AttrDict.build(self.__data[name])
+
+    @classmethod
+    def build(cls, obj):
+        if isinstance(obj, Mapping):
+            return cls(obj)
+        elif isinstance(obj, MutableSequence):
+            return [cls.build(item) for item in obj]
+        else:
+            return obj
+
+    def __repr__(self):
+        return self.__data.__repr__()
 
 
 class AsynchronousRequest(object):
@@ -73,28 +108,6 @@ class AsynchronousRequest(object):
         return self.done
 
 
-def clean_sentence(sentence, term, replacement='_TERM_'):
-    """Replaces all variants of term with a replacement.
-
-        >>> s_clean, variants = clean_sentence("I've had a Déjà Vu!", "deja-vu")
-        >> s_clean
-        "I've had a _TERM_"
-        >> variants
-        ["Déjà Vu"]
-
-    Args:
-        sentence: str
-        term: str
-        replacement: str
-    Returns:
-        tuple -- Contains the cleaned sentence and all variants found.
-    """
-    variants = collect_variants(sentence, term)
-    sentence = " ".join(sentence.replace("_", " ").split())
-    s_clean = multiple_replace(sentence, {v: replacement for v in variants}) if variants else sentence
-    return s_clean, variants
-
-
 def now():
     """Returns the current date and time in ISO8601 format.
 
@@ -140,35 +153,6 @@ def squashed(text, keep=''):
         str
     """
     return re.sub(r"[^a-z0-9{}]".format(keep), "", unidecode(text).lower())
-
-
-def collect_variants(text, term, replace="_TERM_"):
-    """
-    This finds all spelling variants of term in text.
-
-    >>> text = "I had a Deja-vu, or Déjàvu")
-    >>> collect_variants(text, "Déjà Vu")
-
-    returns {"Deja-vu", "Déjàvu"}
-
-    Args:
-        text: str -- text in which to search for spelling variants
-        term: str
-    Returns:
-        set -- A set of all variants found.
-    """
-    squashed_term = squashed(term)
-    clean_text = unidecode(text).lower()
-    # This RE allows for up to one non-letter character between all letters
-    fuzzy_term = ''.join("{}[^a-z0-9]?".format(c) for c in squashed_term[:-1]) + squashed_term[-1]
-    term_re = r'\b({})s?\b'.format(fuzzy_term)  # s? for plurals
-    collected = set()
-    for m in re.finditer(term_re, clean_text):
-        variant = text[m.start():m.end()]
-        if variant.lower().endswith("s") and not term.lower().endswith("s"):
-            variant = variant[:-1]
-        collected.add(variant)
-    return collected
 
 
 def multiple_replace(text, replacements, re_style=False):

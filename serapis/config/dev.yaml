@@ -1,5 +1,6 @@
-min_frd_prob: 0.0
+min_frd_prob: 0.5
 min_frd_rating: 0.0
 save_messages: false
+add_word_interval: 10
 remove_messages: false
 save_html: false

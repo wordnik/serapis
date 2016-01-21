@@ -19,11 +19,11 @@ import html2text
 from bs4 import BeautifulSoup
 from serapis.util import squashed
 from serapis.language import is_english
-from serapis.util import clean_sentence
+from serapis.preprocess import paragraph_to_sentences, qualify_sentence, clean_sentence
 from serapis.util import get_source_from_url
 import re
+import time
 import logging
-from nltk.tokenize import sent_tokenize
 
 
 log = logging.getLogger('serapis.extract')
@@ -50,15 +50,24 @@ class PageRequest(object):
 
     OPENING_QUOTES = ("\"", "'", "&quot;", "“", "&ldquo;", "‘", "&lsquo;", "«", "&laquo;", "‹", "&lsaquo;", "„", "&bdquo;", "‚", "&sbquo;")
     CLOSING_QUOTES = ("'", "&quot;", "”", "&rdquo;", "’", "&rsquo;", "»", "&raquo;", "›", "&rsaquo;", "“", "&ldquo;", "‘", "&lsquo;")
-    ALL_QUOTES = ("&quot;", "“", "&ldquo;", "&lsquo;", "«", "&laquo;", "‹", "&lsaquo;", "„", "&bdquo;", "‚", "&sbquo;", "”", "&rdquo;", "&rsquo;", "»", "&raquo;", "›", "&rsaquo;", "“", "&ldquo;", "&lsquo;")
 
     def request_page(self):
-        try:
-            self.response = requests.get(self.url, timeout=3)
-            return self.response
-        except:
-            log.error("Failed to return page for url: %s" % self.url)
-            return None
+        attempts = config.request_retry
+        while attempts:
+            try:
+                response = requests.get(self.url, timeout=10)
+            except:
+                response = None
+            if response and hasattr(response, "text"):
+                self.response = response
+                return self.response
+            else:
+                log.warning("Didn't get  url: %s" % self.url)
+                attempts -= 1
+                time.sleep(config.request_seconds_before_retry)
+        
+        log.error("Failed to return page for url: %s" % self.url)
+        return None
 
     def extract_sentences(self, page_text):
         """Finds all sentences that contain the term or a spelling variants.
@@ -69,27 +78,14 @@ class PageRequest(object):
         Returns
             str -- cleaned page text.
         """
-        def qualify_sentence(p):
-            if len(p) > 20 and \
-               p.count("\n") < 3 and \
-               "://" not in p and \
-               p.count("---") < 3 and \
-               p.count("#") < 3 and \
-               p.count("*") < 3 and \
-               p.count("|") < 3:
-                return True
-
         doc = []
         for paragraph in page_text.split('\n\n'):
             if is_english(paragraph):
-                for sentence in sent_tokenize(paragraph):
-                    sentence = sentence.strip(" *#").replace("\n", " ")
-                    if qualify_sentence(sentence) and sentence not in [s['s'] for s in self.sentences]:
+                for sentence in paragraph_to_sentences(paragraph, self.term):
+                    if qualify_sentence(sentence):
                         doc.append(sentence)
                         s_clean, variants = clean_sentence(sentence, self.term)
-                        s_clean = s_clean.replace("’", "'")
-                        s_clean = re.sub("|".join(self.ALL_QUOTES), '"', s_clean)
-                        if variants:
+                        if variants and s_clean not in [s['s_clean'] for s in self.sentences]:
                             self.variants.update(variants)
                             self.sentences.append({
                                 's': sentence,
@@ -144,12 +140,7 @@ class PageRequest(object):
         Returns elements extracted from html
 
         """
-        try:
-            self.html = self.response.text
-        except Exception as e:
-            print e
-            print self.response.status
-            print self.response.reason
+        self.html = self.response.text
 
         # Try Aaron's html2text first, and fall back on beautiful soup
         try:
@@ -201,7 +192,8 @@ class PageRequest(object):
 
         if run:
             self.response = self.request_page()
-            self.parse_response()
+            if self.response:
+                self.parse_response()
 
 
 class DiffbotRequest(PageRequest):
@@ -213,7 +205,7 @@ class DiffbotRequest(PageRequest):
 
     def request_page(self):
         params = {
-            'token': config.credentials['diffbot'],
+            'token': config.credentials.diffbot,
             'url': self.url,
             'mode': 'article',
             'discussion': False
