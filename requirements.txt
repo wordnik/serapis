@@ -1,6 +1,5 @@
 nltk==3.1
 python-dateutil==2.4.2
-PyYAML==3.11
 requests==2.8.1
 wheel==0.24.0
 Unidecode==0.4.18

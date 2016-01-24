@@ -12,17 +12,6 @@ __date__ = "2015-11-09"
 __email__ = "manuel@summer.ai"
 
 
-import pip
-installed_packages = pip.get_installed_distributions()
-installed_packages_list = sorted(["%s==%s" % (i.key, i.version) for i in installed_packages])
-print(installed_packages_list)
-
-try:
-    import yaml
-except ImportError:
-    print("Tried importing yaml here, no no avail.")
-
-
 import json
 
 from serapis import tasks
