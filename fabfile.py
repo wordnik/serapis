@@ -21,6 +21,10 @@ env.hosts = [config['ec2_ip']]
 gitfile = 'serapis.git.zip'
 lambdafile = 'serapis.lambda.zip'
 lambdafunction = config['lambda_function_name']
+corpora = [
+    'nltk_data/taggers/averaged_perceptron_tagger/averaged_perceptron_tagger.pickle',
+    'nltk_data/tokenizers/punkt/english.pickle'
+]
 
 
 def pack_local():
@@ -64,6 +68,7 @@ def pack():
         """
         run('virtualenv venv')
         run('source venv/bin/activate && pip install -r requirements.txt')
+        run('zip -9r wordnik.zip venv/lib64/python2.7/site-packages')
         run('zip -9r wordnik.zip venv/lib/python2.7/site-packages')
 
     # Get the file back onto our local machine
@@ -77,7 +82,7 @@ def install_corpora():
 
 def update():
     # Run tests
-    local("py.test")
+    local("py.test serapis/tests/")
 
     # Updates code in zip file with current Master without going to EC2 first.
     local('git archive --format=zip HEAD -o %s' % gitfile, capture=False)
@@ -85,7 +90,9 @@ def update():
     with lcd('git_tmp'):
         local('zip -9r ../%s .' % lambdafile)
     local('zip -9 %s serapis/config/credentials.yaml' % lambdafile)
-    local('zip -9 %s nltk_data/' % lambdafile)
+
+    for corpus in corpora:
+        local('zip -9r {} {}'.format(lambdafile, corpus))
     local('rm -r git_tmp')
 
 

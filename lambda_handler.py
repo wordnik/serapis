@@ -11,6 +11,10 @@ __copyright__ = "Copyright 2015, summer.ai"
 __date__ = "2015-11-09"
 __email__ = "manuel@summer.ai"
 
+import sys
+print sys.path
+sys.path.append('venv/lib64/python2.7/site-packages/yaml')
+
 import json
 
 from serapis import tasks
