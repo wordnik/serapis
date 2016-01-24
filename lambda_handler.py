@@ -11,21 +11,29 @@ __copyright__ = "Copyright 2015, summer.ai"
 __date__ = "2015-11-09"
 __email__ = "manuel@summer.ai"
 
-import sys
-print sys.path
-sys.path.append('venv/lib64/python2.7/site-packages/yaml')
+
+import pip
+installed_packages = pip.get_installed_distributions()
+installed_packages_list = sorted(["%s==%s" % (i.key, i.version) for i in installed_packages])
+print(installed_packages_list)
+
+try:
+    import yaml
+except ImportError:
+    print("Tried importing yaml here, no no avail.")
+
 
 import json
 
 from serapis import tasks
 from serapis.config import config
-from serapis.qualify_word import clean_and_qualify
+from serapis.preprocess import clean_and_qualify_term
 from serapis.util import hashslug
 
 import nltk
 nltk.data.path.append("nltk_data/")
 
-print(json.dumps(config.keys))
+print(json.dumps(config.keys()))
 
 
 tasks_map = {
@@ -49,7 +57,7 @@ def add_words(bucket, key):
     words = contents['Body'].read().splitlines()
     added, skipped = set(), []
     for term in words:
-        term = clean_and_qualify(term)
+        term = clean_and_qualify_term(term)
         if term:
             slug = hashslug(term)
             if slug not in added:

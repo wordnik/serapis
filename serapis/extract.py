@@ -62,7 +62,7 @@ class PageRequest(object):
                 self.response = response
                 return self.response
             else:
-                log.warning("Didn't get  url: %s" % self.url)
+                # log.warning("Didn't get  url: %s" % self.url)
                 attempts -= 1
                 time.sleep(config.request_seconds_before_retry)
         

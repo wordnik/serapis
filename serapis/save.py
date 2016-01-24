@@ -73,11 +73,14 @@ def assemble_result(message, url_object, sentence):
 
 def save_all(message):
     message['variants'] = collect_variants(message)
+    count = 0
     for url_object in message['urls']:
         for sentence in url_object['sentences']:
             if sentence.get('frd', 0) >= config.min_frd_prob:
                 result = assemble_result(message, url_object, sentence)
                 save_single(result)
+                count += 1
+    print("Saved {} FRDs for {}".format(count, message['word']))
 
 
 def save_single(result):
