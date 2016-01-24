@@ -98,7 +98,7 @@ def save_single(result):
             log.info("Saving results to '{}".format(resultfile))
             json.dump(result, f, indent=2)
     else:
-        config.s3.Object(config.bucket, result_slug).put(Body=json.dumps(result))
+        config.s3.Object(config.result_bucket, result_slug).put(Body=json.dumps(result))
         if result['rating'] > config.min_frd_rating:
             # @TODO save to ElasticSearch
             pass

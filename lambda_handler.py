@@ -22,8 +22,6 @@ from serapis.util import hashslug
 import nltk
 nltk.data.path.append("nltk_data/")
 
-print(json.dumps(config.keys()))
-
 
 tasks_map = {
     "search": tasks.search,

@@ -79,6 +79,7 @@ def qupdate():
         local('zip -9r ../%s .' % lambdafile)
     local('zip -9 %s serapis/config/credentials.yaml' % lambdafile)
     local('rm -r git_tmp')
+    deploy()
     
 
 def update():
