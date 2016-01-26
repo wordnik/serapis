@@ -40,7 +40,8 @@ def pack():
     # Make sure machine and dev tools are up to date
     sudo('sudo yum -y update')
     sudo('yum -y upgrade')
-    sudo('yum -y install python27-devel python27-pip libxml libxml2-devel libxslt-devel libyaml-devel')
+    sudo('yum -y install python27-devel python27-pip')
+    sudo('pip install --upgrade pip')
 
     # create a new source distribution zipfile
     local('git archive --format=zip HEAD -o %s' % gitfile, capture=False)
