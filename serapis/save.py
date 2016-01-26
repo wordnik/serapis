@@ -14,6 +14,7 @@ __date__ = "2016-01-08"
 __email__ = "manuel@summer.ai"
 
 import os
+import re
 import json
 from .config import config
 from .util import numeric_hash, slugify
@@ -71,15 +72,33 @@ def assemble_result(message, url_object, sentence):
     }
     
 
+def _crush(text):
+    """Provides a compact hashable representation of a text)"""
+    return re.sub(r"[ -.?:\"'/]", "", text.lower())
+
+
 def save_all(message):
     message['variants'] = collect_variants(message)
     count = 0
+
+    results = []
+    all_crushed_texts = []
     for url_object in message['urls']:
         for sentence in url_object['sentences']:
             if sentence.get('frd', 0) >= config.min_frd_prob:
-                result = assemble_result(message, url_object, sentence)
-                save_single(result)
-                count += 1
+                crushed = _crush(sentence['s'])
+                if crushed not in all_crushed_texts:  # Avoid duplicates
+                    results.append(assemble_result(message, url_object, sentence))
+                    all_crushed_texts.append(crushed)
+
+    # We only want the longest representation of a sentence
+    # So we're "hashing" the sentence
+    for result in results:
+        crushed = _crush(result['text'])
+        if not any(crushed in k and crushed != k for k in all_crushed_texts):
+            count += 1
+            save_single(result)
+
     print("Saved {} FRDs for {}".format(count, message['word']))
 
 
