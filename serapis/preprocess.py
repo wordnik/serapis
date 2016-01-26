@@ -18,6 +18,25 @@ import re
 
 QUOTES_RE = "|".join(("&quot;", "“", "«", "&laquo;", "‹", "&lsaquo;", "„", "&bdquo;", "‚", "&sbquo;", "”", "&rdquo;", "&rsquo;", "»", "&raquo;", "›", "&rsaquo;", "“", "&ldquo;", "&lsquo;"))
 
+# This is for detecting dates in Strings
+months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+short_months = [mo[:3] for mo in months]
+all_months = "|".join(months + short_months)
+time_re = "(,? \d+: ?\d+(: ?\d+)?( [aApP][mM])?( \([a-zA-Z]+\))?)?"
+date_re_1 = "\d{1,2}/\d{1,2}/\d{2,4}"
+date_re_2 = "({}) \d+,? \d*".format(all_months)
+DATE_RE = "({}|{})( \([a-zA-Z]+\))?{}".format(date_re_1, date_re_2, time_re)
+
+# UTILITIES
+########################
+
+
+def _strip_dates(sentence):
+    dates = list(re.finditer(DATE_RE, sentence, re.IGNORECASE))
+    if not dates:
+        return sentence
+    return sentence[dates[-1].end():].lstrip(") ")
+
 # WORDS
 ########################
 
@@ -98,7 +117,7 @@ def paragraph_to_sentences(paragraph, term):
     result = []
     paragraph = re.sub(r"([^ ])([\(\[\"])", r"\1 \2", paragraph)  # Give brackets space to breathe
     paragraph = re.sub(r"([\)\]\"\!\?:])([^ ])", r"\1 \2", paragraph)
-    paragraph = re.sub(r"([^. ]{3})\.([^. ]{3})", r"\1. \2", paragraph)
+    paragraph = re.sub(r"([^. ]{3})\.([^. ]{3}|A |An )", r"\1. \2", paragraph)
     paragraph = re.sub(r" e\.?g\.? ", " _eg_ ", paragraph)  # sent_tokenize has problems with this
     paragraph = re.sub(r" i\.?e\.? ", " _ie_ ", paragraph)
     sentences = sent_tokenize(paragraph)
@@ -112,17 +131,22 @@ def paragraph_to_sentences(paragraph, term):
 ########################
 
 def preprocess_sentence(sentence, term):
+    sentence = re.sub("<[^>]{1,20}>", " ", sentence)  # Strip tags
+    sentence = _strip_dates(sentence)  # If there are dates in the sentence, start right of those
     sentence = sentence.strip(" *#>[]1234567890").replace("\n", " ").replace("_", " ").replace("’", "'")
     sentence = re.sub(r"([^ ])([\(\[\"])", r"\1 \2", sentence)  # Give brackets space to breathe
     sentence = re.sub(r"([\)\]\"\!\?:])([^ ])", r"\1 \2", sentence)
     sentence = re.sub(QUOTES_RE, '"', sentence)  # Normalise quotes
     sentence = " ".join(sentence.split())  # Normalise whitespace
-    
     # This is specific to Wiktionary
     m = re.search("Rate this definition: {}".format(term), sentence, re.IGNORECASE) or re.search(r"{} \((noun|verb|adj|adjective|adv|adverb)\)".format(term), sentence, re.IGNORECASE)
     if m:
         sentence = re.sub(r"^ *\([a-zA-Z ]+\) *", "", sentence[m.end():], flags=re.IGNORECASE)
         sentence = "{}: {}".format(term, sentence)
+
+    # This if for urban Dictionary:
+    if sentence.startswith("Top Definition "):
+        sentence = sentence[15:]
 
     return sentence
 
@@ -193,9 +217,11 @@ def qualify_sentence(p):
        "This page provides all possible meanings" not in p and \
        "What is the origin of the name" not in p and \
        "... (more)" not in p and \
-       p.lower().count("search for") < 3 and \
+       p.lower().count("search") < 3 and \
+       not p.endswith("…") and \
        p.count("---") < 3 and \
        p.count("#") < 3 and \
+       not re.search("[A-Z]{14,}", p) and \
        p.count("*") < 3 and \
        p.count("|") < 3:
         return True
