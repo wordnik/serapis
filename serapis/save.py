@@ -52,6 +52,10 @@ def assemble_result(message, url_object, sentence):
     def _transform_word_variants(word_variants):
         return [{"variant": term, "variantScore": score} for term, score in word_variants.items()]
 
+    word_variants = message.get('variants', {})
+    pos, last_variant = max([(sentence.get('s').find(v), v) for v in word_variants])
+    score = word_variants[last_variant] if pos >= 0 else 0  # Don't take the initial variant if we have the chance
+
     return {
         "metadata":
         {
@@ -68,7 +72,8 @@ def assemble_result(message, url_object, sentence):
         "rating": sentence.get('rating'),
         "url": url_object.get('url'),
         "word": message.get('word'),
-        "wordVariants": _transform_word_variants(message.get('variants')),
+        "wordVariants": _transform_word_variants(word_variants),
+        "score": score,
         "text": sentence.get('s'),
         "frd_rating": sentence.get('frd'),
         "exampleId": numeric_hash(sentence.get('s', ""))
