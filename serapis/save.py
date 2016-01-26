@@ -49,6 +49,9 @@ def assemble_result(message, url_object, sentence):
     Returns:
         dict
     """
+    def _transform_word_variants(word_variants):
+        return [{"variant": term, "variantScore": score} for term, score in word_variants.items()]
+
     return {
         "metadata":
         {
@@ -65,7 +68,7 @@ def assemble_result(message, url_object, sentence):
         "rating": sentence.get('rating'),
         "url": url_object.get('url'),
         "word": message.get('word'),
-        "wordVariants": message.get('variants'),
+        "wordVariants": _transform_word_variants(message.get('variants')),
         "text": sentence.get('s'),
         "frd_rating": sentence.get('frd'),
         "exampleId": numeric_hash(sentence.get('s', ""))
