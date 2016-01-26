@@ -192,7 +192,7 @@ def qualify_sentence(p):
        "://" not in p and \
        "This page provides all possible meanings" not in p and \
        "What is the origin of the name" not in p and \
-       not p.endswith("(more)") and \
+       "... (more)" not in p and \
        p.lower().count("search for") < 3 and \
        p.count("---") < 3 and \
        p.count("#") < 3 and \
