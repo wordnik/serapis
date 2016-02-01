@@ -40,7 +40,8 @@ def pack():
     # Make sure machine and dev tools are up to date
     sudo('sudo yum -y update')
     sudo('yum -y upgrade')
-    sudo('yum -y install python27-devel python27-pip libxml libxml2-devel libxslt-devel libyaml-devel')
+    sudo('yum -y install python27-devel python27-pip')
+    sudo('pip install --upgrade pip')
 
     # create a new source distribution zipfile
     local('git archive --format=zip HEAD -o %s' % gitfile, capture=False)
@@ -56,29 +57,31 @@ def pack():
         run('rm -rf ~/lambda')
     run('mkdir ~/lambda')
 
+    run('virtualenv venv')
     with cd('~/lambda'):
         run('unzip %s' % deploy_filename)
-        # now setup the package with our virtual environment's
-        # python interpreter
-        # run('/var/www/yourapplication/env/bin/python setup.py install')
-
-        """
-        TODO: compile all the dependencies locally on the ec2 machine,
-        making sure any extensions are in a subdirectory of ~/lambda so that they are zipped
-        """
-        run('virtualenv venv')
-        run('source venv/bin/activate && pip install -r requirements.txt')
-        run('zip -9r wordnik.zip venv/lib64/python2.7/site-packages')
-        run('zip -9r wordnik.zip venv/lib/python2.7/site-packages')
+        run('source ../venv/bin/activate && pip install -r requirements.txt -t .')
+        run('zip -9r ../wordnik.zip .')
 
     # Get the file back onto our local machine
-    local('scp %s@%s:~/lambda/wordnik.zip %s' % (env.user, env.hosts[0], lambdafile))
+    local('scp %s@%s:~/wordnik.zip %s' % (env.user, env.hosts[0], lambdafile))
     update()
 
 
 def install_corpora():
     local("python -m nltk.downloader -d nltk_data {}".format(" ".join(config['nltk_corpora'])))
 
+
+def qupdate():
+    # Updates code in zip file with current Master without going to EC2 first.
+    local('git archive --format=zip HEAD -o %s' % gitfile, capture=False)
+    local('unzip -d git_tmp -o -u %s' % gitfile)
+    with lcd('git_tmp'):
+        local('zip -9r ../%s .' % lambdafile)
+    local('zip -9 %s serapis/config/credentials.yaml' % lambdafile)
+    local('rm -r git_tmp')
+    deploy()
+    
 
 def update():
     # Run tests

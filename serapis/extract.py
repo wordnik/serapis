@@ -13,7 +13,6 @@ __date__ = "2015-11-20"
 __email__ = "clare@summer.ai"
 
 import requests
-from lxml import etree
 from .config import config  # Make sure to use absolute imports here
 import html2text
 from bs4 import BeautifulSoup
@@ -62,7 +61,7 @@ class PageRequest(object):
                 self.response = response
                 return self.response
             else:
-                log.warning("Didn't get  url: %s" % self.url)
+                # log.warning("Didn't get  url: %s" % self.url)
                 attempts -= 1
                 time.sleep(config.request_seconds_before_retry)
         
@@ -105,17 +104,17 @@ class PageRequest(object):
         }
         authors = []
 
-        tree = etree.HTML(page_html)  # TODO may change this to response.content, access as bytes
         for prop, value in prop_names.items():
-            tags = tree.xpath("//meta[@{}='{}']".format(prop, value))
-            authors.extend([tag.attrib.get('content') for tag in tags])
+            m_re = r"< *meta.+{}=.?{}.? content=(\"[^\"]+\"|'[^']+') [^>]>".format(prop, value)
+            for m in re.findall(m_re, page_html):
+                authors.extend([m.strip("'\"")])
 
         # Pick the first author that looks reasonable
         authors = filter(lambda author: author and not author.startswith("http"), authors)
         self.author = authors[0] if authors else None
 
-        title_tags = tree.xpath("//title")
-        self.title = title_tags[0].text if title_tags else None
+        title_tags = re.findall("< *title *>([^<]+)</ *title *>", page_html)
+        self.title = title_tags[0].strip(" \n") if title_tags else None
 
     def get_html_features(self, html):
         """Detects whether the search term exists is highlighted (bolded, emphasised) or
@@ -147,7 +146,7 @@ class PageRequest(object):
             raw = html_parser.handle(self.html)
         except:
             log.info("Falling back on BeautifulSoup for '{}'".format(self.url))
-            soup = BeautifulSoup(self.html, 'lxml')
+            soup = BeautifulSoup(self.html, 'html5lib')
             for el in soup(['head', 'script']) + soup(class_='comments') + soup(id="comments"):
                 el.extract()
             raw = re.sub(r"\n+", "\n\n", soup.get_text())

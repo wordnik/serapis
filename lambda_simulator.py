@@ -21,7 +21,7 @@ from watchdog.events import FileSystemEventHandler
 
 from serapis.config import config, update_config
 from add import add
-from serapis.qualify_word import clean_and_qualify
+from serapis.preprocess import clean_and_qualify_term
 from serapis.util import slugify
 
 tasks_map = {}
@@ -47,7 +47,7 @@ class TaskHandler(FileSystemEventHandler):
         added, skipped = set(), []
         with open(filename) as f:
             for term in f.readlines():
-                term = clean_and_qualify(term)
+                term = clean_and_qualify_term(term)
                 if term:
                     slug = slugify(term)
                     if slug not in added:
