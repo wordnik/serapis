@@ -32,12 +32,13 @@ log = logging.getLogger('serapis.persist_model')
 local_path = 'temp_models'
 model_filename = 'model_' + datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
 
-s3 = boto3.client(
+s3 = boto3.resource(
     's3',
     region_name=config.region,
     aws_access_key_id=config.credentials['aws_access_key'],
     aws_secret_access_key=config.credentials['aws_access_secret']
 )
+
 model_bucket = config.model_s3_bucket
 model_zip_name = config.model_zip_name
 
@@ -91,7 +92,7 @@ class PackagedModel(object):
                     data['metadata'] = json.loads(open(filename_full, 'rt').read())
                 else:
                     data[filename[:-4]] = joblib.load(filename_full)
-            return cls(**data)
+            return PackagedModel(**data)
         finally:
             shutil.rmtree(extract_dir)
 
@@ -133,7 +134,8 @@ class PackagedModel(object):
                 zfile.write(os.path.join(local_path, fn), fn)
         # Upload zipped file to S3
         try:
-            s3.upload_file(archive_name, model_bucket, model_zip_name)
+            obj = s3.Object(model_bucket, model_zip_name)
+            obj.put(Body=open(archive_name, 'rb'), ACL='bucket-owner-full-control')
         except Exception, e:
             message = "Something went wrong pushing the zip to s3: %s %s" % (e, type(e))
             log.warning(message)
@@ -151,7 +153,7 @@ class PackagedModel(object):
             self._model = model
             self._data = {
                 'x_train':       x_train,
-                'x_train_vec':   vectorizer.transform(x_test),
+                'x_train_vec':   vectorizer.fit_transform(x_test),
                 'y_train':       y_train,
                 'x_test':        x_test,
                 'x_test_vec':    vectorizer.transform(x_test),
@@ -159,10 +161,12 @@ class PackagedModel(object):
             }
             now = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
 
-            if not metadata:
+            if metadata:
+                self.metadata = metadata
+            else:
                 precision, recall, fscore, support = precision_recall_fscore_support(
                     y_test,
-                    model.predict(self._data['x_train_vec'])
+                    model.predict(self._data['x_test_vec'])
                 )
                 self.metadata = {
                     'vectorizer':    vectorizer_to_str(vectorizer),
