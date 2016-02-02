@@ -8,7 +8,7 @@ bucket: ai.summer.serapis.messages
 result_bucket: ai.summer.serapis.results
 region: us-east-1
 model_zip_name: model.zip
-model_s3_bucket: wordnik.1m.frd_models
+model_s3_bucket: summer.1m.frd-models
 save_messages: true
 local_s3: local_bucket
 log_to_file: false
