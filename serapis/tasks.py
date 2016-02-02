@@ -13,7 +13,6 @@ __email__ = "manuel@summer.ai"
 
 import os
 import json
-print("Importing tasks")
 from serapis.config import config
 from serapis.search import search_all
 from serapis.save import save_all
