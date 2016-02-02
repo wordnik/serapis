@@ -22,7 +22,7 @@ from serapis.util import get_git_hash
 from contextlib import closing
 
 from sklearn.externals import joblib
-from sklearn.metrics import precision_recall_fscore_support
+from sklearn.metrics import precision_recall_fscore_support, roc_curve, auc
 
 import boto3
 from serapis.config import config
@@ -171,10 +171,11 @@ class PackagedModel(object):
             if metadata:
                 self.metadata = metadata
             else:
-                precision, recall, fscore, support = precision_recall_fscore_support(
-                    y_test,
-                    model.predict(self._data['x_test_vec'])
-                )
+                pred = model.predict(self._data['x_test_vec'])
+                precision, recall, fscore, support = precision_recall_fscore_support(y_test, pred)
+                fpr, tpr, thresholds = roc_curve(y_test, pred)
+                auc_score = auc(fpr, tpr)
+
                 self.metadata = {
                     'vectorizer':    vectorizer_to_str(vectorizer),
                     'model':         str(model),
@@ -185,6 +186,7 @@ class PackagedModel(object):
                     'recall':        [float(r) for r in recall],
                     'fscore':        [float(f) for f in fscore],
                     'support':       [int(s) for s in support],
+                    'auc': auc_score
                 }
 
             log.info('Initialized PackagedModel %s' % now)
