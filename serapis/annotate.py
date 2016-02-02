@@ -38,20 +38,34 @@ def batch_tag_sentences(message_dict):
 
 def annotate_single_sentence(sentence):
     tags = pos_tag(word_tokenize(sentence))
-    pos_tags = ['/'.join(b) for b in tags]
+    pos_tags = ['/'.join((b[0].lower(), b[1])) for b in tags]
     return " ".join(pos_tags)
 
 
-def annotate_pos_with_term(sentence):
-    """ POS-tag single sentence while preserving _TERM_ """
-    pos_term = []
-    tags = pos_tag(word_tokenize(sentence))
-    for tag in tags:
-        if tag[0] == '_TERM_':
-            pos_term.append('_TERM_')
+def annotate_pos_with_term(sentence, term):
+    """ POS-tag single sentence while preserving _TERM_ using the original term """
+    try:
+        pos_term = []
+
+        # replace term if necessary
+        if '_term_' not in sentence.lower():
+            sentence_term = sentence.lower().replace(term.lower(), '_TERM_')
         else:
-            pos_term.append(tag[1])
-    return pos_term
+            sentence_term = sentence.lower()
+
+        tok = word_tokenize(sentence_term)
+        tags = pos_tag(tok)
+
+        for tag in tags:
+            if '_TERM_' in tag[0].upper():
+                pos_term.append('_TERM_')
+            else:
+                pos_term.append(tag[1])
+
+        return ' '.join(pos_term)
+    except Exception, e:
+        log.error('POS annotation error: %s', e)
+        return None
 
 
 def get_pos_term_context(sentence, ngrams=5):
@@ -65,9 +79,9 @@ def get_pos_term_context(sentence, ngrams=5):
     s = sentence.split()
     try:
         loc = s.index("_TERM_")
-    except ValueError:
-        return ' '
-        log.warning("_TERM_ not found in pos tags.")
+    except Exception, e:
+        return -1
+        log.warning("_TERM_ not found in pos tags. %s", e)
     back = loc - ngrams + 1
     if back < 0:  # we don't want negative indicies
         back = 0
