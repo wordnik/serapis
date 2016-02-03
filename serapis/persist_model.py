@@ -16,36 +16,18 @@ import zipfile
 import datetime
 import tempfile
 import json as json
+from contextlib import closing
 
 from serapis.util import get_git_hash
-
-from contextlib import closing
+from serapis.config import config
 
 from sklearn.externals import joblib
 from sklearn.metrics import precision_recall_fscore_support, roc_curve, auc
-
-import boto3
-from serapis.config import config
 
 log = logging.getLogger('serapis.persist_model')
 
 local_path = 'temp_models'
 model_filename = 'model_' + datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-
-s3 = boto3.resource(
-    's3',
-    region_name=config.region,
-    aws_access_key_id=config.credentials['aws_access_key'],
-    aws_secret_access_key=config.credentials['aws_access_secret']
-)
-
-s3_client = boto3.client(
-    's3',
-    region_name=config.region,
-    aws_access_key_id=config.credentials['aws_access_key'],
-    aws_secret_access_key=config.credentials['aws_access_secret']
-)
-
 model_bucket = config.model_s3_bucket
 model_zip_name = config.model_zip_name
 
@@ -78,7 +60,7 @@ class PackagedModel(object):
         """ Retrieve the model from s3 """
         filename = 'temp_models/model.zip'
         try:
-            s3_client.download_file(model_bucket, 'model.zip', filename)
+            config.s3_client.download_file(model_bucket, 'model.zip', filename)
             return cls.from_file(filename)
         except Exception, e:
             message = "Something went wrong pulling from s3: %s %s" % (e, type(e))
@@ -141,7 +123,7 @@ class PackagedModel(object):
                 zfile.write(os.path.join(local_path, fn), fn)
         # Upload zipped file to S3
         try:
-            obj = s3.Object(bucket_name=model_bucket, key=model_zip_name)
+            obj = config.s3.Object(bucket_name=model_bucket, key=model_zip_name)
             obj.put(Body=open(archive_name, 'rb'))
         except Exception, e:
             message = "Something went wrong pushing the zip to s3: %s %s" % (e, type(e))
