@@ -19,7 +19,10 @@ from serapis.search import search_all
 from serapis.save import save_all
 from serapis.features import match_wordnik_rules
 from serapis.annotate import batch_tag_sentences, readability_score
+# from serapis.rate import rate_sentence_frd
+from serapis.persist_model import PackagedModel
 from serapis.util import now
+import numpy as np
 import codecs
 
 
@@ -122,11 +125,23 @@ def detect(message):
 
 def rate(message):
     """
-    ...
+    Where s is the sentence and frd is the probability of this sentence being an FRD.
+
     """
+    model_pipeline = PackagedModel().get_model()
+    git_hash = model_pipeline.metadata['git_hash']
+
+    vec = model_pipeline._vectorizer
+    model = model_pipeline._model
+    class_idx = np.where(model.classes_ == 1)[0][0]  # index of '1' pred in .predict_proba
+
     for url in message['urls']:
         for sentence in url['sentences']:
-            sentence['rating'] = 0
+            x = vec.transform([sentence['s_clean']])
+            sentence['rating'] = model.predict(x)[0]
+            sentence['rating_proba'] = round(model.predict_proba(x)[0][class_idx], 4)
+            sentence['model_git_hash'] = git_hash
+
     return write_message('save', message)
 
 
