@@ -118,11 +118,11 @@ def paragraph_to_sentences(paragraph, term):
     paragraph = re.sub(r"([^ ])([\(\[\"])", r"\1 \2", paragraph)  # Give brackets space to breathe
     paragraph = re.sub(r"([\)\]\"\!\?:])([^ ])", r"\1 \2", paragraph)
     paragraph = re.sub(r"([^. ]{3})\.([^. ]{3}|A |An )", r"\1. \2", paragraph)
-    paragraph = re.sub(r" e\.?g\.? ", " _eg_ ", paragraph)  # sent_tokenize has problems with this
+    paragraph = re.sub(r" e\.?g\.? ", " _eg_ ", paragraph)  # sent_tokenize improperly splits sentences here
     paragraph = re.sub(r" i\.?e\.? ", " _ie_ ", paragraph)
     sentences = sent_tokenize(paragraph)
     for sentence in sentences:
-        sentence = sentence.replace("_eg_", "_e.g._").replace("_ie_", "i.e.")
+        sentence = sentence.replace("_eg_", "_e.g._").replace("_ie_", "i.e.")  # reverts edge case
         result.append(preprocess_sentence(sentence, term))
     return result
 
@@ -131,6 +131,14 @@ def paragraph_to_sentences(paragraph, term):
 ########################
 
 def preprocess_sentence(sentence, term):
+    """
+    Strips string elements such as html tags, dates, new lines, underscore emphasis, 
+      brackets, numbers and special chars at start of sentence
+    Normalizes quotes, whitespace
+
+    NB: includes specific filtering for Wiktionary and Urban Dictionary
+
+    """
     sentence = re.sub("<[^>]{1,20}>", " ", sentence)  # Strip tags
     sentence = _strip_dates(sentence)  # If there are dates in the sentence, start right of those
     sentence = sentence.strip(" *#>[]1234567890").replace("\n", " ").replace("_", " ").replace("’", "'")
