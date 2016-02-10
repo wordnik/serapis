@@ -76,7 +76,6 @@ def watch():
     tasks_map = {
         "search": tasks.search,
         "detect": tasks.detect,
-        "rate": tasks.rate,
         "save": tasks.save
     }
 
