@@ -9,5 +9,6 @@ html2text==2015.11.4
 functools32==3.2.3.post2
 unicodecsv==0.14.1
 html5lib==0.9999999
+numpy==1.10.4
 scipy==0.16.1
 scikit-learn==0.17
