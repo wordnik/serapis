@@ -18,12 +18,6 @@ from serapis.preprocess import clean_and_qualify_term
 import codecs
 
 
-def test_qualify():
-    with codecs.open("serapis/tests/data/words_qualified.txt", 'r', 'utf-8') as wordlist:
-        for word in wordlist.readlines():
-            assert clean_and_qualify_term(word), "Word '{}' falsely marked as invalid".format(word.strip())
-
-
 def test_disqualify():
     with codecs.open("serapis/tests/data/words_disqualified.txt", 'r', 'utf-8') as wordlist:
         for word in wordlist.readlines():
