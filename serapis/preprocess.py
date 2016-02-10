@@ -127,7 +127,25 @@ def clean_and_qualify_term(term):
     return qualify_term(cleaned) and cleaned
     
 
+# List of words
+###############
 
+def clean_and_qualify_wordlist(wordlist):
+    """Generator that returns cleaned version of a list of words.
+    Will remove any non-words.
+
+    Args:
+        wordlist: list
+    Returns:
+        list
+    """
+    cleaned = filter(bool, map(clean_and_qualify_term, wordlist))
+    cleaned_squashed = set()
+    for term in cleaned:
+        s = squashed(term)
+        if s not in cleaned_squashed:
+            cleaned_squashed.add(s)
+            yield term
 
 
 # Paragraphs
