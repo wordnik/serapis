@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 # coding=utf-8
 """
+LANGUAGE PRE-PROCESSING
+
 Methods to pre-process and qualify words and sentences
+
 """
 from __future__ import unicode_literals
 from __future__ import absolute_import
@@ -173,6 +176,9 @@ def collect_variants(text, term, replace="_TERM_"):
         term: str
     Returns:
         set -- A set of all variants found.
+
+    *NB: This is used in the output JSON as an additional index within Wordnik #TODO
+
     """
     squashed_term = squashed(term)
     clean_text = unidecode(text).lower()
@@ -185,6 +191,8 @@ def collect_variants(text, term, replace="_TERM_"):
         if variant.lower().endswith("s") and not term.lower().endswith("s"):
             variant = variant[:-1]
         collected.add(variant)
+        # collected.add(term + 's')  # account for finding plurals
+        # collected.add(term + 'es')
     return collected
 
 

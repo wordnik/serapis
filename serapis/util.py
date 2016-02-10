@@ -179,37 +179,6 @@ def squashed(text, keep=''):
     return re.sub(r"[^a-z0-9{}]".format(keep), "", unidecode(text).lower())
 
 
-def collect_variants(text, term, replace="_TERM_"):
-    """
-    This finds all spelling variants of term in text.
-
-    >>> text = "I had a Deja-vu, or Déjàvu")
-    >>> collect_variants(text, "Déjà Vu")
-
-    returns {"Deja-vu", "Déjàvu"}
-
-    Args:
-        text: str -- text in which to search for spelling variants
-        term: str
-    Returns:
-        set -- A set of all variants found.
-    """
-    squashed_term = squashed(term)
-    clean_text = unidecode(text).lower()
-    # This RE allows for up to one non-letter character between all letters
-    term_re = r'\b' + \
-              ''.join("{}[^a-z0-9]?".format(c) for c in squashed_term[:-1]) + \
-              squashed_term[-1] + r'\b'
-    collected = set()
-    for m in re.finditer(term_re, clean_text):
-        collected.add(text[m.start():m.end()])
-
-    collected.add(term + 's')  # plurals
-    collected.add(term + 'es')
-
-    return list(collected)
-
-
 def multiple_replace(text, replacements, re_style=False):
     """Makes several replacements in a string.
 

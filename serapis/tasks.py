@@ -130,6 +130,7 @@ def rate(message):
     """
     model_pipeline = PackagedModel().get_model()
     git_hash = model_pipeline.metadata['git_hash']
+    created_at = model_pipeline.metadata['created_at']
 
     vec = model_pipeline._vectorizer
     model = model_pipeline._model
@@ -138,9 +139,14 @@ def rate(message):
     for url in message['urls']:
         for sentence in url['sentences']:
             x = vec.transform([sentence['s_clean']])
-            sentence['rating'] = model.predict(x)[0]
-            sentence['rating_proba'] = round(model.predict_proba(x)[0][class_idx], 4)
+            
+            # metadata
             sentence['model_git_hash'] = git_hash
+            sentence['model_creation_date'] = created_at
+            
+            # predictions from model
+            sentence['frd'] = model.predict(x)[0]
+            sentence['frd_likelihood'] = round(model.predict_proba(x)[0][class_idx], 4)  # P(Classification as FRD)
 
     return write_message('save', message)
 
