@@ -24,6 +24,7 @@ import datetime
 from urlparse import urlparse
 from collections import Mapping, MutableSequence
 import subprocess
+import types
 
 log = logging.getLogger('serapis.search')
 
@@ -40,6 +41,7 @@ class AttrDict(object):
         >>> b.x.bar[-1]
         5
     """
+
     def __init__(self, mapping):
         self.__data = dict(mapping)
     
@@ -82,6 +84,7 @@ class AsynchronousRequest(object):
         error -- Exception raised, if any
         done -- True if the function has returned or raised an Exception
     """
+
     def __init__(self, function, *args, **kwargs):
         """
         Args:
@@ -178,6 +181,7 @@ def multiple_replace(text, replacements, re_style=False):
 
 class Collector(object):
     """Collector decorator"""
+
     all = []
 
     def __init__(self, func):
@@ -213,10 +217,10 @@ def slugify(string):
 
 
 def hashslug(word):
-    """returns a slug and a short hash for a word, separated by a colon. EG
+    """Returns a slug and a short hash for a word, separated by a colon. EG
 
-        >>> hashslug("L'esprit de l'escalier")
-        'lesprit-de-lescalier:6ad283'
+    >>> hashslug("L'esprit de l'escalier")
+    'lesprit-de-lescalier:6ad283'
 
     """
     if not isinstance(word, unicode):
@@ -295,8 +299,8 @@ def get_source_from_url(url):
         return hostname
 
 
-def batch(generator, batch_size=5):
-    """Wraps around a generator and yields results in batches.
+def batch(iterable, batch_size=5):
+    """Wraps around an iterable or generator and yields results in batches.
 
     Example:
 
@@ -311,13 +315,18 @@ def batch(generator, batch_size=5):
         QRSTUVWX
         YZ
     """
-    cont = True
-    while cont:
-        result = []
-        for n in range(batch_size):
-            try:
-                result.append(next(generator))
-            except StopIteration:
-                cont = False
-                break
-        yield result
+    if isinstance(iterable, types.GeneratorType):
+        cont = True
+        while cont:
+            result = []
+            for n in range(batch_size):
+                try:
+                    result.append(next(iterable))
+                except StopIteration:
+                    cont = False
+                    break
+            yield result
+    else:
+        l = len(iterable)
+        for ndx in range(0, l, batch_size):
+            yield iterable[ndx:min(ndx + batch_size, l)]
