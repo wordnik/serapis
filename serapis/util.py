@@ -23,6 +23,7 @@ import unicodecsv as csv
 import datetime
 from urlparse import urlparse
 from collections import Mapping, MutableSequence
+import subprocess
 
 log = logging.getLogger('serapis.search')
 
@@ -224,6 +225,14 @@ def hashslug(word):
         slugify(word),
         hashlib.md5(word.encode('utf-8')).hexdigest()[:6]
     )
+
+
+def get_git_hash():
+    """Return the current git hash (if found)"""
+    try:
+        return subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip().decode('utf-8')
+    except:
+        return ''
 
 
 def read_csv(filename, skip_header=False):
