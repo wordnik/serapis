@@ -52,7 +52,7 @@ def qualify_term(term):
     """
     # Comments are how many disqualified words out of 10k the rule caught
     # Ordered it in descending order (fast failure mode)
-    if any(len(word) > 15 for word in term.split()):  # 51%
+    if any(len(word) > 15 for word in term.split()):
         return False
     if len(term.split()) > 5:  # 28%
         return False
@@ -60,18 +60,23 @@ def qualify_term(term):
         return False
     if sum(ord(c) > 255 for c in term) > 2:  # 0.8%
         return False
+
     parts = term.split()
     short_parts = sum([len(w) < 3 for w in parts])
     if short_parts == len(parts):
         return False
     if len(parts) > 2 and short_parts >= len(parts) - 1:
         return False
+    if re.search("\d", term):
+        return False  # No numbers
     num_letters = len(re.findall("[a-zA-Z]", term))
-    num_numbers = len(re.findall("[0-9]", term))
-    if num_numbers > num_letters:
+    if num_letters < len(term) / 2 or num_letters < 3:
         return False
     decoded = unidecode(term)
-    unicode_letters = len(term) - sum(term[n] == decoded[n] for n in range(len(term)))
+    try:
+        unicode_letters = len(term) - sum(term[n] == decoded[n] for n in range(len(term)))
+    except IndexError:
+        return False
     if unicode_letters > len(term) / 2:
         return False
     return True
@@ -81,14 +86,37 @@ def qualify_raw_term(term):
     """Does some qualification on the unprocessed term.
     """
     try:
-        if "__" in term:  # 0.6%
+        if "__" in term:
             return False
-        if "--" in term:  # 0.6%
+        if "--" in term:
             return False
-    except Exception as e:
-        print e, term
+    except Exception:
         return False
     return True
+
+
+def clean_term(term):
+    """
+    Cleans a search term of unwanted characters.
+    
+    Args:
+        term: str
+    """
+    if not isinstance(term, unicode):
+        term = term.decode('utf-8')
+
+    term = term.strip(" \n[](),.!?`'\"")
+    term = re.sub(r"%?20|\+", " ", term)
+    term = re.sub(r"[_\\%|@]", " ", term)
+    term = re.sub(r"[()\[\]\".!?`]", "", term)
+    term = term.replace("´", "'")
+    parts = term.split()
+    if len(parts) > 1 and parts[0] in ("a", "an"):
+        term = " ".join(parts[1:])
+    else:
+        term = " ".join(parts)  # Replace multiple white space
+    term = re.sub(r"- | -", "-", term)
+    return term
 
 
 def clean_and_qualify_term(term):
@@ -99,15 +127,7 @@ def clean_and_qualify_term(term):
     return qualify_term(cleaned) and cleaned
     
 
-def clean_term(term):
-    if not isinstance(term, unicode):
-        term = term.decode('utf-8')
 
-    term = term.strip(" \n[](),.!?`'\"")
-    term = re.sub(r"[_\\%|@]", " ", term)
-    term = re.sub(r"[()\[\]'\".!?`]", "", term)
-    term = " ".join(term.split())  # Replace multiple white space
-    return term
 
 
 # Paragraphs
@@ -135,12 +155,14 @@ def paragraph_to_sentences(paragraph, term):
 
 def preprocess_sentence(sentence, term):
     """
-    Strips string elements such as html tags, dates, new lines, underscore emphasis, 
-      brackets, numbers and special chars at start of sentence
-    Normalizes quotes, whitespace
+    Strips string elements such as html tags, dates, new lines, underscore emphasis,
+    brackets, numbers and special chars at start of sentence. Normalizes quotes, whitespace.
 
     NB: includes specific filtering for Wiktionary and Urban Dictionary
 
+    Args:
+        sentence: str
+        term: str
     """
     sentence = re.sub("<[^>]{1,20}>", " ", sentence)  # Strip tags
     sentence = _strip_dates(sentence)  # If there are dates in the sentence, start right of those
@@ -224,7 +246,9 @@ def qualify_sentence(p):
     Returns:
         bool
     """
-    real_word = lambda word: not all([c in "1234567890-@,!.:;$" for c in word])
+    def real_word(word):
+        return not all([c in "1234567890-@,!.:;$" for c in word])
+
     words = filter(real_word, p.split())
     if len(words) > 4 and \
        p.count("\n") < 3 and \
