@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from __future__ import absolute_import
 
 __author__ = "Clare Corthell"
-__copyright__ = "Copyright 2015, summer.ai"
+__copyright__ = "Copyright 2016, summer.ai"
 __date__ = "2015-11-25"
 __email__ = "clare@summer.ai"
 
@@ -57,7 +57,9 @@ class PackagedModel(object):
 
     @classmethod
     def get_model(cls, model_bucket=model_bucket):
-        """ Retrieve the model from s3 """
+        """Retrieve the model from s3"""
+        if not os.path.exists("temp_models"):
+            os.mkdir("temp_models")
         filename = 'temp_models/model.zip'
         try:
             config.s3_client.download_file(model_bucket, 'model.zip', filename)
@@ -69,7 +71,7 @@ class PackagedModel(object):
 
     @classmethod
     def from_file(cls, f):
-        """ Given filename, read file and load model """
+        """Given filename, read file and load model"""
         zfile = zipfile.ZipFile(f)
         extract_dir = tempfile.mkdtemp()
         try:
@@ -132,8 +134,8 @@ class PackagedModel(object):
 
     def __init__(
         self,
-        vectorizer=None, model=None, 
-        x_train=None, y_train=None, x_test=None, y_test=None, 
+        vectorizer=None, model=None,
+        x_train=None, y_train=None, x_test=None, y_test=None,
         feature_names=None, metadata=None,
         *args, **kwargs
     ):
