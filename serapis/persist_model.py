@@ -186,11 +186,11 @@ class PackagedPipeline(object):
 
     >>> PackagedPipeline(pipeline, x_train, y_train, x_test, y_test)
 
-    .save (for use during model development)
+    .save (for use during development)
     .get (for use in production)
     
     Stores to local directory and S3
-    Model identified by `model_bucket` attr
+    Pipeline identified by `pipeline_bucket` attr
 
     NB: Does _not_ employ versioning, assumes single pipeline (identified by s3 bucket)
         Requires pipeline with Feature Translation with key='union'
@@ -198,12 +198,15 @@ class PackagedPipeline(object):
     """
 
     @classmethod
-    def get(cls, model_bucket=model_bucket):
+    def get(cls, pipeline_bucket=pipeline_bucket):
         """ Retrieve the pipeline from s3 """
-        filename = 'temp_models/pipeline.zip'
+        filename = local_path + 'pipeline.zip'
         try:
-            config.s3_client.download_file(model_bucket, 'pipeline.zip', filename)
-            return cls.from_file(filename)
+            config.s3_client.download_file(pipeline_bucket, 'pipeline.zip', filename)
+            try:
+                return cls.from_file(filename)
+            except:
+                print 'from_file issue'
         except Exception, e:
             message = "Something went wrong pulling from s3: %s %s" % (e, type(e))
             log.warning(message)
@@ -227,7 +230,7 @@ class PackagedPipeline(object):
         finally:
             shutil.rmtree(extract_dir)
 
-    def save(self, local_path=local_path, model_bucket=pipeline_bucket, filename=pipeline_filename):
+    def save(self, pipeline_bucket=pipeline_bucket, filename=pipeline_filename):
         """
         Save the classifier under current path
 
@@ -249,7 +252,7 @@ class PackagedPipeline(object):
 
         archive_name = os.path.join(local_path, filename)
         # joblib requires dump to disk
-        joblib.dump(self._pipeline, os.path.join(local_path, 'model.bin'), compress=9)
+        joblib.dump(self._pipeline, os.path.join(local_path, 'pipeline.bin'), compress=9)
         joblib.dump(self._data['x_train'], os.path.join(local_path, 'x_train.bin'), compress=9)
         joblib.dump(self._data['y_train'], os.path.join(local_path, 'y_train.bin'), compress=9)
         joblib.dump(self._data['x_test'], os.path.join(local_path, 'x_test.bin'), compress=9)
@@ -259,12 +262,12 @@ class PackagedPipeline(object):
             f.write(json.dumps(self.metadata))
 
         with closing(zipfile.ZipFile(archive_name, 'w', zipfile.ZIP_DEFLATED)) as zfile:
-            for fn in ['vectorizer.bin', 'model.bin', 'x_train.bin', 'y_train.bin',
+            for fn in ['pipeline.bin', 'x_train.bin', 'y_train.bin',
                        'x_test.bin', 'y_test.bin', 'metadata.json']:
                 zfile.write(os.path.join(local_path, fn), fn)
         # Upload zipped file to S3
         try:
-            obj = config.s3.Object(bucket_name=model_bucket, key=model_zip_name)
+            obj = config.s3.Object(bucket_name=pipeline_bucket, key=pipeline_zip_name)
             obj.put(Body=open(archive_name, 'rb'))
         except Exception, e:
             message = "Something went wrong pushing the zip to s3: %s %s" % (e, type(e))
@@ -297,7 +300,7 @@ class PackagedPipeline(object):
                 auc_score = auc(fpr, tpr)
 
                 self.metadata = {
-                    'pipeline':         str(pipeline),
+                    'pipeline':      str(pipeline),
                     'created_at':    now,
                     'git_hash':      get_git_hash(),
                     'precision':     [float(p) for p in precision],
