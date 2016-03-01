@@ -18,8 +18,7 @@ from serapis.search import search_all
 from serapis.save import save_all
 from serapis.features import match_wordnik_rules
 from serapis.annotate import batch_tag_sentences, readability_score
-# from serapis.rate import rate_sentence_frd
-from serapis.persist_model import PackagedModel
+from serapis.persist_model import PackagedPipeline
 from serapis.util import now
 import numpy as np
 import codecs
@@ -75,18 +74,20 @@ def detect(message):
     git_hash = model_pipeline.metadata['git_hash']
     created_at = model_pipeline.metadata['created_at']
 
-    vec = model_pipeline._vectorizer
-    model = model_pipeline._model
+    feature_union = model_pipeline._feature_union
+    model = model_pipeline._pipeline
     class_idx = np.where(model.classes_ == 1)[0][0]  # index of '1' pred in .predict_proba
 
     for url_object in message['urls']:
         readability_score(url_object)
         for sentence in url_object['sentences']:
             sentence_clean = sentence['s_clean']
-            sentence_vec = vec.transform([sentence['s_clean']])
+            sentence_feature_union = feature_union.transform({
+                's_clean': sentence['s_clean'],
+                'pos': sentence['pos_tags']
+            })
 
             # metadata
-            sentence['model_git_hash'] = git_hash
             sentence['model_creation_date'] = created_at
             
             # predictions from model
