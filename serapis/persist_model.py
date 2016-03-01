@@ -203,13 +203,15 @@ class PackagedPipeline(object):
     @classmethod
     def get(cls, pipeline_bucket=pipeline_bucket):
         """ Retrieve the pipeline from s3 """
-        filename = local_path + pipeline_zip_name
+        filename = os.path.join(local_path, pipeline_zip_name)
         try:
             config.s3_client.download_file(pipeline_bucket, pipeline_zip_name, filename)
             try:
                 return cls.from_file(filename)
-            except:
-                print 'from_file issue'
+            except Exception, e:
+                message = "Issue returning from file: %s %s" % (e, type(e))
+                log.warning(message)
+                raise Exception(message)
         except Exception, e:
             message = "Something went wrong pulling from s3: %s %s" % (e, type(e))
             log.warning(message)
@@ -242,7 +244,7 @@ class PackagedPipeline(object):
         - Packs files into zip archive
         - Saves to s3 bucket
 
-        Replaces a single pipeline in S3. Local pipeline have dateime stamps.
+        Replaces a single pipeline in S3. Local pipeline have datetime stamps.
         No versioning employed in S3.
 
         """
