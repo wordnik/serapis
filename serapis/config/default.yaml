@@ -10,6 +10,10 @@ region: us-east-1
 model_zip_name: model.zip
 model_s3_bucket: summer.1m.frd-models
 save_messages: true
+es_host: search-wordnik-dev-es-grlfahewx54ezx4al4d4642c7q.us-west-1.es.amazonaws.com
+es_index: testexamples
+es_doctype: FRDexample
+es_region: us-west-1
 local_s3: local_bucket
 log_to_file: false
 local_s3_results: local_result_bucket

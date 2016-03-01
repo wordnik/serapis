@@ -77,23 +77,18 @@ def load_config(config):
 
     if "aws_access_key" in keys['credentials']:
         keys['s3'] = boto3.resource(
-            's3',
-            region_name=keys['region'],
+            's3', region_name=keys['region'],
             aws_access_key_id=keys['credentials']['aws_access_key'],
             aws_secret_access_key=keys['credentials']['aws_access_secret']
         )
-    else:
-        keys['s3'] = boto3.resource('s3', region_name=keys['region'])
-
-    if "aws_access_key" in keys['credentials']:
         keys['s3_client'] = boto3.client(
-            's3',
-            region_name=keys['region'],
+            's3', region_name=keys['region'],
             aws_access_key_id=keys['credentials']['aws_access_key'],
             aws_secret_access_key=keys['credentials']['aws_access_secret']
         )
     else:
         keys['s3'] = boto3.resource('s3', region_name=keys['region'])
+        keys['s3_client'] = boto3.client('s3', region_name=keys['region'])
 
     return AttrDict(keys)
 

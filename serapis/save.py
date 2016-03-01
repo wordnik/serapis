@@ -7,6 +7,8 @@ from __future__ import unicode_literals
 from __future__ import absolute_import
 from itertools import chain
 from collections import Counter
+from elasticsearch import Elasticsearch
+from serapis.awses import AWSConnection
 
 __author__ = "Manuel Ebert"
 __copyright__ = "Copyright 2016, summer.ai"
@@ -106,8 +108,23 @@ def save_all(message):
         if not any(crushed in k and crushed != k for k in all_crushed_texts):
             count += 1
             save_single(result)
+            save_to_elastic_search(result)
 
     print("Saved {} FRDs for {}".format(count, message['word']))
+
+
+def save_to_elastic_search(result):
+    """Indexes the results on AWS ElasticSearch.
+
+    Args:
+        result: dict
+    """
+    if not config.save_messages:
+        log.info("Skipped indexing FRD for '{}'".format(result['word']))
+        return
+    es = Elasticsearch(host=config.es_host, connection_class=AWSConnection, region=config.es_region)
+    es.index(index=config.es_index, doc_type=config.es_doctype, body=result)
+    log.info("Indexed FRD for '{}'".format(result['word']))
 
 
 def save_single(result):
