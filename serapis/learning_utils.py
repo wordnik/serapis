@@ -6,7 +6,7 @@ Utilities for Machine Learning
 """
 from sklearn.base import BaseEstimator, TransformerMixin
 from nltk.stem.porter import PorterStemmer
-
+from nltk import word_tokenize
 
 class ItemSelector(BaseEstimator, TransformerMixin):
     """
@@ -51,13 +51,15 @@ class ItemSelector(BaseEstimator, TransformerMixin):
 
 
 ### Stemming Utils ###
+stemmer = PorterStemmer()
+
 def stem_tokens(tokens, stemmer):
     stemmed = []
     for item in tokens:
         stemmed.append(stemmer.stem(item))
     return stemmed
 
-def tokenize(text):
-    tokens = nltk.word_tokenize(text)
+def tokenize_stem(text):
+    tokens = word_tokenize(text)
     stems = stem_tokens(tokens, stemmer)
     return stems
