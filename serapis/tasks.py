@@ -67,7 +67,7 @@ def detect(message):
     at least a doc property. This will split the doc of each URL into
     sentences, and  determine whether each sentence is an FRD or not.
     """
-    # batch_tag_sentences(message)
+    batch_tag_sentences(message)
 
     # Load Models
     model_pipeline = PackagedPipeline().get()
