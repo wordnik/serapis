@@ -67,11 +67,10 @@ def detect(message):
     at least a doc property. This will split the doc of each URL into
     sentences, and  determine whether each sentence is an FRD or not.
     """
-    batch_tag_sentences(message)
+    # batch_tag_sentences(message)
 
     # Load Models
     model_pipeline = PackagedPipeline().get()
-    git_hash = model_pipeline.metadata['git_hash']
     created_at = model_pipeline.metadata['created_at']
 
     feature_union = model_pipeline._feature_union
@@ -83,9 +82,10 @@ def detect(message):
         for sentence in url_object['sentences']:
             sentence_clean = sentence['s_clean']
             pos = ' '.join([i[i.find('/')+1:] for i in sentence['pos_tags'].split()]) # just pos tags
+            
             sentence_feature_union = feature_union.transform({
-                's_clean': sentence['s_clean'],
-                'pos': pos
+                's_clean': [sentence['s_clean']],
+                'pos': [pos]
             })
 
             # metadata
@@ -93,8 +93,8 @@ def detect(message):
             
             # predictions from model
             sentence['patterns'] = match_wordnik_rules(sentence_clean)
-            sentence['frd'] = model.predict(sentence_vec)[0]
-            sentence['frd_likelihood'] = round(model.predict_proba(sentence_vec)[0][class_idx], 4)  # P(Classification as FRD)
+            sentence['frd'] = model.predict(sentence_feature_union)[0]
+            sentence['frd_likelihood'] = round(model.predict_proba(sentence_feature_union)[0][class_idx], 4)  # P(Classification as FRD)
 
     return write_message('save', message)
 
