@@ -82,9 +82,10 @@ def detect(message):
         readability_score(url_object)
         for sentence in url_object['sentences']:
             sentence_clean = sentence['s_clean']
+            pos = ' '.join([i[i.find('/')+1:] for i in sentence['pos_tags'].split()]) # just pos tags
             sentence_feature_union = feature_union.transform({
                 's_clean': sentence['s_clean'],
-                'pos': sentence['pos_tags']
+                'pos': pos
             })
 
             # metadata
