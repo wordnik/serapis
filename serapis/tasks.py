@@ -70,7 +70,7 @@ def detect(message):
     batch_tag_sentences(message)
 
     # Load Models
-    model_pipeline = PackagedModel().get_model()
+    model_pipeline = PackagedPipeline().get()
     git_hash = model_pipeline.metadata['git_hash']
     created_at = model_pipeline.metadata['created_at']
 
