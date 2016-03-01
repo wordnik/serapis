@@ -18,10 +18,10 @@ import tempfile
 import json as json
 from contextlib import closing
 
-from util import get_git_hash
-from config import config
-from learning_utils import ItemSelector
-from learning_utils import tokenize_stem
+from serapis.util import get_git_hash
+from serapis.config import config
+from serapis.learning_utils import ItemSelector
+from serapis.learning_utils import tokenize_stem
 
 from sklearn.externals import joblib
 from sklearn.metrics import precision_recall_fscore_support, roc_curve, auc
