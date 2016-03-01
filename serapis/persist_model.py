@@ -18,8 +18,9 @@ import tempfile
 import json as json
 from contextlib import closing
 
-from serapis.util import get_git_hash
-from serapis.config import config
+from util import get_git_hash
+from config import config
+from learning_utils import ItemSelector
 
 from sklearn.externals import joblib
 from sklearn.metrics import precision_recall_fscore_support, roc_curve, auc
@@ -194,15 +195,16 @@ class PackagedPipeline(object):
 
     NB: Does _not_ employ versioning, assumes single pipeline (identified by s3 bucket)
         Requires pipeline with Feature Translation with key='union'
+        Requires input data: 's_clean', 'pos'
 
     """
 
     @classmethod
     def get(cls, pipeline_bucket=pipeline_bucket):
         """ Retrieve the pipeline from s3 """
-        filename = local_path + 'pipeline.zip'
+        filename = local_path + pipeline_zip_name
         try:
-            config.s3_client.download_file(pipeline_bucket, 'pipeline.zip', filename)
+            config.s3_client.download_file(pipeline_bucket, pipeline_zip_name, filename)
             try:
                 return cls.from_file(filename)
             except:
@@ -252,6 +254,7 @@ class PackagedPipeline(object):
 
         archive_name = os.path.join(local_path, filename)
         # joblib requires dump to disk
+        l = ItemSelector('temp') # need to load ItemSelector alongside
         joblib.dump(self._pipeline, os.path.join(local_path, 'pipeline.bin'), compress=9)
         joblib.dump(self._data['x_train'], os.path.join(local_path, 'x_train.bin'), compress=9)
         joblib.dump(self._data['y_train'], os.path.join(local_path, 'y_train.bin'), compress=9)
