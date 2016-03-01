@@ -21,6 +21,7 @@ from contextlib import closing
 from util import get_git_hash
 from config import config
 from learning_utils import ItemSelector
+from learning_utils import tokenize_stem
 
 from sklearn.externals import joblib
 from sklearn.metrics import precision_recall_fscore_support, roc_curve, auc
@@ -256,6 +257,7 @@ class PackagedPipeline(object):
         # joblib requires dump to disk
         l = ItemSelector('temp') # need to load ItemSelector alongside
         joblib.dump(self._pipeline, os.path.join(local_path, 'pipeline.bin'), compress=9)
+        joblib.dump(self._feature_union, os.path.join(local_path, 'feature_union.bin'), compress=9)
         joblib.dump(self._data['x_train'], os.path.join(local_path, 'x_train.bin'), compress=9)
         joblib.dump(self._data['y_train'], os.path.join(local_path, 'y_train.bin'), compress=9)
         joblib.dump(self._data['x_test'], os.path.join(local_path, 'x_test.bin'), compress=9)
@@ -265,7 +267,7 @@ class PackagedPipeline(object):
             f.write(json.dumps(self.metadata))
 
         with closing(zipfile.ZipFile(archive_name, 'w', zipfile.ZIP_DEFLATED)) as zfile:
-            for fn in ['pipeline.bin', 'x_train.bin', 'y_train.bin',
+            for fn in ['pipeline.bin', 'feature_union.bin', 'x_train.bin', 'y_train.bin',
                        'x_test.bin', 'y_test.bin', 'metadata.json']:
                 zfile.write(os.path.join(local_path, fn), fn)
         # Upload zipped file to S3
@@ -279,12 +281,13 @@ class PackagedPipeline(object):
 
     def __init__(
         self,
-        pipeline=None, 
+        pipeline=None, feature_union=None,
         x_train=None, y_train=None, x_test=None, y_test=None, 
         metadata=None,
         *args, **kwargs
     ):
         if pipeline:
+            self._feature_union = feature_union # will this maintain state?
             self._pipeline = pipeline
             self._data = {
                 'x_train':       x_train,
@@ -297,13 +300,15 @@ class PackagedPipeline(object):
             if metadata:
                 self.metadata = metadata
             else:
-                pred = pipeline.predict(self._data['x_test'])
+                x_test_vec = feature_union.transform(self._data['x_test'])
+                pred = pipeline.predict(x_test_vec)
                 precision, recall, fscore, support = precision_recall_fscore_support(y_test, pred)
                 fpr, tpr, thresholds = roc_curve(y_test, pred)
                 auc_score = auc(fpr, tpr)
 
                 self.metadata = {
                     'pipeline':      str(pipeline),
+                    'feature_union':      str(feature_union),
                     'created_at':    now,
                     'git_hash':      get_git_hash(),
                     'precision':     [float(p) for p in precision],
