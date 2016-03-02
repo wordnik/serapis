@@ -12,3 +12,4 @@ html5lib==0.9999999
 numpy==1.10.4
 scipy==0.16.1
 scikit-learn==0.17
+tqdm==3.8.0

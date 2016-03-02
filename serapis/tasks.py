@@ -18,8 +18,7 @@ from serapis.search import search_all
 from serapis.save import save_all
 from serapis.features import match_wordnik_rules
 from serapis.annotate import batch_tag_sentences, readability_score
-# from serapis.rate import rate_sentence_frd
-from serapis.persist_model import PackagedModel
+from serapis.persist_model import PackagedPipeline
 from serapis.util import now
 import numpy as np
 import codecs
@@ -71,28 +70,31 @@ def detect(message):
     batch_tag_sentences(message)
 
     # Load Models
-    model_pipeline = PackagedModel().get_model()
-    git_hash = model_pipeline.metadata['git_hash']
+    model_pipeline = PackagedPipeline().get()
     created_at = model_pipeline.metadata['created_at']
 
-    vec = model_pipeline._vectorizer
-    model = model_pipeline._model
+    feature_union = model_pipeline._feature_union
+    model = model_pipeline._pipeline
     class_idx = np.where(model.classes_ == 1)[0][0]  # index of '1' pred in .predict_proba
 
     for url_object in message['urls']:
         readability_score(url_object)
         for sentence in url_object['sentences']:
             sentence_clean = sentence['s_clean']
-            sentence_vec = vec.transform([sentence['s_clean']])
+            pos = ' '.join([i[i.find('/')+1:] for i in sentence['pos_tags'].split()]) # just pos tags
+            
+            sentence_feature_union = feature_union.transform({
+                's_clean': [sentence['s_clean']],
+                'pos': [pos]
+            })
 
             # metadata
-            sentence['model_git_hash'] = git_hash
             sentence['model_creation_date'] = created_at
             
             # predictions from model
             sentence['patterns'] = match_wordnik_rules(sentence_clean)
-            sentence['frd'] = model.predict(sentence_vec)[0]
-            sentence['frd_likelihood'] = round(model.predict_proba(sentence_vec)[0][class_idx], 4)  # P(Classification as FRD)
+            sentence['frd'] = model.predict(sentence_feature_union)[0]
+            sentence['frd_likelihood'] = round(model.predict_proba(sentence_feature_union)[0][class_idx], 4)  # P(Classification as FRD)
 
     return write_message('save', message)
 
