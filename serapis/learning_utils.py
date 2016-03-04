@@ -8,6 +8,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from nltk.stem.porter import PorterStemmer
 from nltk import word_tokenize
 
+
 class ItemSelector(BaseEstimator, TransformerMixin):
     """
     __author__ = "https://github.com/amueller"
@@ -40,6 +41,7 @@ class ItemSelector(BaseEstimator, TransformerMixin):
     key : hashable, required
         The key corresponding to the desired value in a mappable.
     """
+
     def __init__(self, key):
         self.key = key
 
@@ -50,14 +52,16 @@ class ItemSelector(BaseEstimator, TransformerMixin):
         return data_dict[self.key]
 
 
-### Stemming Utils ###
+# Stemming Utils
 stemmer = PorterStemmer()
+
 
 def stem_tokens(tokens, stemmer):
     stemmed = []
     for item in tokens:
         stemmed.append(stemmer.stem(item))
     return stemmed
+
 
 def tokenize_stem(text):
     tokens = word_tokenize(text)

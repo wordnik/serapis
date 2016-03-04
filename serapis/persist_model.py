@@ -21,7 +21,6 @@ from contextlib import closing
 from serapis.util import get_git_hash
 from serapis.config import config
 from serapis.learning_utils import ItemSelector
-from serapis.learning_utils import tokenize_stem
 
 from sklearn.externals import joblib
 from sklearn.metrics import precision_recall_fscore_support, roc_curve, auc
@@ -77,7 +76,7 @@ class PackagedModel(object):
 
     @classmethod
     def from_file(cls, f):
-        """ Given filename, read file and load model """
+        """Given filename, read file and load model"""
         zfile = zipfile.ZipFile(f)
         extract_dir = tempfile.mkdtemp()
         try:
@@ -140,8 +139,8 @@ class PackagedModel(object):
 
     def __init__(
         self,
-        vectorizer=None, model=None, 
-        x_train=None, y_train=None, x_test=None, y_test=None, 
+        vectorizer=None, model=None,
+        x_train=None, y_train=None, x_test=None, y_test=None,
         feature_names=None, metadata=None,
         *args, **kwargs
     ):
@@ -149,12 +148,12 @@ class PackagedModel(object):
             self._vectorizer = vectorizer
             self._model = model
             self._data = {
-                'x_train':       x_train,
-                'x_train_vec':   vectorizer.fit_transform(x_test),
-                'y_train':       y_train,
-                'x_test':        x_test,
-                'x_test_vec':    vectorizer.transform(x_test),
-                'y_test':        y_test,
+                'x_train': x_train,
+                'x_train_vec': vectorizer.fit_transform(x_test),
+                'y_train': y_train,
+                'x_test': x_test,
+                'x_test_vec': vectorizer.transform(x_test),
+                'y_test': y_test,
             }
             now = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
 
@@ -167,15 +166,15 @@ class PackagedModel(object):
                 auc_score = auc(fpr, tpr)
 
                 self.metadata = {
-                    'vectorizer':    vectorizer_to_str(vectorizer),
-                    'model':         str(model),
-                    'created_at':    now,
+                    'vectorizer': vectorizer_to_str(vectorizer),
+                    'model': str(model),
+                    'created_at': now,
                     'feature_names': feature_names,
-                    'git_hash':      get_git_hash(),
-                    'precision':     [float(p) for p in precision],
-                    'recall':        [float(r) for r in recall],
-                    'fscore':        [float(f) for f in fscore],
-                    'support':       [int(s) for s in support],
+                    'git_hash': get_git_hash(),
+                    'precision': [float(p) for p in precision],
+                    'recall': [float(r) for r in recall],
+                    'fscore': [float(f) for f in fscore],
+                    'support': [int(s) for s in support],
                     'auc': auc_score
                 }
 
@@ -202,7 +201,7 @@ class PackagedPipeline(object):
 
     @classmethod
     def get(cls, pipeline_bucket=pipeline_bucket):
-        """ Retrieve the pipeline from s3 """
+        """Retrieve the pipeline from s3"""
         filename = os.path.join(local_path, pipeline_zip_name)
         try:
             config.s3_client.download_file(pipeline_bucket, pipeline_zip_name, filename)
@@ -219,7 +218,7 @@ class PackagedPipeline(object):
 
     @classmethod
     def from_file(cls, f):
-        """ Given filename, read file and load pipeline """
+        """Given filename, read file and load pipeline"""
         zfile = zipfile.ZipFile(f)
         extract_dir = tempfile.mkdtemp()
         try:
@@ -257,7 +256,7 @@ class PackagedPipeline(object):
 
         archive_name = os.path.join(local_path, filename)
         # joblib requires dump to disk
-        l = ItemSelector('temp') # need to load ItemSelector alongside
+        l = ItemSelector('temp')  # need to load ItemSelector alongside
         joblib.dump(self._pipeline, os.path.join(local_path, 'pipeline.bin'), compress=9)
         joblib.dump(self._feature_union, os.path.join(local_path, 'feature_union.bin'), compress=9)
         joblib.dump(self._data['x_train'], os.path.join(local_path, 'x_train.bin'), compress=9)
@@ -284,18 +283,18 @@ class PackagedPipeline(object):
     def __init__(
         self,
         pipeline=None, feature_union=None,
-        x_train=None, y_train=None, x_test=None, y_test=None, 
+        x_train=None, y_train=None, x_test=None, y_test=None,
         metadata=None,
         *args, **kwargs
     ):
         if pipeline:
-            self._feature_union = feature_union # will this maintain state?
+            self._feature_union = feature_union  # will this maintain state?
             self._pipeline = pipeline
             self._data = {
-                'x_train':       x_train,
-                'y_train':       y_train,
-                'x_test':        x_test,
-                'y_test':        y_test,
+                'x_train': x_train,
+                'y_train': y_train,
+                'x_test': x_test,
+                'y_test': y_test,
             }
             now = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
 
@@ -309,14 +308,14 @@ class PackagedPipeline(object):
                 auc_score = auc(fpr, tpr)
 
                 self.metadata = {
-                    'pipeline':      str(pipeline),
-                    'feature_union':      str(feature_union),
-                    'created_at':    now,
-                    'git_hash':      get_git_hash(),
-                    'precision':     [float(p) for p in precision],
-                    'recall':        [float(r) for r in recall],
-                    'fscore':        [float(f) for f in fscore],
-                    'support':       [int(s) for s in support],
+                    'pipeline': str(pipeline),
+                    'feature_union': str(feature_union),
+                    'created_at': now,
+                    'git_hash': get_git_hash(),
+                    'precision': [float(p) for p in precision],
+                    'recall': [float(r) for r in recall],
+                    'fscore': [float(f) for f in fscore],
+                    'support': [int(s) for s in support],
                     'auc': auc_score
                 }
 
