@@ -5,3 +5,4 @@ add_word_interval: 10
 remove_messages: false
 save_html: false
 log_to_file: true
+es_host: search-wordnik-dev-es-grlfahewx54ezx4al4d4642c7q.us-west-1.es.amazonaws.com

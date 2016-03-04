@@ -13,3 +13,4 @@ numpy==1.10.4
 scipy==0.16.1
 scikit-learn==0.17
 tqdm==3.8.0
+pandas==0.17.1

@@ -65,6 +65,8 @@ def qualify_term(term):
     short_parts = sum([len(w) < 3 for w in parts])
     if short_parts == len(parts):
         return False
+    if any(len(part) == 1 and part != 'a' for part in parts):
+        return False
     if len(parts) > 2 and short_parts >= len(parts) - 1:
         return False
     if re.search("\d", term):
