@@ -9,6 +9,7 @@ from itertools import chain
 from collections import Counter
 from elasticsearch import Elasticsearch
 from serapis.awses import AWSConnection
+from datetime import datetime
 
 __author__ = "Manuel Ebert"
 __copyright__ = "Copyright 2016, summer.ai"
@@ -87,6 +88,23 @@ def _crush(text):
     return re.sub(r"[ -.?:\"'/]", "", text.lower())
 
 
+def stats(message):
+    """Calculates statistics for this word.
+
+    Returns:
+        tuple -- containing the word, number of seconds the word took to complete,
+                 number of urls found, number of pages parsed, number of sentences,
+                 and number of FRDs.
+    """
+    urls = len(message['urls'])
+    urls_success = len([u for u in message['urls'] if u.get('doc')])
+    all_sentences = list(chain(*(u['sentences'] for u in message['urls'])))
+    frds = len([s for s in all_sentences if s.get('frd') > config.min_frd_prob])
+    crawl_date = datetime.strptime(message['crawl_date'], '%Y-%m-%dT%H:%M:%S')
+    duration = (datetime.now() - crawl_date).seconds
+    return (message['word'], duration, urls, urls_success, len(all_sentences), frds)
+
+
 def save_all(message):
     message['variants'] = collect_variants(message)
     count = 0
@@ -110,7 +128,7 @@ def save_all(message):
             save_single(result)
             save_to_elastic_search(result)
 
-    print("Saved {} FRDs for {}".format(count, message['word']))
+    print("{:20} {:>4}s {:>3} urls {:>3} pages {:>4} sentences {:>4} FRDs".format(*stats(message)))
 
 
 def save_to_elastic_search(result):

@@ -51,7 +51,7 @@ def search_all(term):
     while not (ddg.done and search.done):
         time.sleep(.5)
     combined = (ddg.value or []) + (search.value or [])
-    result = [url_object for url_object in combined if url_object and url_object.get('doc')]
+    result = [url_object for url_object in combined if url_object]
     log.info("Searching URLs for '{}' yielded {} results".format(term, len(result)))
     return result
 

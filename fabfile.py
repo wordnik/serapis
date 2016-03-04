@@ -60,7 +60,7 @@ def pack():
     run('virtualenv venv')
     with cd('~/lambda'):
         run('unzip %s' % deploy_filename)
-        run('source ../venv/bin/activate && pip install -r requirements.txt -t .')
+        run('source ../venv/bin/activate && pip install numpy==1.10.4 -t . && pip install -r requirements.txt -t .')
         run('zip -9r ../wordnik.zip .')
 
     # Get the file back onto our local machine

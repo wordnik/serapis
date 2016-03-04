@@ -256,7 +256,7 @@ class PackagedPipeline(object):
 
         archive_name = os.path.join(local_path, filename)
         # joblib requires dump to disk
-        l = ItemSelector('temp')  # need to load ItemSelector alongside
+        ItemSelector('temp')  # need to load ItemSelector alongside
         joblib.dump(self._pipeline, os.path.join(local_path, 'pipeline.bin'), compress=9)
         joblib.dump(self._feature_union, os.path.join(local_path, 'feature_union.bin'), compress=9)
         joblib.dump(self._data['x_train'], os.path.join(local_path, 'x_train.bin'), compress=9)
