@@ -13,6 +13,38 @@ __email__ = "manuel@summer.ai"
 
 
 import json
+import sys
+sys.path.append('.')
+
+print("Importing Unidecode")
+import unidecode
+print("Importing nltk")
+import nltk
+print("Importing python-dateutil")
+from dateutil.parser import parse as parse_date
+print("Importing requests")
+import requests
+print("Importing beautifulsoup4")
+from bs4 import BeautifulSoup
+print("Importing html2text")
+import html2text
+print("Importing unicodecsv")
+import unicodecsv
+print("Importing numpy")
+import numpy
+print("Importing elasticsearch")
+import elasticsearch
+print("Importing scipy")
+import scipy
+print("Importing scikit-learn")
+from sklearn.externals import joblib
+print("Importing pandas")
+import pandas
+print("Importing boto")
+import boto
+
+
+
 
 from serapis import tasks
 from serapis.config import config
