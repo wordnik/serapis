@@ -286,6 +286,7 @@ def qualify_sentence(p):
     if len(words) > 4 and \
        all(phrase not in p for phrase in exclude_phrases) and \
        len(p) < 300 and \
+       p[-1] == "." and \
        p.lower().count("search") < 3 and \
        not p.endswith("…") and \
        p.count("---") < 3 and \
