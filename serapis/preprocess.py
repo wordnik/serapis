@@ -166,7 +166,9 @@ def paragraph_to_sentences(paragraph, term):
     sentences = sent_tokenize(paragraph)
     for sentence in sentences:
         sentence = sentence.replace("_eg_", "_e.g._").replace("_ie_", "i.e.")  # reverts edge case
-        result.append(preprocess_sentence(sentence, term))
+        processed = preprocess_sentence(sentence, term)
+        if qualify_sentence(processed):
+            result.append(processed)
     return result
 
 
@@ -270,13 +272,20 @@ def qualify_sentence(p):
         return not all([c in "1234567890-@,!.:;$" for c in word])
 
     words = filter(real_word, p.split())
+
+    exclude_phrases = ('<s>@</s>',
+                       "://",
+                       "This page provides all possible meanings",
+                       "What is the origin of the name",
+                       "Video results for the word",
+                       "Related Items"
+                       "... (more)",
+                       ">> >>"
+                       )
+
     if len(words) > 4 and \
-       p.count("\n") < 3 and \
-       '<s>@</s>' not in p and \
-       "://" not in p and \
-       "This page provides all possible meanings" not in p and \
-       "What is the origin of the name" not in p and \
-       "... (more)" not in p and \
+       all(phrase not in p for phrase in exclude_phrases) and \
+       len(p) < 300 and \
        p.lower().count("search") < 3 and \
        not p.endswith("…") and \
        p.count("---") < 3 and \

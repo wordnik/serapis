@@ -37,6 +37,15 @@ exclude_domains:
     - wikipedia.org
     - amazon.com
     - airbnb.com
+    - anagrammer.com
+    - morewords.com
+    - worddetector
+    - anagramscramble.com
+    - audioenglish.org
+    - wordfind.com
+    - merriam.com
+    - britannica.com
+    - ebay.com
     - wordnik.com
     - twitter.com
     - instagram.com

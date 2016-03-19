@@ -24,6 +24,7 @@ import datetime
 from urlparse import urlparse
 from collections import Mapping, MutableSequence
 import subprocess
+import warnings
 import types
 
 log = logging.getLogger('serapis.search')
@@ -158,7 +159,9 @@ def squashed(text, keep=''):
     Returns:
         str
     """
-    return re.sub(r"[^a-z0-9{}]".format(keep), "", unidecode(text).lower())
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        return re.sub(r"[^a-z0-9{}]".format(keep), "", unidecode(text).lower())
 
 
 def multiple_replace(text, replacements, re_style=False):
