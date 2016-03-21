@@ -5,7 +5,8 @@ Serapis is an acquisition, mining, and modeling pipeline that takes undefined wo
 For example, this sentence is a free-range definition, or "FRD", for "cheeseor":
 
 ```
-The term “cheeseors” describes flighted globules of intergalactic cheese, known to be the scourge of the asteroid belt.
+The term “cheeseors” describes flighted globules of intergalactic cheese, 
+known to be the scourge of the asteroid belt.
 ```
 
 ### Pipeline Schematic
