@@ -1,6 +1,6 @@
 # Serapis
 
-Serapis is an acquisition, mining, and modeling pipeline that takes undefined words from [Wordnik's](http://wordnik.com) dictionary, finds occurences of them across the web, and determines whether the sentence in which they occur offers an in-context definition of the word.
+Serapis is an acquisition, mining, and modeling pipeline that takes undefined words from [Wordnik's](http://wordnik.com) dictionary, finds occurences of them across the web, and determines a given sentence in which the word occurs offers an in-context definition for that word.
 
 For example, this sentence is a free-range definition, or "FRD", for "cheeseor":
 
