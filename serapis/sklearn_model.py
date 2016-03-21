@@ -37,7 +37,7 @@ def build_pipeline():
 
     feature_union = FeatureUnion(
                 transformer_list=[
-                    ('s_clean', Pipeline([
+                    ('x', Pipeline([
                         ('selector', ItemSelector(key='x')),
                         ('tfidf', tfidf),
                         ('best', SelectKBest(k=1000))
