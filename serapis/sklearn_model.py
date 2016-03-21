@@ -33,13 +33,13 @@ def get_training_data():
 
 def build_pipeline():
     x_train, x_test, y_train, y_test = get_training_data()
-    sentence_tfidf = TfidfVectorizer()
+    tfidf = TfidfVectorizer()
 
     feature_union = FeatureUnion(
                 transformer_list=[
                     ('s_clean', Pipeline([
                         ('selector', ItemSelector(key='x')),
-                        ('tfidf', sentence_tfidf),
+                        ('tfidf', tfidf),
                         ('best', SelectKBest(k=1000))
                     ]))
                 ])
