@@ -19,7 +19,7 @@ It uses a standard [message format](https://github.com/summerAI/serapis/wiki/Mes
 
 High-level details on the feature development and production can be found in the slides from Clare's [presentation on building this system](http://www.slideshare.net/ClareCorthell/distributed-natural-language-processing-systems-in-python).
 
-The system requires a model to score sentences for FRDness (scores: binary classification, classification confidence) which is not included here.
+The system requires a model to score sentences for FRDness (scores: binary classification, classification confidence) for which the data is not included here.
 
 ### Setup and Troubleshooting
 
