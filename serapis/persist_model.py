@@ -28,6 +28,9 @@ from sklearn.metrics import precision_recall_fscore_support, roc_curve, auc
 log = logging.getLogger('serapis.persist_model')
 
 local_path = 'temp_models'
+if not os.path.exists(local_path):
+    os.mkdir(local_path)
+
 model_filename = 'model_' + datetime.datetime.now().strftime('%Y%m%d%H%M%S')
 model_bucket = config.model_s3_bucket
 model_zip_name = config.model_zip_name
@@ -63,8 +66,6 @@ class PackagedModel(object):
     @classmethod
     def get_model(cls, model_bucket=model_bucket):
         """Retrieve the model from s3"""
-        if not os.path.exists("temp_models"):
-            os.mkdir("temp_models")
         filename = 'temp_models/model.zip'
         try:
             config.s3_client.download_file(model_bucket, 'model.zip', filename)
@@ -72,8 +73,6 @@ class PackagedModel(object):
             message = "Something went wrong pulling from s3: %s %s" % (e, type(e))
             log.warning(message)
             raise Exception(message)
-        print(os.path.listdir("."))
-        print(os.path.listdir("temp_models"))
         return cls.from_file(filename)
 
     @classmethod
@@ -205,6 +204,8 @@ class PackagedPipeline(object):
     def get(cls, pipeline_bucket=pipeline_bucket):
         """Retrieve the pipeline from s3"""
         filename = os.path.join(local_path, pipeline_zip_name)
+        print(os.path.listdir(local_path))
+        print(filename)
         try:
             config.s3_client.download_file(pipeline_bucket, pipeline_zip_name, filename)
             try:
