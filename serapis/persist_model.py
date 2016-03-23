@@ -68,11 +68,13 @@ class PackagedModel(object):
         filename = 'temp_models/model.zip'
         try:
             config.s3_client.download_file(model_bucket, 'model.zip', filename)
-            return cls.from_file(filename)
         except Exception, e:
             message = "Something went wrong pulling from s3: %s %s" % (e, type(e))
             log.warning(message)
             raise Exception(message)
+        print(os.path.listdir("."))
+        print(os.path.listdir("temp_models"))
+        return cls.from_file(filename)
 
     @classmethod
     def from_file(cls, f):
