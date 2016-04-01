@@ -90,6 +90,8 @@ def update():
 
 def qu():
     local('zip -9 %s lambda_handler.py' % lambdafile)
+    local('zip -9r %s serapis/' % lambdafile)
+    local('zip -9r %s temp_models/' % lambdafile)
 
 
 def deploy():

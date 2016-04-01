@@ -204,18 +204,18 @@ class PackagedPipeline(object):
     def get(cls, pipeline_bucket=pipeline_bucket):
         """Retrieve the pipeline from s3"""
         filename = os.path.join(local_path, pipeline_zip_name)
-        print(os.path.listdir(local_path))
-        print(filename)
-        try:
-            config.s3_client.download_file(pipeline_bucket, pipeline_zip_name, filename)
+        if not os.path.exists(filename):
             try:
-                return cls.from_file(filename)
+                config.s3_client.download_file(pipeline_bucket, pipeline_zip_name, filename)
             except Exception, e:
-                message = "Issue returning from file: %s %s" % (e, type(e))
+                message = "Something went wrong pulling from s3: %s %s" % (e, type(e))
                 log.warning(message)
                 raise Exception(message)
+
+        try:
+            return cls.from_file(filename)
         except Exception, e:
-            message = "Something went wrong pulling from s3: %s %s" % (e, type(e))
+            message = "Issue returning from file: %s %s" % (e, type(e))
             log.warning(message)
             raise Exception(message)
 
