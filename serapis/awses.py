@@ -56,7 +56,10 @@ class AWSConnection(Connection):
                               aws_secret_access_key=self.secret,
                               security_token=self.token,
                               is_secure=False)
-
+        if isinstance(method, unicode):
+            method = method.encode('utf-8')
+        if isinstance(url, unicode):
+            url = url.encode('utf-8')
         if body:
             response = client.make_request(method, path=url, params=params, data=body)
         else:

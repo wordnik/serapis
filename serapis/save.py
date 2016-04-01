@@ -81,7 +81,7 @@ def assemble_result(message, url_object, sentence):
         "frd_rating": sentence.get('frd'),
         "exampleId": numeric_hash(sentence.get('s', ""))
     }
-    
+
 
 def _crush(text):
     """Provides a compact hashable representation of a text)"""
@@ -126,7 +126,6 @@ def save_all(message):
         if not any(crushed in k and crushed != k for k in all_crushed_texts):
             count += 1
             save_single(result)
-            save_to_elastic_search(result)
 
     print("{:20} {:>4}s {:>3} urls {:>3} pages {:>4} sentences {:>4} FRDs".format(*stats(message)))
 
@@ -161,6 +160,4 @@ def save_single(result):
             json.dump(result, f, indent=2)
     else:
         config.s3.Object(config.result_bucket, result_slug).put(Body=json.dumps(result))
-        if result['rating'] > config.min_frd_rating:
-            # @TODO save to ElasticSearch
-            pass
+        save_to_elastic_search(result)
