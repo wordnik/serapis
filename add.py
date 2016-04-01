@@ -50,16 +50,15 @@ def add_wordlist(filename, batch_size=0, interval=60):
     cleaned = list(tqdm(preprocess.clean_and_qualify_wordlist(wordlist), total=len(wordlist) * .6, desc="Cleaning", unit="word"))
     print "Retained {} out of {} words ({:.0%}).".format(len(cleaned), len(wordlist), 1. * len(cleaned) / len(wordlist))
     if not batch_size:
-        config.s3.Object(config.bucket, key + ".wordlist").put("\n".join(cleaned))
+        config.s3.Object(config.bucket, key + ".wordlist").put(Body="\n".join(cleaned))
     else:
         batches = int(math.ceil(1. * len(cleaned) / batch_size))
         key_ext = 0
         for sublist in tqdm(util.batch(cleaned, batch_size), total=batches, desc="Uploading batches", unit="batch"):
-            config.s3.Object(config.bucket, "{}.{}.wordlist".format(key, key_ext)).put("\n".join(sublist))
+            config.s3.Object(config.bucket, "{}.{}.wordlist".format(key, key_ext)).put(Body="\n".join(sublist))
             key_ext += 1
             time.sleep(interval)
     print("Added wordlist '{}'".format(key))
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Add a new word to the pipeline')
@@ -67,6 +66,8 @@ if __name__ == "__main__":
     parser.add_argument('--config', dest='config', default="default", help='Config file to use')
     parser.add_argument('--batch_size', dest='batch_size', type=int, default=0, help='Batch size of wordlist')
     parser.add_argument('--interval', dest='interval', type=int, default=60, help='Batch size of wordlist')
+    parser.add_argument('--offset', dest='offset', type=int, default=0, help='Start of wordlis')
+    parser.add_argument('--limit', dest='limit', type=int, default=0, help='End of wordlist')
     args = parser.parse_args()
     update_config(args.config)
     if args.word.endswith(".wordlist") or args.word.endswith(".txt"):
