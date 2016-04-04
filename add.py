@@ -62,17 +62,24 @@ def add_wordlist(filename, batch_size=0, interval=60):
 
 
 def print_stats():
-    keys = set()
+    results, queries = [], set()
     for obj in config.s3.Bucket(config.result_bucket).objects.all():
-        keys.add(obj.key)
-    words = [key.split(":")[0] for key in keys]
-    word_set = set(words)
-    print("   {} results for {} words ({:.2} FRDs / Word)".format(len(keys), len(word_set), 1.0 * len(keys) / len(word_set)))
+        results.append(obj.key.split(":")[0])
+    for obj in config.s3.Bucket(config.bucket).objects.all():
+        if obj.key.startswith("search"):
+            queries.add(obj.key.split(":")[1])
+    result_set = set(results)
+    print("   {} queries, {} words, {} FRDs ({:.2} FRDs / Word, {:.1%} of queries found)".format(
+        len(queries),
+        len(result_set),
+        len(results),
+        1.0 * len(results) / len(result_set),
+        1.0 * len(result_set) / len(queries)))
     buckets = [0] * 15
-    for word in word_set:
-        buckets[min(words.count(word) - 1, 14)] += 1
+    for word in result_set:
+        buckets[min(results.count(word) - 1, 14)] += 1
     for idx, b in enumerate([60.0 * b / max(buckets) for b in buckets]):
-        print "{:2} {:<60} {}".format(idx + 1, "#" * int(b), buckets[idx])
+        print "{:2} {:<60} {}".format(idx + 1, "█" * int(b), buckets[idx])
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Add a new word to the pipeline')
