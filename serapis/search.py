@@ -70,11 +70,13 @@ def search_and_parse(search_func, term):
     """
     search_result = search_func(term)
     jobs = [async(extract_wrapper, url_object, term) for url_object in search_result]
-    while not all(jobs):
+    time_waited = 0
+    while not all(jobs) and time_waited < config.max_search_duration:
         time.sleep(.5)
+        time_waited += .5
 
-    result = [job.value for job in jobs if job.value]
-    log.info("Parsing URLs for '{}' yielded {} results".format(term, len(result)))
+    result = [job.value for job in jobs if job.done]
+    log.info("Parsing URLs for '{}' yielded {} results, {} urls lost".format(term, len(result), len(search_result) - len(result)))
     return result
 
 

@@ -21,8 +21,7 @@ ec2_ip: 52.91.194.132
 google_cse: 000579440470800426354:_4qo2s0ijsi  # borrowed from the pattern library
 lambda_function_name: WordTask
 search_engine: bing  # use google or bing here
-request_seconds_before_retry: 8
-request_retry: 3
+max_search_duration: 60
 add_word_interval: 0 # seconds to wait before adding words from a wordlist
 duckduckgo_sources:  # Acceptable sources for DuckDuckGo's instant answer API
     - Wikipedia

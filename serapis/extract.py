@@ -21,7 +21,6 @@ from serapis.language import is_english
 from serapis.preprocess import paragraph_to_sentences, qualify_sentence, clean_sentence
 from serapis.util import get_source_from_url
 import re
-import time
 import logging
 
 
@@ -51,19 +50,13 @@ class PageRequest(object):
     CLOSING_QUOTES = ("'", "&quot;", "”", "&rdquo;", "’", "&rsquo;", "»", "&raquo;", "›", "&rsaquo;", "“", "&ldquo;", "‘", "&lsquo;")
 
     def request_page(self):
-        attempts = config.request_retry
-        while attempts:
-            try:
-                response = requests.get(self.url, timeout=10)
-            except:
-                response = None
-            if response and hasattr(response, "text"):
-                self.response = response
-                return self.response
-            else:
-                # log.warning("Didn't get  url: %s" % self.url)
-                attempts -= 1
-                time.sleep(config.request_seconds_before_retry)
+        try:
+            response = requests.get(self.url, timeout=10)
+        except:
+            response = None
+        if response and hasattr(response, "text"):
+            self.response = response
+            return self.response
         
         log.error("Failed to return page for url: %s" % self.url)
         return None
