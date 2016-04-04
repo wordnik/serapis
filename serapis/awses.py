@@ -40,10 +40,9 @@ class AWSConnection(Connection):
         super(AWSConnection, self).__init__(host, region, **kwargs)
         self.host = host
         self.region = region
-        self.token = kwargs['session_token'] if 'session_token' in kwargs else os.environ.get('AWS_SESSION_TOKEN')
-        self.secret = kwargs['secret_key'] if 'secret_key' in kwargs else config.credentials.aws_access_secret
-        self.key = kwargs['access_key'] if 'access_key' in kwargs else config.credentials.aws_access_key
-
+        self.token = kwargs.get('session_token')  # or os.environ.get('AWS_SESSION_TOKEN')
+        self.key = kwargs.get('access_key') or config.credentials.aws_access_key
+        self.secret = kwargs.get('secret_key') or config.credentials.aws_access_secret
         self.kwargs = kwargs
 
     def perform_request(self, method, url, params=None, body=None, timeout=None, ignore=()):

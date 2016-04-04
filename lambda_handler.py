@@ -35,7 +35,6 @@ tasks_map = {
 def run_task(bucket, key):
     task, _, _ = key.split(":")
     contents = config.s3.Object(bucket, key).get()
-    print(contents)
     message = json.loads(contents['Body'].read())
     tasks_map[task](message)
 
@@ -63,7 +62,6 @@ def handler(event, context):
     for record in event['Records']:
         bucket = record['s3']['bucket']['name']
         key = record['s3']['object']['key']
-        print(json.dumps(event))
         key = key.replace("%3A", ":")  # That's my URLDecode.
         if key.count(":") == 2:
             return run_task(bucket, key)

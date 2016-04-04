@@ -139,7 +139,7 @@ def save_to_elastic_search(result):
     if not config.save_messages:
         log.info("Skipped indexing FRD for '{}'".format(result['word']))
         return
-    es = Elasticsearch(host=config.es_host, connection_class=AWSConnection, region=config.es_region)
+    es = Elasticsearch(host=config.es_host, connection_class=AWSConnection, region=config.es_region, secret_key=config.credentials.aws_access_secret, access_key=config.credentials.aws_access_key)
     es.index(index=config.es_index, doc_type=config.es_doctype, body=result)
     log.info("Indexed FRD for '{}'".format(result['word']))
 
