@@ -60,6 +60,20 @@ def add_wordlist(filename, batch_size=0, interval=60):
             time.sleep(interval)
     print("Added wordlist '{}'".format(key))
 
+
+def print_stats():
+    keys = set()
+    for obj in config.s3.Bucket(config.result_bucket).objects.all():
+        keys.add(obj.key)
+    words = [key.split(":")[0] for key in keys]
+    word_set = set(words)
+    print("   {} results for {} words ({:.2} FRDs / Word)".format(len(keys), len(word_set), 1.0 * len(keys) / len(word_set)))
+    buckets = [0] * 15
+    for word in word_set:
+        buckets[min(words.count(word) - 1, 14)] += 1
+    for idx, b in enumerate([60.0 * b / max(buckets) for b in buckets]):
+        print "{:2} {:<60} {}".format(idx + 1, "#" * int(b), buckets[idx])
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Add a new word to the pipeline')
     parser.add_argument('word', help='Word or wordlist to add')
@@ -70,7 +84,9 @@ if __name__ == "__main__":
     parser.add_argument('--limit', dest='limit', type=int, default=0, help='End of wordlist')
     args = parser.parse_args()
     update_config(args.config)
-    if args.word.endswith(".wordlist") or args.word.endswith(".txt"):
+    if args.word == "stats":
+        print_stats()
+    elif args.word.endswith(".wordlist") or args.word.endswith(".txt"):
         add_wordlist(args.word, args.batch_size, args.interval)
     else:
         add(args.word)
