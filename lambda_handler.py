@@ -64,7 +64,8 @@ def handler(event, context):
         key = record['s3']['object']['key']
         key = key.replace("%3A", ":")  # That's my URLDecode.
         if key.count(":") == 2:
-            return run_task(bucket, key)
+            result = run_task(bucket, key)
+            sys.exit(0 if result else 1)  # Don't wait for threads that might still be running somewhere...
         elif key.endswith(".wordlist"):
             return add_words(bucket, key)
         else:

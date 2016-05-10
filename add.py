@@ -45,20 +45,38 @@ def add_wordlist(filename, batch_size=0, interval=60):
         interval: int -- if non-zero, wait for n seconds between each batch
     """
     key = os.path.split(filename)[-1].split(".")[0]
+    if not os.path.exists("current_page.{}".format(key)):
+        page = 0
+    else:
+        with open("current_page.{}".format(key)) as f:
+            page = int(f.read())
     with codecs.open(filename, 'r', 'utf-8') as f:
         wordlist = f.read().splitlines()
-    cleaned = list(tqdm(preprocess.clean_and_qualify_wordlist(wordlist), total=len(wordlist) * .6, desc="Cleaning", unit="word"))
-    print "Retained {} out of {} words ({:.0%}).".format(len(cleaned), len(wordlist), 1. * len(cleaned) / len(wordlist))
+
+    print "Continuing from page", page
+    cleaned = wordlist[page:]
     if not batch_size:
         config.s3.Object(config.bucket, key + ".wordlist").put(Body="\n".join(cleaned))
     else:
         batches = int(math.ceil(1. * len(cleaned) / batch_size))
         key_ext = 0
         for sublist in tqdm(util.batch(cleaned, batch_size), total=batches, desc="Uploading batches", unit="batch"):
-            config.s3.Object(config.bucket, "{}.{}.wordlist".format(key, key_ext)).put(Body="\n".join(sublist))
+            if config.save_messages:
+                config.s3.Object(config.bucket, "{}.{}.wordlist".format(key, key_ext)).put(Body="\n".join(sublist))
             key_ext += 1
+            page += batch_size
             time.sleep(interval)
+            with open("current_page.{}".format(key), 'w') as f:
+                f.write(str(page))
     print("Added wordlist '{}'".format(key))
+
+
+def clean(filename):
+    with codecs.open(filename, 'r', 'utf-8') as f:
+        wordlist = f.read().splitlines()
+    cleaned = list(tqdm(preprocess.clean_and_qualify_wordlist(wordlist), total=len(wordlist) * .6, desc="Cleaning", unit="word"))
+    print "Retained {} out of {} words ({:.0%}).".format(len(cleaned), len(wordlist), 1. * len(cleaned) / len(wordlist))
+    print "\n".join(cleaned)
 
 
 def print_stats():
@@ -89,6 +107,7 @@ if __name__ == "__main__":
     parser.add_argument('--interval', dest='interval', type=int, default=60, help='Batch size of wordlist')
     parser.add_argument('--offset', dest='offset', type=int, default=0, help='Start of wordlis')
     parser.add_argument('--limit', dest='limit', type=int, default=0, help='End of wordlist')
+    parser.add_argument('--clean', dest='clean', type=int, default=0, help='End of wordlist')
     args = parser.parse_args()
     update_config(args.config)
     if args.word == "stats":

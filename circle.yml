@@ -7,7 +7,6 @@ dependencies:
         - pip install -r requirements-dev.txt
     post:
         - python -m nltk.downloader punkt
-        - python -m textblob.download_corpora
         - pip --version
         - pip freeze
 test:
