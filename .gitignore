@@ -75,3 +75,5 @@ nltk_data/
 .ipynb_checkpoints
 
 *.wordlist
+
+current_page.master
