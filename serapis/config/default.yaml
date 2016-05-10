@@ -48,6 +48,12 @@ exclude_domains:
     - wordnik.com
     - twitter.com
     - instagram.com
+    - babylon.com
+    - babylon-software.com
+    - definitions.net
+    - onelook.com
+    - wordreference.com
+    - crosswordtracker.com
 nltk_corpora:
     - punkt
     - averaged_perceptron_tagger
