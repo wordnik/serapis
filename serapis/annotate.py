@@ -43,7 +43,7 @@ def annotate_single_sentence(sentence):
 
 
 def annotate_pos_with_term(sentence, term):
-    """ POS-tag single sentence while preserving _TERM_ using the original term """
+    """POS-tag single sentence while preserving _TERM_ using the original term"""
     try:
         pos_term = []
 
@@ -69,10 +69,10 @@ def annotate_pos_with_term(sentence, term):
 
 
 def get_pos_term_context(sentence, ngrams=5):
-    """ 
+    """
     Returns just POS tags while preserving _TERM_
 
-    Returns substring context around _TERM_ 
+    Returns substring context around _TERM_
     as defined by number of `ngrams` preceding and following _TERM_
 
     """
@@ -116,5 +116,8 @@ def readability_score(url_object):
     Args:
         url_object: dict
     """
+    if not url_object.get('doc'):
+        url_object['readability_score'] = None
+        return
     scores = Readability(url_object['doc'])
     url_object['readability_score'] = scores.fleisch_reading_ease()

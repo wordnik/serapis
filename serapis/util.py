@@ -295,6 +295,8 @@ def get_source_from_url(url):
     Returns:
         str
     """
+    if not url:
+        return None
     hostname = urlparse(url).hostname
     try:
         return hostname.replace(".co.", ".co").split(".")[-2].capitalize()
