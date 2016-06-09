@@ -20,6 +20,7 @@ import os
 import time
 from tqdm import tqdm
 import math
+import json
 
 tasks_map = {}
 
@@ -99,6 +100,14 @@ def print_stats():
     for idx, b in enumerate([60.0 * b / max(buckets) for b in buckets]):
         print "{:2} {:<60} {}".format(idx + 1, "█" * int(b), buckets[idx])
 
+
+def print_hist(n=10000):
+    results = []
+    for obj in config.s3.Bucket(config.result_bucket).objects.limit(n):
+        body = json.loads(obj.get()['Body'].read())
+        results.append(body['frd_rating'])
+    print results
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Add a new word to the pipeline')
     parser.add_argument('word', help='Word or wordlist to add')
@@ -112,6 +121,8 @@ if __name__ == "__main__":
     update_config(args.config)
     if args.word == "stats":
         print_stats()
+    if args.word == "hist":
+        print_hist()
     elif args.word.endswith(".wordlist") or args.word.endswith(".txt"):
         add_wordlist(args.word, args.batch_size, args.interval)
     else:
